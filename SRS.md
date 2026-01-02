@@ -121,7 +121,7 @@ Date: 2025-12-25
   - The exported CSV file must be readable by spreadsheet software (e.g., Excel) and contain all required fields
 
 ---
-### Work in progress
+
 ## Non-Functional Requirements
 
 ### NFR-01 Performance
@@ -129,182 +129,22 @@ Date: 2025-12-25
 - Verification: Perform an automated load test using a testing tool (like JMeter) or a manual test during the project demo to confirm response times match the metrics
 
 ### NFR-02 Security
-- Requirement: The system shall not store passwords in plain text and shall enforce role-based access control for Student/Teacher/Admin
-- Verification: Database inspection + role access checks
+- Requirement: The system shall not store user passwords in plain text. Passwords shall be secured using a strong hashing algorithm (e.g., SHA-256 or Bcrypt) before being stored in the database. Furthermore, the system shall enforce strict role-based access control (RBAC), ensuring that students, teachers, and admins can only access features authorized for their specific roles
+- Verification: 
+  1. Database audit: Verify that the password column contains only hashed values
+  2. Access control testing: Attempt to access teacher/admin URLs using a student account to ensure the system blocks unauthorized requests
 
 ### NFR-03 Availability
-- Requirement: The system shall remain available during the scheduled quiz window except for planned maintenance announced in advance
-- Verification: Monitoring/log review during testing
+- Requirement: The system shall maintain an availability of at least 99.9% during all scheduled quiz windows. Total downtime during these critical periods shall not exceed 10 seconds in any single day. Planned maintenance shall be announced at least 48 hours in advance and must not overlap with any scheduled examination
+- Verification: Analysis of system uptime logs during a 72-hour operational test to ensure that the total cumulative downtime does not exceed the specified threshold
 
 ### NFR-04 Usability
 - Requirement: A Student shall be able to start a quiz attempt in ≤ 3 steps after logging in
 - Verification: Usability walkthrough with test users
 
 ### NFR-05 Maintainability
-- Requirement: The project shall include a README with setup/run instructions and a clear module structure (auth/quiz/question/result)
-- Verification: A new team member can run the system following README within ≤ 60 minutes
-
----
-
-## Data Flow Diagram
-
-Attach DFD diagrams drawn in diagrams.net (draw.io)
-
-Minimum required:
-- DFD Level 0 (Context Diagram): External entities (Student, Teacher, Admin) and the Quiz System
-- DFD Level 1: Main processes such as Authentication, Question Bank Management, Quiz Management, Attempt Management, Grading/Results
-
-Files to include:
-- `DFD_Level0.png`
-- `DFD_Level1.png`
-
----
-
-## Use Case Diagram
-
-Attach a Use Case Diagram drawn in diagrams.net (draw.io)
-
-Actors:
-- Student
-- Teacher
-- Admin
-
-Use cases (minimum):
-- Login/Logout
-- Manage Questions
-- Create/Configure Quiz
-- Take Quiz Attempt
-- Submit Attempt / Auto-submit on timeout
-- View Results / Export Reports
-
-Files to include:
-- `UseCaseDiagram.png`
-
----
-
-## Class Diagram
-
-Attach a Class Diagram drawn in diagrams.net (draw.io)
-
-Suggested core classes:
-- User (userId, username, passwordHash, role)
-- Quiz (quizId, title, timeLimit, openTime, closeTime, settings)
-- Question (questionId, content, difficulty, topic)
-- AnswerOption (optionId, questionId, content, isCorrect)
-- Attempt (attemptId, quizId, studentId, startTime, submitTime, score, status)
-- AttemptAnswer (attemptAnswerId, attemptId, questionId, selectedOptionId)
-
-Files to include:
-- `ClassDiagram.png`
-
----
-
-## Data Model
-
-Define database tables with primary keys (PK) and foreign keys (FK)
-
-### Table: Users
-- user_id (PK)
-- username (UNIQUE)
-- password_hash
-- role (Student/Teacher/Admin)
-- created_at
-
-### Table: Quizzes
-- quiz_id (PK)
-- title
-- time_limit_minutes
-- open_time
-- close_time
-- created_by (FK -> Users.user_id)
-
-### Table: Questions
-- question_id (PK)
-- content
-- difficulty
-- topic
-- created_by (FK -> Users.user_id)
-
-### Table: AnswerOptions
-- option_id (PK)
-- question_id (FK -> Questions.question_id)
-- content
-- is_correct (BOOLEAN)
-
-### Table: QuizQuestions (mapping)
-- quiz_id (FK -> Quizzes.quiz_id)
-- question_id (FK -> Questions.question_id)
-- (PK: quiz_id, question_id)
-
-### Table: Attempts
-- attempt_id (PK)
-- quiz_id (FK -> Quizzes.quiz_id)
-- student_id (FK -> Users.user_id)
-- start_time
-- submit_time
-- status
-- score
-
-### Table: AttemptAnswers
-- attempt_answer_id (PK)
-- attempt_id (FK -> Attempts.attempt_id)
-- question_id (FK -> Questions.question_id)
-- selected_option_id (FK -> AnswerOptions.option_id)
-
-Notes:
-- Adjust for multiple correct answers if needed (e.g., store multiple selected_option_id rows)
-
----
-
-## Interface Design Description
-
-### Option A: Console Application (Text UI)
-- Login screen:
-  - Input: username, password
-  - Output: success/failure message
-- Student menu:
-  - List available quizzes
-  - Start attempt
-  - Navigate questions: [N]ext, [P]revious, [S]ubmit
-- Teacher menu:
-  - Manage questions (create/edit/delete)
-  - Create/configure quiz
-  - View/export results
-
-### Option B: GUI/Web (If implemented)
-- Pages/screens:
-  - Login page
-  - Student: quiz list -> attempt page -> results page
-  - Teacher: question bank -> quiz editor -> results dashboard
-- UI rules:
-  - Show remaining time during attempt
-  - Disable “Start quiz” outside open/close time
-
----
-
-## Implementation (Stage 3) Notes
-- Language: Python / C++ / Java (choose one)
-- Repository: GitHub/GitLab.
-- Recommended structure:
-  - /docs (this document + exported diagrams)
-  - /src (source code)
-  - /tests (test data/scripts if any)
-
----
-
-## Testing (Stage 4)
-
-### Test Cases (examples)
-- TC-01 Login success with valid credentials
-- TC-02 Login fails with invalid password
-- TC-03 Teacher creates quiz with invalid close_time < open_time (must fail)
-- TC-04 Student starts attempt and system auto-submits when time expires
-- TC-05 Auto-grading returns correct score for known answers
-
-### Bug Management
-- Tool: Excel or Jira/Bugzilla/Mantis
-- Required fields:
-  - Bug ID, Title, Steps to Reproduce, Expected vs Actual, Severity, Priority, Status, Assignee, Evidence (screenshot/log)
+- Requirement: The project shall provide comprehensive documentation in a README file (hosted on Github) including environment setup, build instruction, and a logical module architecture (auth, quiz, question, result). The source code shall follow a consistent coding standard to ensure understandability
+- Verification: A technical review where a new developer (not in the orginal team) can successfully set up the development environment and run the system following the README instructions within <= 60 minutes
 
 ---
 
