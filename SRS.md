@@ -4,8 +4,14 @@
 Project: Quiz examination system  
 Course: Software Engineering  
 Group: 05
-Version: v1.0  
-Date: 2025-12-25
+Version: v1.1  
+Date: 2026-01-04
+
+## Revision history (Change log)
+| Version | Date       | Changes |
+|---------|------------|---------|
+| v1.0    | 2025-12-25 | Add initial SRS document for Quiz Examination System |
+| v1.1    | 2026-01-04 | Enhance SRS document with detailed functional requirements and system scope |
 
 ---
 
