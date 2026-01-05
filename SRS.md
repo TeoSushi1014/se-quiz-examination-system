@@ -191,6 +191,43 @@ Date: 2026-01-04
   - Admin can disable an account and the disabled user cannot log in
   - Admin can reset a password and the user can log in using the new password
 
+### FR-09 Manage quiz lifecycle (Archive/Delete)
+- Description: The system shall allow a teacher (or admin) to manage the lifecycle of quizzes by archiving quizzes and deleting quizzes permanently only when safe
+- Primary actors: Teacher, admin
+- Preconditions:
+  - User is authenticated (FR-01)
+  - User has permission to manage quizzes
+- Definitions:
+  - Archived quiz: A quiz that is hidden from students and cannot be started, but its historical data (attempts/results) is retained for reporting and audit
+  - Permanent delete: Physically removes the quiz record from the system database
+- Main flow (Archive quiz):
+  1. Teacher/admin selects a quiz from the quiz management screen
+  2. Teacher/admin chooses "Archive"
+  3. System shows a confirmation dialog: "Archive this quiz? Students will not be able to start new attempts"
+  4. Teacher/admin confirms
+  5. System marks the quiz as Archived and displays a success message: "Quiz archived successfully"
+- Effects of archiving:
+  - The quiz shall not appear in the student's "Available Quizzes" list (FR-04)
+  - The quiz shall not be startable even if the current time is within the scheduled window (FR-07)
+  - Teachers/admins shall still be able to view/export reports for existing attempts (FR-06)
+- Main flow (Permanent delete quiz):
+  1. Teacher/admin selects a quiz
+  2. Teacher/admin chooses "Delete permanently"
+  3. System validates that the quiz has zero submitted attempts
+  4. If valid, system shows a confirmation dialog: "Delete permanently? This action cannot be undone"
+  5. Teacher/admin confirms
+  6. System deletes the quiz and displays a success message: "Quiz deleted successfully"
+- Alternative/exception flows:
+  - Quiz has attempts:
+    - If the quiz has one or more submitted attempts, the system shall block permanent deletion and show a message:
+      "Cannot delete permanently because this quiz has student attempts. Please archive the quiz instead"
+- Postconditions:
+  - Archive: quiz is hidden from students, historical attempts/results remain available for reporting
+  - Permanent delete: quiz is removed only when no attempts exist
+- Acceptance criteria:
+  - If a quiz has ≥ 1 attempt, permanent delete is blocked and Archive remains available
+  - Archived quizzes are not visible/startable by students but remain visible to teacher/admin for reporting/export
+
 ---
 
 ## Non-Functional Requirements
@@ -240,6 +277,17 @@ Date: 2026-01-04
 - Verification:
   1. Build the Docker image from the repository.
   2. Run the container and confirm the backend is accessible on localhost and can connect to the Supabase Postgres database.
+
+### NFR-07 Data retention & referential integrity
+- Requirement:
+  - The system shall retain historical quiz attempt records and results for reporting and later review, even if a quiz is no longer active
+  - The system shall prevent operations that would break referential integrity between quizzes and their related attempts/results
+  - Permanent deletion of a quiz shall be allowed only when doing so does not orphan related records (i.e., there are zero attempts)
+- Verification:
+  1. Create a quiz, submit at least one attempt, then attempt "Delete permanently" and confirm the system blocks the operation and suggests archiving
+  2. Archive the quiz and confirm:
+     - Students cannot see/start the quiz.
+     - Teacher/admin can still view/export the report for existing attempts
 
 ---
 
