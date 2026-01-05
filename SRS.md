@@ -12,7 +12,7 @@ Date: 2026-01-04
 |---------|------------|---------|
 | v1.0    | 2025-12-25 | Add initial SRS document for Quiz Examination System |
 | v1.1    | 2026-01-04 | Enhance SRS document with detailed functional requirements and system scope |
-
+| v1.2    | 2026-01-05 | Add functional requirement for managing quiz lifecycle and data retention |
 ---
 
 ## System scope and purpose
