@@ -191,28 +191,38 @@ Date: 2026-01-04
   - Admin can disable an account and the disabled user cannot log in
   - Admin can reset a password and the user can log in using the new password
 
-### FR-09 Delete quiz
-- Description: The system shall allow teacher and admin to delete a quiz only when the quiz has no submitted attempts
+### FR-09 Delete and purge quiz
+- Description: The system shall allow teacher to delete a quiz only when it has no submitted attempts and allow admin to purge a quiz permanently even if it has attempts
 - Primary actors: Teacher, admin
 - Preconditions:
   - User is authenticated (FR-01)
   - User has permission to manage quizzes
-- Main flow:
-  1. Teacher admin selects a quiz from the quiz management screen
-  2. Teacher admin chooses "Delete"
+- Main flow (Teacher delete quiz with zero attempts):
+  1. Teacher selects a quiz from the quiz management screen
+  2. Teacher chooses "Delete"
   3. System validates that the quiz has zero submitted attempts
   4. System shows a confirmation dialog: "Delete this quiz? This action cannot be undone"
-  5. Teacher admin confirms
+  5. Teacher confirms
   6. System deletes the quiz and displays a success message: "Quiz deleted successfully"
+- Main flow (Admin purge quiz permanently):
+  1. Admin selects a quiz from the quiz management screen
+  2. Admin chooses "Purge permanently"
+  3. System shows a confirmation dialog: "Purge permanently? This will delete the quiz and all attempts results and cannot be undone"
+  4. Admin confirms
+  5. System permanently deletes the quiz and all related attempts results
+  6. System displays a success message: "Quiz purged successfully"
 - Alternative exception flows:
-  - Quiz has attempts:
-    - If the quiz has one or more submitted attempts, the system shall block deletion and show a message:
-      "Cannot delete because this quiz has student attempts"
+  - Teacher delete blocked due to attempts:
+    - If the quiz has one or more submitted attempts, the system shall block teacher deletion and show a message: "Cannot delete because this quiz has student attempts"
+  - Non admin purge blocked:
+    - If a non admin user attempts to purge, the system shall block and show a message: "Only admin can purge data permanently"
 - Postconditions:
-  - If deletion succeeds, the quiz is removed from the database and is no longer accessible
+  - Teacher delete removes only quizzes with zero attempts
+  - Admin purge removes the quiz and all related attempts results
 - Acceptance criteria:
-  - A quiz with zero submitted attempts can be deleted by teacher or admin
-  - A quiz with one or more submitted attempts cannot be deleted by any role
+  - Teacher can delete a quiz only when the quiz has zero submitted attempts
+  - Admin can purge a quiz even when the quiz has one or more submitted attempts
+  - After admin purge, related attempts results are removed and the quiz no longer appears in reports
 
 ---
 
@@ -264,13 +274,15 @@ Date: 2026-01-04
   1. Build the Docker image from the repository.
   2. Run the container and confirm the backend is accessible on localhost and can connect to the Supabase Postgres database.
 
-### NFR-07 Data retention for graded attempts
+### NFR-07 Privileged deletion safety and referential integrity
 - Requirement:
-  - The system shall retain historical quiz attempt records and results for reporting and later review
-  - The system shall prevent deletion of any quiz that has one or more submitted attempts to avoid data loss and referential integrity issues
+  - The system shall enforce referential integrity when deleting data that has relationships using the database foreign key delete rules
+  - The system shall support admin purge by deleting related attempts results together with the quiz to avoid foreign key constraint errors
+  - The system shall log admin purge actions with admin identity and timestamp
 - Verification:
-  1. Create a quiz and submit at least one attempt then attempt to delete the quiz and confirm the system blocks deletion
-  2. Create a quiz with zero attempts then delete it and confirm the quiz is removed and not accessible
+  1. Create a quiz and submit at least one attempt then purge as admin and confirm the quiz and related attempts results are removed
+  2. Attempt purge as teacher and confirm it is blocked
+  3. Attempt teacher delete on a quiz with attempts and confirm it is blocked
 
 ---
 
