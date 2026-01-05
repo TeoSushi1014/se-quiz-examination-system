@@ -4,8 +4,8 @@
 Project: Quiz examination system  
 Course: Software Engineering  
 Group: 05
-Version: v1.1  
-Date: 2026-01-04
+Version: v1.2  
+Date: 2026-01-05
 
 ## Revision history (Change log)
 | Version | Date       | Changes |
@@ -90,23 +90,25 @@ Date: 2026-01-04
 - Preconditions:
   - Student is authenticated and authorized for the specific quiz
   - The current time is within the scheduled time window of the quiz (FR-07)
-  - Student has not submitted an attempt for this quiz
+  - Student does not have any existing attempt for this quiz
 - Attempt limit:
-  - Each student shall be allowed to submit at most one attempt for each quiz
+  - Each student shall be allowed to have at most one existing attempt for each quiz
 - Main flow:
   1. Student selects a quiz from the list of available assessments
   2. System initializes the attempt, starts the countdown timer, and displays the first set of questions
-  3. Student selects answers and navigates through questions (Previous or Next)
+  3. Student selects answers and navigates through questions (Previous/Next)
   4. The system shall automatically save the student's current answers when the student navigates between questions
   5. Student confirms and submits the attempt
   6. The system records the completion time and final responses into the database
-- Alternative or exception flows:
-  - Time expiration: If the countdown reaches zero, the system shall auto submit the last saved answers and notify the student
-  - Attempt limit reached: If the student has already submitted an attempt for this quiz, the system shall prevent starting a new attempt and show a clear message
+- Alternative/Exception flows:
+  - Time expiration:
+    - If the countdown reaches zero, the system shall auto submit the last saved answers and notify the student
+  - Attempt exists:
+    - If an attempt for this quiz already exists, the system shall prevent starting a new attempt and show a clear message
 - Postconditions:
-  - The attempt is marked as Submitted and the data is ready for the grading process
+  - The attempt is marked as submitted and the data is ready for the grading process
 - Acceptance criteria:
-  - A student cannot submit more than one attempt for the same quiz
+  - A student cannot have more than one existing attempt for the same quiz
   - Answers are stored correctly even if the attempt is auto submitted due to time expiration
 
 ### FR-05 Auto grading and results
@@ -128,14 +130,15 @@ Date: 2026-01-04
 ### FR-06 View and export reports
 - Description: The system shall allow teachers and admins to view a list of student attempts for a specific quiz and export these results to a CSV file
 - Primary actors: Teacher, admin
-- Preconditions: The user is logged in with appropriate permissions and at least one quiz attempt has been submitted
+- Preconditions: The user is logged in with appropriate permissions and at least one quiz attempt exists
 - Main flow:
   1. User selects a specific quiz from the management dashboard
-  2. System displays a table of all attempts (student username, completion date, score, time spent)
+  2. System displays a table of all existing attempts (student username, completion date, score, time spent)
   3. User chooses the "Export to CSV" option
   4. System generates and downloads a CSV file containing all displayed data
 - Alternative/Exception flows:
-  - No attempts found: If no students have taken the quiz, the system shall display a message: "No results available to display or export"
+  - No attempts found:
+    - If no attempts exist for the quiz, the system shall display a message: "No results available to display or export"
 - Postconditions: A CSV file is downloaded to the user's device
 - Acceptance criteria:
   - The displayed report must match the data in the database for that specific quiz
@@ -159,7 +162,7 @@ Date: 2026-01-04
   4. The system validates that the start time is earlier than the end time and that at least one student is assigned
   5. The system saves the schedule time window
   6. The system makes the quiz visible and accessible only to assigned students during the scheduled time window
-- Alternative or exception flows:
+- Alternative/Exception flows:
   - Invalid time window: If the start time is not earlier than the end time, the system shall prevent saving and show an error message
   - No students assigned: If no student or class is selected, the system shall prevent saving and show an error message
 - Postconditions:
@@ -181,7 +184,7 @@ Date: 2026-01-04
   3. Admin disables or enables an existing user account
   4. Admin resets a user password and provides a new initial password to the user
   5. The system saves the changes and logs the action with the admin identity and time
-- Alternative or exception flows:
+- Alternative/Exception flows:
   - Duplicate username: If the username already exists, the system shall reject the creation and show an error message
   - Invalid role assignment: If the admin selects an unsupported role, the system shall reject the change and show an error message
 - Postconditions:
@@ -192,7 +195,7 @@ Date: 2026-01-04
   - Admin can reset a password and the user can log in using the new password
 
 ### FR-09 Delete and purge quiz
-- Description: The system shall allow teacher to delete a quiz only when it has no submitted attempts and allow admin to purge a quiz permanently even if it has attempts
+- Description: The system shall allow teacher to delete a quiz only when it has no existing attempts and allow admin to purge a quiz permanently even if it has attempts
 - Primary actors: Teacher, admin
 - Preconditions:
   - User is authenticated (FR-01)
@@ -200,7 +203,7 @@ Date: 2026-01-04
 - Main flow (Teacher delete quiz with zero attempts):
   1. Teacher selects a quiz from the quiz management screen
   2. Teacher chooses "Delete"
-  3. System validates that the quiz has zero submitted attempts
+  3. System validates that the quiz has zero existing attempts
   4. System shows a confirmation dialog: "Delete this quiz? This action cannot be undone"
   5. Teacher confirms
   6. System deletes the quiz and displays a success message: "Quiz deleted successfully"
@@ -211,7 +214,7 @@ Date: 2026-01-04
   4. Admin confirms
   5. System permanently deletes the quiz and all related attempts results
   6. System displays a success message: "Quiz purged successfully"
-- Alternative exception flows:
+- Alternative/Exception flows:
   - Teacher delete blocked due to attempts:
     - If the quiz has one or more submitted attempts, the system shall block teacher deletion and show a message: "Cannot delete because this quiz has student attempts"
   - Non admin purge blocked:
@@ -220,9 +223,122 @@ Date: 2026-01-04
   - Teacher delete removes only quizzes with zero attempts
   - Admin purge removes the quiz and all related attempts results
 - Acceptance criteria:
-  - Teacher can delete a quiz only when the quiz has zero submitted attempts
+  - Teacher can delete a quiz only when the quiz has zero existing attempts
   - Admin can purge a quiz even when the quiz has one or more submitted attempts
   - After admin purge, related attempts results are removed and the quiz no longer appears in reports
+
+### FR-10 Delete student attempt
+- Description: The system shall allow teacher and admin to permanently delete a student's quiz attempt from the database so the student can start a new attempt
+- Primary actors: Teacher, admin
+- Preconditions:
+  - User is authenticated (FR-01)
+  - The quiz exists and the attempt exists
+  - The attempt belongs to the selected quiz
+- Authorization rules:
+  - Teacher can delete attempts only for quizzes created by that teacher
+  - Admin can delete attempts for any quiz
+- Main flow:
+  1. Teacher admin selects a quiz from the management dashboard
+  2. System displays the list of attempts for that quiz
+  3. Teacher admin selects a specific student attempt
+  4. Teacher admin chooses "Delete attempt"
+  5. System shows a confirmation dialog: "Delete this attempt permanently? This action cannot be undone"
+  6. Teacher admin confirms
+  7. System permanently deletes the attempt from the database
+  8. System permanently deletes all related attempt data including saved answers for that attempt
+  9. System allows the student to start a new attempt for that quiz
+- Alternative/Exception flows:
+  - Unauthorized access:
+    - If teacher tries to delete an attempt for a quiz not owned by that teacher the system shall block the operation and show a clear message
+  - Attempt not found:
+    - If the attempt no longer exists the system shall show an error message and refresh the attempt list
+- Postconditions:
+  - The deleted attempt is removed from the database and is no longer accessible
+  - The student is allowed to create a new attempt for that quiz
+- Acceptance criteria:
+  - Teacher admin can delete an attempt and the student can start a new attempt
+  - After deletion the attempt and its related answers do not appear in any report export or history query
+
+### FR-11 User logout
+- Description: The system shall allow an authenticated user (Student/Teacher/Admin) to log out and terminate the current authenticated session
+- Primary actors: Student, teacher, admin
+- Preconditions:
+  - The user is authenticated (FR-01) and has an active session
+- Main flow:
+  1. The user selects "Logout"
+  2. The system invalidates the user's current session/token on the server
+  3. The system removes the authentication credential on the client (e.g., deletes auth cookie / clears stored token)
+  4. The system navigates the user to the login screen
+- Alternative/Exception flows:
+  - Session already expired:
+    - If the session is already expired, the system shall still navigate the user to the login screen and show a message: "Session expired. Please log in again"
+- Postconditions:
+  - The user is no longer authenticated and cannot access any role-based features without logging in again
+- Acceptance criteria:
+  - After logout, using the browser back button (or reopening the app window) shall not restore access to authenticated pages
+  - Any request made with the old session/token after logout shall be rejected by the backend
+
+### FR-12 Change password
+- Description: The system shall allow an authenticated user (Student/Teacher/Admin) to change their password
+- Primary actors: Student, teacher, admin
+- Preconditions:
+  - The user is authenticated (FR-01)
+  - The user account is active
+- Data fields:
+  - Current password
+  - New password
+  - Confirm new password
+- Main flow:
+  1. The user opens "Account settings" and selects "Change password"
+  2. The user enters current password, new password, and confirm new password
+  3. The system validates:
+     - Current password is correct
+     - New password and confirm new password match
+     - New password satisfies password policy (NFR-02)
+  4. The system updates the stored password hash
+  5. The system invalidates the user's current session and requires the user to log in again
+  6. The system shows a success message: "Password changed successfully. Please log in again"
+- Alternative/Exception flows:
+  - Incorrect current password:
+    - The system shall show an error message: "Current password is incorrect"
+  - New password mismatch:
+    - The system shall show an error message: "New password and confirmation do not match"
+  - Policy violation:
+    - If the new password violates NFR-02 constraints (e.g., too long), the system shall reject the change and highlight invalid fields
+- Postconditions:
+  - The new password takes effect immediately
+  - The user must re-authenticate to access the system again
+- Acceptance criteria:
+  - The user cannot log in using the old password after a successful password change
+  - The user can log in using the new password after a successful password change
+
+### FR-13 Forgot password
+- Description: The system shall not provide a self-service "Forgot password" feature for end users. Password reset shall be performed only by admin via user management functions (FR-08)
+- Primary actor: Admin
+- Supporting actors: Student, teacher
+- Preconditions:
+  - Admin is authenticated (FR-01)
+  - The target user account exists and is in an active state
+- Main flow:
+  1. Admin opens the user management screen (FR-08)
+  2. Admin selects a target user account
+  3. Admin chooses "Reset password"
+  4. Admin provides a new initial password for the user (or system generates one based on implementation)
+  5. The system updates the stored password hash according to the password storage policy (NFR-02)
+  6. The system invalidates any active sessions/tokens for that user (if applicable)
+  7. The system logs the action with admin identity and time (FR-08)
+  8. The system displays a success message: "Password reset successfully"
+- Alternative/Exception flows:
+  - User not found:
+    - If the selected user no longer exists, the system shall show an error message and refresh the user list
+  - Disabled account:
+    - If the account is disabled, the system shall allow admin to reset password but the user still cannot log in until the account is enabled
+- Postconditions:
+  - The target user can log in using the new password (only if the account is enabled)
+- Acceptance criteria:
+  - The system does not show any "Forgot password" or self-service reset function on the login screen
+  - After admin reset, the old password can no longer be used
+  - All existing sessions of the target user are invalidated after reset (if the system uses sessions/tokens)
 
 ---
 
@@ -283,6 +399,14 @@ Date: 2026-01-04
   1. Create a quiz and submit at least one attempt then purge as admin and confirm the quiz and related attempts results are removed
   2. Attempt purge as teacher and confirm it is blocked
   3. Attempt teacher delete on a quiz with attempts and confirm it is blocked
+
+### NFR-08 Referential integrity for attempt deletion
+- Requirement:
+  - The system shall ensure referential integrity when permanently deleting attempts and their related answer records
+  - The database schema shall support deleting an attempt together with its related answer records without foreign key constraint errors
+- Verification:
+  1. Create a quiz and submit an attempt then delete the attempt and confirm the attempt and related answers are removed
+  2. Confirm the student can start a new attempt after deletion
 
 ---
 
