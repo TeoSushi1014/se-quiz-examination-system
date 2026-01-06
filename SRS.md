@@ -413,7 +413,7 @@ Date: 2026-01-05
 ## Data Flow Diagram
 
 ## Use Case Diagram
-
+![Use Case Diagram – Quiz Examination System](usecase_.png)
 ## Class Diagram
 
 ## Data Model
