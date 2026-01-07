@@ -1,0 +1,181 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.2.9">
+  <diagram name="Trang-1" id="a7MkdKUHk4ouyqciVKUn">
+    <mxGraphModel dx="1961" dy="875" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-31" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-28">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-48" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="3.1 Configure Quiz &amp;amp; Select Questions" vertex="1">
+          <mxGeometry height="109" width="109" x="310" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-32" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-51" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="3.2 Schedule &amp;amp; Assign Students" vertex="1">
+          <mxGeometry height="110" width="110" x="330" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-37" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="650" y="510" />
+            </Array>
+            <mxPoint x="650" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-53" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="40" y="510" />
+            </Array>
+            <mxPoint x="40" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;span data-path-to-node=&quot;6,3,1,0&quot;&gt;&lt;span data-path-to-node=&quot;6,3,1,0&quot; data-index-in-node=&quot;0&quot;&gt;3.3 Handle Quiz Delete Requests&lt;/span&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="110" width="110" x="309" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-13" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-5" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D2:&amp;nbsp; &amp;nbsp; Question Bank" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-8" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" target="4pdqI1BVLyPOUeWbrvSc-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="40" y="60" />
+            </Array>
+            <mxPoint x="40" y="240" as="sourcePoint" />
+            <mxPoint x="300" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-10" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="4pdqI1BVLyPOUeWbrvSc-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Teacher" vertex="1">
+          <mxGeometry height="60" width="120" x="10" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-9" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="4pdqI1BVLyPOUeWbrvSc-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="260" />
+              <mxPoint x="240" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-12" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.738;entryY=0.064;entryDx=0;entryDy=0;entryPerimeter=0;" target="4pdqI1BVLyPOUeWbrvSc-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="400" />
+              <mxPoint x="390" y="432" />
+              <mxPoint x="390" y="432" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Admin" vertex="1">
+          <mxGeometry height="60" width="120" x="650" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-14" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D4:&amp;nbsp; &amp;nbsp; Attempts &amp;amp; Results" vertex="1">
+          <mxGeometry height="40" width="150" x="650" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-19" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.996;entryY=0.541;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.001;exitY=0.377;exitDx=0;exitDy=0;exitPerimeter=0;" target="4pdqI1BVLyPOUeWbrvSc-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="634" y="490" />
+            </Array>
+            <mxPoint x="645" y="490" as="sourcePoint" />
+            <mxPoint x="426" y="485" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-20" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Quiz Parameters" vertex="1">
+          <mxGeometry height="30" width="110" x="140" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Schedule &amp;amp; Assignment Data" vertex="1">
+          <mxGeometry height="30" width="180" x="150" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&#xa;Delete Request&#xa;&#xa;" vertex="1">
+          <mxGeometry height="30" width="130" x="130" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Permanent Delete Request" vertex="1">
+          <mxGeometry height="30" width="190" x="435" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Question List" vertex="1">
+          <mxGeometry height="30" width="100" x="440" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Verify Attempt Count" vertex="1">
+          <mxGeometry height="30" width="140" x="465" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-28" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D3:&amp;nbsp; &amp;nbsp; Quizzes Table" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-29" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D5:&amp;nbsp; &amp;nbsp; System Log" vertex="1">
+          <mxGeometry height="45" width="131" x="309" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-33" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Save/Update Quiz Data" vertex="1">
+          <mxGeometry height="30" width="150" x="380" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Save/Update Quiz Data" vertex="1">
+          <mxGeometry height="30" width="150" x="460" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-38" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete&amp;nbsp; Results Data" vertex="1">
+          <mxGeometry height="30" width="140" x="460" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-39" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0.99;entryDx=0;entryDy=0;entryPerimeter=0;" target="4pdqI1BVLyPOUeWbrvSc-28">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="364" y="350" />
+              <mxPoint x="650" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-40" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete Quiz Data" vertex="1">
+          <mxGeometry height="30" width="140" x="480" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-47" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Admin Action Log" vertex="1">
+          <mxGeometry height="30" width="140" x="240" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-49" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Quiz Created/Updated Successfully" vertex="1">
+          <mxGeometry height="30" width="200" x="90" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-52" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Quiz Created/Updated Successfully" vertex="1">
+          <mxGeometry height="30" width="200" x="130" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-54" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete Confirmation/Error Message" vertex="1">
+          <mxGeometry height="30" width="210" x="80" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-57" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="4pdqI1BVLyPOUeWbrvSc-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-58" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete Confirmation/Error Message" vertex="1">
+          <mxGeometry height="30" width="210" x="425" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="4pdqI1BVLyPOUeWbrvSc-62" edge="1" parent="1" source="4pdqI1BVLyPOUeWbrvSc-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.42;entryY=0.043;entryDx=0;entryDy=0;entryPerimeter=0;" target="4pdqI1BVLyPOUeWbrvSc-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
