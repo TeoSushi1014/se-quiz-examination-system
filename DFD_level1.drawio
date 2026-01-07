@@ -1,0 +1,555 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.2.10">
+  <diagram name="Trang-1" id="NFSERxslceuH7Ev-3Llj">
+    <mxGraphModel dx="2316" dy="1458" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="LieTYFZEi5oVee_hH0jD-1" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.995;exitY=0.406;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-83">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="425" y="139" />
+              <mxPoint x="612" y="139" />
+              <mxPoint x="612" y="1119" />
+            </Array>
+            <mxPoint x="429" y="1109" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-2" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="LieTYFZEi5oVee_hH0jD-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="341" y="29" />
+              <mxPoint x="731" y="29" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;1.0&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;Authentication&lt;/span&gt;" vertex="1">
+          <mxGeometry height="120" width="120" x="306" y="89" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-4" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.001;entryY=0.699;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-83">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="181" y="364" />
+              <mxPoint x="181" y="1119" />
+              <mxPoint x="320" y="1119" />
+            </Array>
+            <mxPoint x="201" y="1109" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;2.0&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;Question Bank Management&lt;/span&gt;" vertex="1">
+          <mxGeometry height="120" width="120" x="289" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="LieTYFZEi5oVee_hH0jD-83">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="588" y="621" />
+              <mxPoint x="588" y="1107" />
+            </Array>
+            <mxPoint x="395.6662479035542" y="621.5" as="sourcePoint" />
+            <mxPoint x="441" y="1107" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;3.0&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;Quiz Management&lt;/span&gt;" vertex="1">
+          <mxGeometry height="120" width="120" x="306" y="519" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;4.0&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;Attempt Management&lt;/span&gt;" vertex="1">
+          <mxGeometry height="120" width="120" x="306" y="739" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Student" vertex="1">
+          <mxGeometry height="70" width="130" x="42" y="559" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-10" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="LieTYFZEi5oVee_hH0jD-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="731" y="169" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Teacher" vertex="1">
+          <mxGeometry height="70" width="130" x="631.5" y="424" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Admin" vertex="1">
+          <mxGeometry height="70" width="130" x="666" y="89" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-13" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.009;entryY=0.333;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-83">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="201" y="1009" />
+              <mxPoint x="201" y="1109" />
+            </Array>
+            <mxPoint x="302.20000000000005" y="1009" as="sourcePoint" />
+            <mxPoint x="310.999" y="1106.79" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;5.0&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;color: rgb(31, 35, 40); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 16px; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;Grading/Results&lt;/span&gt;" vertex="1">
+          <mxGeometry height="120" width="120" x="311" y="929" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-15" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-9" style="endArrow=classic;html=1;rounded=0;entryX=0.023;entryY=0.337;entryDx=0;entryDy=0;exitX=0.403;exitY=0.007;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="91" y="129" />
+              <mxPoint x="216" y="129" />
+            </Array>
+            <mxPoint x="116" y="279" as="sourcePoint" />
+            <mxPoint x="166" y="229" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Login Credentials" vertex="1">
+          <mxGeometry height="20" width="110" x="136" y="109" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-17" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D1:&amp;nbsp; &amp;nbsp; Users Table" vertex="1">
+          <mxGeometry height="30" width="110" x="308.5" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-18" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="251" y="479" />
+              <mxPoint x="251" y="771" />
+            </Array>
+            <mxPoint x="312" y="771" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-19" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="LieTYFZEi5oVee_hH0jD-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="351" y="439" />
+              <mxPoint x="351" y="439" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-20" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D2:&amp;nbsp; &amp;nbsp;Question Bank" vertex="1">
+          <mxGeometry height="30" width="126" x="303" y="459" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-21" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="LieTYFZEi5oVee_hH0jD-24">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="471" y="609" />
+              <mxPoint x="471" y="889" />
+            </Array>
+            <mxPoint x="421" y="609" as="sourcePoint" />
+            <mxPoint x="471" y="889" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-22" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D3:&amp;nbsp; &amp;nbsp;Quizzes Table" vertex="1">
+          <mxGeometry height="30" width="115" x="311" y="669" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-23" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.996;entryY=0.587;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="521" y="899" />
+              <mxPoint x="521" y="589" />
+              <mxPoint x="425" y="589" />
+            </Array>
+            <mxPoint x="426" y="679" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-24" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D4:&amp;nbsp; &amp;nbsp;Attempts &amp;amp; Results" vertex="1">
+          <mxGeometry height="30" width="145" x="306" y="879" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-25" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.33;entryY=0.98;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.343;exitY=-0.092;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="346.23" y="249" as="sourcePoint" />
+            <mxPoint x="346" y="206.78999999999996" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-26" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="386" y="209" as="sourcePoint" />
+            <mxPoint x="386" y="249" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Verify Credentials" vertex="1">
+          <mxGeometry height="30" width="106" x="386" y="199" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="User Profile &amp;amp; Role" vertex="1">
+          <mxGeometry height="40" width="120" x="233" y="209" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-29" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.69;entryY=-0.04;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="132" y="169" />
+            </Array>
+            <mxPoint x="306" y="169" as="sourcePoint" />
+            <mxPoint x="106" y="549" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-30" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Auth Status &amp;amp; Access Rights" vertex="1">
+          <mxGeometry height="20" width="180" x="116" y="149" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-31" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=0.792;entryY=0.075;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="665.96" y="99" as="sourcePoint" />
+            <mxPoint x="416" y="101.53999999999996" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-32" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-3" style="endArrow=classic;html=1;rounded=0;entryX=0.007;entryY=0.573;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.957;exitY=0.331;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-12" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="546" y="129" />
+            </Array>
+            <mxPoint x="426" y="159" as="sourcePoint" />
+            <mxPoint x="476" y="109" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-33" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Login Credentials" vertex="1">
+          <mxGeometry height="30" width="110" x="492" y="69" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Auth Status &amp;amp; Access Rights" vertex="1">
+          <mxGeometry height="30" width="169" x="462.5" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Login Credentials" vertex="1">
+          <mxGeometry height="30" width="120" x="456" y="139" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-36" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Auth Status &amp;amp; Access Rights" vertex="1">
+          <mxGeometry height="30" width="174" x="542" y="289" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-37" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.404;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="707.02" y="194" />
+              <mxPoint x="707.52" y="324" />
+            </Array>
+            <mxPoint x="412.48" y="194" as="sourcePoint" />
+            <mxPoint x="707.04" y="424.0000000000001" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-38" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-3" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.488;exitY=1.006;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="367.25" y="209" as="sourcePoint" />
+            <mxPoint x="364.75" y="249" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-39" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Update Lock Status" vertex="1">
+          <mxGeometry height="30" width="110" x="366" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-40" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-12" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.154;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="686" y="79" />
+              <mxPoint x="686" y="69" />
+              <mxPoint x="686" y="59" />
+              <mxPoint x="546" y="59" />
+              <mxPoint x="366" y="59" />
+            </Array>
+            <mxPoint x="726" y="89" as="sourcePoint" />
+            <mxPoint x="776" y="39" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-41" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Account Management Data" vertex="1">
+          <mxGeometry height="30" width="196" x="456" y="29" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-42" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-5" style="endArrow=classic;html=1;rounded=0;entryX=0.163;entryY=-0.059;entryDx=0;entryDy=0;exitX=0.288;exitY=0.953;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-20" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points" />
+            <mxPoint x="359.5" y="409" as="sourcePoint" />
+            <mxPoint x="366" y="439" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Update/Overwrite Question Data" vertex="1">
+          <mxGeometry height="30" width="150" x="167" y="424" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-44" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Question Data (Create/Edit/Delete)" vertex="1">
+          <mxGeometry height="30" width="60" x="492" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-45" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;exitX=0.308;exitY=0.017;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="672.24" y="347.80999999999995" />
+            </Array>
+            <mxPoint x="671.78" y="424" as="sourcePoint" />
+            <mxPoint x="411" y="348" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-46" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Management Confirmation" vertex="1">
+          <mxGeometry height="30" width="146" x="456" y="349" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-47" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-20" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="LieTYFZEi5oVee_hH0jD-7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="362" y="489" as="sourcePoint" />
+            <mxPoint x="412" y="439" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-48" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.78;entryY=0.091;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="472" y="459" />
+              <mxPoint x="472" y="529" />
+              <mxPoint x="419" y="529" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-49" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Quiz Schedule, Settings &amp;amp; Assignments" vertex="1">
+          <mxGeometry height="30" width="160" x="451" y="429" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-50" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Question list" vertex="1">
+          <mxGeometry height="30" width="96" x="282" y="489" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-51" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Save Quiz Configuration" vertex="1">
+          <mxGeometry height="30" width="135" x="233" y="639" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-52" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-7" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=0.936;exitY=0.249;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="461" y="549" />
+              <mxPoint x="491" y="549" />
+              <mxPoint x="492" y="478" />
+            </Array>
+            <mxPoint x="431" y="549" as="sourcePoint" />
+            <mxPoint x="628" y="479" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-53" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="161" y="789" />
+            </Array>
+            <mxPoint x="161" y="629" as="sourcePoint" />
+            <mxPoint x="302" y="789" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-54" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Helvetica&quot;&gt;Select Quiz &amp;amp; Submit Answers&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="70" x="93" y="649" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-55" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Question Content" vertex="1">
+          <mxGeometry height="30" width="126" x="136" y="509" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-56" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-22" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.526;entryY=0.006;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-8" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="452" y="729" as="sourcePoint" />
+            <mxPoint x="502" y="679" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-57" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Quiz Parameters" vertex="1">
+          <mxGeometry height="30" width="111" x="255" y="699" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-58" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.431;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="252" y="809" />
+              <mxPoint x="82" y="809" />
+            </Array>
+            <mxPoint x="302" y="809" as="sourcePoint" />
+            <mxPoint x="82.02999999999997" y="629" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-59" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Question Display &amp;amp; Timer" vertex="1">
+          <mxGeometry height="70" width="80" x="13" y="729" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-60" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.455;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-24" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="372" y="859" as="sourcePoint" />
+            <mxPoint x="422" y="809" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-61" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Record/Update Responses" vertex="1">
+          <mxGeometry height="30" width="170" x="208" y="849" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-62" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Student Answers" vertex="1">
+          <mxGeometry height="30" width="96" x="250" y="909" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-63" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.034;entryY=0.326;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="111.5" y="829" />
+              <mxPoint x="112" y="969" />
+            </Array>
+            <mxPoint x="301.5" y="829" as="sourcePoint" />
+            <mxPoint x="311" y="1005.8399999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-64" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Submission Trigger" vertex="1">
+          <mxGeometry height="30" width="60" x="42" y="869" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-65" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-20" style="endArrow=classic;html=1;rounded=0;exitX=-0.002;exitY=0.344;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.116;entryY=0.164;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="202" y="469" />
+              <mxPoint x="202" y="519" />
+              <mxPoint x="202" y="949" />
+            </Array>
+            <mxPoint x="302" y="499" as="sourcePoint" />
+            <mxPoint x="352" y="449" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Correct Answer Key" vertex="1">
+          <mxGeometry height="30" width="111" x="93" y="889" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-67" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-24" style="endArrow=classic;html=1;rounded=0;exitX=0.302;exitY=1.012;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="352" y="929" as="sourcePoint" />
+            <mxPoint x="350" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-68" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-69" style="endArrow=classic;html=1;rounded=0;entryX=0.592;entryY=1.011;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.004;exitY=0.389;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-24" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="392" y="969" as="sourcePoint" />
+            <mxPoint x="442" y="919" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-69" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Update Final Score &amp;amp; Summary" vertex="1">
+          <mxGeometry height="30" width="116" x="392" y="919" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-70" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-14" style="endArrow=classic;html=1;rounded=0;entryX=0.123;entryY=1.031;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="LieTYFZEi5oVee_hH0jD-9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="61" y="989" />
+            </Array>
+            <mxPoint x="302" y="1049" as="sourcePoint" />
+            <mxPoint x="352" y="999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-71" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Grades &amp;amp; Feedback" vertex="1">
+          <mxGeometry height="30" width="51" x="13" y="939" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-72" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Performance Reports (CSV)" vertex="1">
+          <mxGeometry height="30" width="150" x="572" y="729" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-73" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Report Request" vertex="1">
+          <mxGeometry height="30" width="100" x="572" y="679" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-74" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-12" style="endArrow=classic;html=1;rounded=0;entryX=0.958;entryY=0.754;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.801;exitY=0.993;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="772" y="1019" />
+            </Array>
+            <mxPoint x="772" y="169" as="sourcePoint" />
+            <mxPoint x="431" y="1027.91" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-75" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-14" style="endArrow=classic;html=1;rounded=0;entryX=0.953;entryY=1.045;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.79;exitY=0.913;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-12" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="1039" />
+            </Array>
+            <mxPoint x="412" y="1039" as="sourcePoint" />
+            <mxPoint x="790" y="169" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-76" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-5" style="endArrow=classic;html=1;rounded=0;entryX=0.158;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.986;exitY=0.618;exitDx=0;exitDy=0;exitPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="652" y="379" />
+            </Array>
+            <mxPoint x="422" y="379" as="sourcePoint" />
+            <mxPoint x="472" y="329" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-77" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Report Request" vertex="1">
+          <mxGeometry height="30" width="96" x="672" y="859" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-78" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Performance Reports (CSV)" vertex="1">
+          <mxGeometry height="30" width="156" x="631.5" y="899" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-79" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.947;entryY=0.254;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="672" y="959" />
+            </Array>
+            <mxPoint x="672" y="499" as="sourcePoint" />
+            <mxPoint x="722" y="439" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-80" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.617;entryY=1.055;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="712" y="979" />
+            </Array>
+            <mxPoint x="432" y="979" as="sourcePoint" />
+            <mxPoint x="482" y="979" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-81" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-83" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="373.27272727272725" y="1119" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-82" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-83" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.24;entryY=0.056;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="376" y="1149" />
+              <mxPoint x="21" y="1149" />
+              <mxPoint x="21" y="96" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-83" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=3;points=[[0,0],[0.5,0],[1,0],[0,0.5],[1,0.5],[0,1],[0.5,1],[1,1]];" value="D5:&amp;nbsp; &amp;nbsp;System log" vertex="1">
+          <mxGeometry height="30" width="111" x="320" y="1099" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-84" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="742" y="999" />
+            </Array>
+            <mxPoint x="432" y="999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-85" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete Attempt Request&amp;nbsp;" vertex="1">
+          <mxGeometry height="30" width="142" x="602" y="809" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-86" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="812" y="124" />
+              <mxPoint x="812" y="1069" />
+              <mxPoint x="372" y="1069" />
+              <mxPoint x="372" y="1049" />
+            </Array>
+            <mxPoint x="372" y="1049" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-87" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete Attempt Request&amp;nbsp;" vertex="1">
+          <mxGeometry height="30" width="142" x="672" y="949" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-88" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Admin Action Log" vertex="1">
+          <mxGeometry height="30" width="100.5" x="81" y="1019" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-89" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Admin Action Log" vertex="1">
+          <mxGeometry height="30" width="100.5" x="102" y="1059" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-90" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Admin Action Log" vertex="1">
+          <mxGeometry height="30" width="100.5" x="515.5" y="529" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-91" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.654;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.996;entryY=0.41;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="751" y="399" />
+              <mxPoint x="551" y="399" />
+              <mxPoint x="551" y="568" />
+            </Array>
+            <mxPoint x="431" y="569" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-92" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&#xa;Permanent Delete Request&#xa;&#xa;" vertex="1">
+          <mxGeometry height="30" width="174" x="587.5" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-93" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Quiz Created/Updated Successfully" vertex="1">
+          <mxGeometry height="30" width="129" x="492" y="479" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-94" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Delete Quiz/Results Data" vertex="1">
+          <mxGeometry height="60" width="60" x="409" y="699" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-95" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Verify Attempt Count" vertex="1">
+          <mxGeometry height="60" width="60" x="517" y="684" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-96" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Admin Action Log" vertex="1">
+          <mxGeometry height="30" width="100.5" x="490.5" y="779" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-97" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Log Data Retrieval" vertex="1">
+          <mxGeometry height="30" width="120" x="47" y="1129" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-98" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="System Activity Report" vertex="1">
+          <mxGeometry height="30" width="192" x="366" y="9" as="geometry" />
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-99" edge="1" parent="1" source="LieTYFZEi5oVee_hH0jD-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.463;entryY=0.124;entryDx=0;entryDy=0;entryPerimeter=0;" target="LieTYFZEi5oVee_hH0jD-22">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="364" y="659" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LieTYFZEi5oVee_hH0jD-100" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Question List for Management" vertex="1">
+          <mxGeometry height="30" width="95" x="356" y="429" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
