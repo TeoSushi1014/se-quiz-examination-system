@@ -6,7 +6,8 @@ Course: Software Engineering
 Group: 05
 Version: v1.2  
 Date: 2026-01-05
-Repository Github: https://github.com/TeoSushi1014/se-quiz-examination-system.git
+Repository Github: https://github.com/TeoSushi1014/se-quiz-examination-system.git  
+Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZHbpk6U7AmSn6TJQVEOCwnLIksFs/edit?usp=sharing
 
 ## Revision history (Change log)
 | Version | Date       | Changes |
