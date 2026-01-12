@@ -4,8 +4,8 @@
 Project: Quiz examination system  
 Course: Software Engineering  
 Group: 05
-Version: v1.2  
-Date: 2026-01-05
+Version: v1.3  
+Date: 2026-01-12
 Repository Github: https://github.com/TeoSushi1014/se-quiz-examination-system.git  
 Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZHbpk6U7AmSn6TJQVEOCwnLIksFs/edit?usp=sharing
 
@@ -15,20 +15,142 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
 | v1.0    | 2025-12-25 | Add initial SRS document for Quiz Examination System |
 | v1.1    | 2026-01-04 | Enhance SRS document with detailed functional requirements and system scope |
 | v1.2    | 2026-01-05 | Add functional requirement for managing quiz lifecycle and data retention |
----
-
-## System scope and purpose
-- The purpose of the Quiz examination system is to provide a robust, scalable, and secure platform for conducting online multiple-choice tests. It aims to automate the entire lifecycle of an examination: from question bank management by teachers to automated grading and reporting for students and admins
-
-## System actors
-- Student: User who takes quizzes and views their own results
-- Teacher: User who creates questions, manages quizzes, and views statistics
-- Admin: User responsible for system management and user accounts
+| v1.3    | 2026-01-12 | Add multiple attempts feature, restructure FR as narrative, add use case descriptions and actor/UC tables |
 
 ## Functional requirements
 
-### FR-01 User authentication
-- Description: The system shall allow users (Student/Teacher/Admin) to log in using a username and password
+The Quiz Examination System is a robust, scalable, and secure platform for conducting online multiple-choice tests. The system automates the entire lifecycle of an examination: from question bank management by teachers to automated grading and reporting for students and admins. The system provides the following key functionalities:
+
+**User authentication and account management:**
+- Users (Students, Teachers, and Admins) must log in to the system using a username and password. The system validates credentials against the database and creates a session for authenticated users. If a user exceeds 5 failed login attempts, the account is temporarily locked for 30 minutes to prevent unauthorized access
+- Authenticated users can change their own password by providing the current password and entering a new password that satisfies the system's password policy. After a successful password change, the user must log in again
+- Users can log out at any time to terminate their authenticated session. After logout, all session tokens are invalidated and users cannot access role-based features without logging in again
+- The system does not provide a self-service "Forgot password" feature. If a user forgets their password, only an Admin can reset it through the user management interface
+- Admins have full control over user account management, including creating new accounts (Student or Teacher), disabling or enabling existing accounts, resetting passwords, and assigning roles. All admin actions are logged with admin identity and timestamp for audit purposes
+
+**Question bank management:**
+- Teachers can manage a question bank by creating, editing, and deleting multiple-choice questions. Each question includes question text, four answer options (A, B, C, D), exactly one correct option, difficulty level (easy, medium, hard), and topic or tag for categorization
+- When creating or editing questions, the system validates that exactly one correct option is selected. If a teacher attempts to delete a question that is currently used in an active quiz, the system prevents deletion and displays a warning message
+
+**Quiz creation and configuration:**
+- Teachers can create new quizzes by selecting questions from the question bank and configuring various parameters including quiz title, time limit (in minutes), total points, scoring rules, question and answer shuffle options, result visibility settings (immediate: show results right after submission; after quiz end: show results only after the scheduled end time of the quiz; or manual release: teacher must manually release results), and maximum attempts allowed per student (a specific number such as 1, 2, 3, or unlimited)
+- The maximum attempts setting controls how many times each student can attempt the quiz. If set to a specific number (e.g., 2), students can submit up to that many attempts. If set to unlimited, students can attempt the quiz as many times as they want within the scheduled time window. When a student has multiple attempts, the system records all attempts separately with their individual scores and timestamps
+- The scoring system supports single-choice questions where students receive full points for selecting the correct option and zero points for incorrect or unanswered questions. The total score is the sum of points from all questions in the quiz
+- The system validates all quiz settings before saving. If the number of selected questions is zero or if parameters such as time limit or total points have invalid values (e.g., negative numbers), the system prevents saving and highlights the invalid fields
+
+**Quiz scheduling and assignment:**
+- Teachers can schedule quizzes by specifying a start time and end time, creating a time window during which the quiz is accessible. Teachers assign quizzes to specific students, classes, or groups. The system validates that the start time is earlier than the end time and that at least one student is assigned
+- Only assigned students can see and access scheduled quizzes, and only during the scheduled time window. Students outside the assignment or accessing outside the time window cannot start the quiz
+
+**Taking quiz attempts:**
+- Students can view their list of available quizzes and select a quiz to begin an attempt. The number of attempts allowed per student depends on the maximum attempts setting configured by the teacher when creating the quiz. If a student has reached the maximum number of allowed attempts, the system prevents starting a new attempt and displays a message indicating the limit has been reached
+- When a student starts a quiz, the system initializes the attempt, starts a countdown timer, and displays the questions (shuffled according to the quiz configuration). Students can select answers and navigate through questions using Previous/Next buttons
+- The system automatically saves the student's current answers when navigating between questions to prevent data loss. Students can submit their attempt at any time before the timer expires
+- If the countdown timer reaches zero before the student submits, the system automatically submits the last saved answers and notifies the student. The completion time and all responses are recorded in the database
+- After submitting an attempt, if the student has not reached the maximum attempts limit and the quiz is still within the scheduled time window, the student can start a new attempt. Each attempt is recorded separately with its own timestamp and score
+
+**Automated grading and results:**
+- Immediately after a student submits a quiz, the system automatically retrieves the student's answers and compares them against the correct answers stored in the question bank
+- The system calculates the total score based on the scoring rules configured for the quiz and generates an attempt summary including total score, number of correct answers, number of incorrect answers, and completion time
+- The system stores the results permanently in the student's history and applies the visibility rule configured by the teacher. If the result visibility is set to "immediate", students can view their results right away. If set to "manual release", results are stored but hidden until the teacher explicitly releases them
+
+**Viewing and exporting reports:**
+- Teachers and Admins can view comprehensive reports of student attempts for specific quizzes. The report displays a table of all attempts including student username, attempt number (e.g., attempt 1 of 3), completion date, score, and time spent. When a student has multiple attempts, all attempts are displayed in the report with their individual scores
+- Users can export these results to a CSV file that can be opened in spreadsheet software such as Excel. The exported file contains all displayed data fields including all attempts for each student. If no attempts exist for a quiz, the system displays a message indicating no results are available
+- For student view, when a student has multiple attempts, the system displays all their attempts with scores, and highlights the best score achieved
+
+**Quiz and attempt deletion:**
+- Teachers can delete quizzes that have no existing student attempts. If a quiz has one or more submitted attempts, the system blocks teacher deletion and displays a clear message
+- Admins have elevated privileges and can permanently purge quizzes even if they have student attempts. When an admin purges a quiz, the system deletes the quiz along with all related attempt records and results. All purge actions are logged with admin identity and timestamp
+- Teachers and admins can permanently delete individual student attempts (useful for removing invalid attempts due to technical errors or granting additional attempts beyond the configured limit). Teachers can only delete attempts for quizzes they created, while admins can delete attempts for any quiz. After an attempt is deleted, all related data including saved answers are removed. If the student has not reached the maximum attempts limit after deletion, they can start a new attempt
+
+---
+
+## Non-functional requirements
+
+### NFR-01 Performance
+- Description: The system shall respond to critical actions (auto-save answer, start quiz attempt, generate CSV report) within specified time limits under concurrent load during demo
+
+### NFR-02 Security
+- Description: The system shall not store user passwords in plain text and shall enforce role based access control
+
+### NFR-03 Availability
+- Description: During a scheduled demo session, the system shall operate without service interruption
+
+### NFR-04 Usability
+- Description: A student shall be able to start a quiz attempt in ≤ 3 steps after logging in
+
+### NFR-05 Maintainability
+- Description: The project shall provide comprehensive documentation for environment setup, build instructions, and logical module architecture
+
+### NFR-06 Deployment (Docker)
+- Description: The backend service shall be runnable using Docker while the database is hosted on Supabase cloud
+
+### NFR-07 Privileged deletion safety and referential integrity
+- Description: The system shall enforce referential integrity when deleting data and support admin purge with proper logging
+
+### NFR-08 Referential integrity for attempt deletion
+- Description: The system shall ensure referential integrity when permanently deleting attempts and their related answer records
+
+---
+
+## Data flow diagram
+
+### DFD level 0
+![DFD Level 0](dfd/image/DFD-level0.png)
+
+### DFD level 1
+![DFD Level 1](dfd/image/DFD_level1.png)
+
+### DFD level 2 - Authentication
+![DFD Level 2 - Authentication](dfd/image/DFD_level2-Authentication.png)
+
+### DFD level 2 - Question bank management
+![DFD Level 2 - Question Bank Management](dfd/image/DFD_level2-Question%20Bank%20Management.png)
+
+### DFD level 2 - Quiz management
+![DFD Level 2 - Quiz Management](dfd/image/DFD_level2-Quiz%20Management.png)
+
+### DFD level 2 - Attempt management
+![DFD Level 2 - Attempt Management](dfd/image/DFD-level2_Attempt%20Management.png)
+
+### DFD level 2 - Grading and results
+![DFD Level 2 - Grading and Results](dfd/image/DFD-level2_Grading_Results.png)
+
+## Use case diagram
+
+![Use Case Diagram](uc/uc.png)
+
+### Actors
+
+| No. | Actor   | Description                                                                                              |
+|-----|---------|----------------------------------------------------------------------------------------------------------|
+| 1   | Student | User who takes quizzes and views their own results                                                       |
+| 2   | Teacher | User who creates questions, manages quizzes, views statistics and student results                        |
+| 3   | Admin   | User responsible for system management and user accounts (create, disable, reset password, assign roles) |
+
+### Use cases
+
+| No. | Use Case                    | Description                                                                                        |
+|-----|-----------------------------|----------------------------------------------------------------------------------------------------|
+| 1   | User authentication         | Log in to the system using username and password                                                   |
+| 2   | Manage question bank        | Manage (create, edit, delete) multiple choice questions in the question bank                       |
+| 3   | Create and configure quiz   | Create a new quiz by selecting questions and configuring parameters                                |
+| 4   | Take quiz attempt           | Student selects a quiz, performs the attempt within time limit, and submits responses              |
+| 5   | Auto grading and results    | System automatically calculates score based on correct answers and stores results                  |
+| 6   | View and export reports     | View list of student attempts for a specific quiz and export results to CSV file                   |
+| 7   | Schedule and assign quiz    | Schedule and assign quiz to specific students within a time window                                 |
+| 8   | Manage user accounts        | Manage user accounts (create, disable, reset password, assign roles)                               |
+| 9   | Delete and purge quiz       | Delete quiz (teacher: only with no attempts, admin: permanently delete even with attempts)         |
+| 10  | Delete student attempt      | Permanently delete a student's attempt so the student can start a new attempt                      |
+| 11  | User logout                 | Log out and terminate the current authenticated session                                            |
+| 12  | Change password             | Change own password                                                                                |
+| 13  | Forgot password             | Admin resets password for users (no self-service reset feature)                                    |
+
+## Use case specifications
+
+### UC-01 User authentication
+- Description: The system allows users (Student/Teacher/Admin) to log in using a username and password
 - Primary actors: Student, teacher, admin
 - Preconditions: The user account exists in the database and is in an active state
 - Main flow:
@@ -43,8 +165,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - System grants access only with correct credentials
   - Account locks exactly after the 5th failed attempt
 
-### FR-02 Manage question bank
-- Description: The system shall allow a teacher to manage (create, edit, delete) multiple choice questions in the question bank
+### UC-02 Manage question bank
+- Description: The system allows a teacher to manage (create, edit, delete) multiple choice questions in the question bank
 - Primary actor: teacher
 - Data fields: question text, answer options A B C D, correct option, difficulty level (easy medium hard), topic or tag
 - Preconditions: teacher is logged in and has permission to manage questions
@@ -60,14 +182,14 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - Questions are successfully saved with all data fields
   - Non authorized users cannot access management functions
 
-### FR-03 Create and configure quiz
-- Description: The system shall allow a teacher to create a new quiz by selecting questions and configuring parameters
+### UC-03 Create and configure quiz
+- Description: The system allows a teacher to create a new quiz by selecting questions and configuring parameters (time limit, scoring rules, shuffle options, result visibility, maximum attempts)
 - Primary actor: teacher
 - Preconditions: teacher has successfully logged in and has access to at least one question bank
 - Main flow:
   1. Teacher selects "Create new quiz"
   2. Teacher enters quiz title and selects a set of questions from the question bank
-  3. Teacher configures settings: time limit in minutes, total points, scoring rules, shuffle questions, shuffle answers options, and result visibility (immediate / after end time / manual release)
+  3. Teacher configures settings: time limit in minutes, total points, scoring rules, shuffle questions, shuffle answers options, result visibility (immediate: show after submission / after quiz end: show after scheduled end time / manual release: teacher releases manually), and maximum attempts per student (specific number or unlimited)
   4. System validates that the number of selected questions is greater than zero and settings are valid
   5. System saves the quiz and displays a "Quiz created successfully" message
 - Exception flows:
@@ -86,15 +208,15 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - If the student leaves the question unanswered, the system shall add zero points
 - The total score of an attempt shall be the sum of the points from all questions in that quiz
 
-### FR-04 Take quiz attempt
-- Description: The system shall allow a student to select an assigned quiz, perform the attempt within a time limit, and submit their responses for grading
+### UC-04 Take quiz attempt
+- Description: The system allows a student to select an assigned quiz, perform the attempt within a time limit, and submit their responses for grading
 - Primary actor: Student
 - Preconditions:
   - Student is authenticated and authorized for the specific quiz
   - The current time is within the scheduled time window of the quiz (FR-07)
-  - Student does not have any existing attempt for this quiz
+  - Student has not reached the maximum attempts limit configured for this quiz
 - Attempt limit:
-  - Each student shall be allowed to have at most one existing attempt for each quiz
+  - The number of attempts allowed is determined by the maximum attempts setting configured by the teacher when creating the quiz (can be a specific number like 1, 2, 3, or unlimited)
 - Main flow:
   1. Student selects a quiz from the list of available assessments
   2. System initializes the attempt, starts the countdown timer, and displays the first set of questions
@@ -105,16 +227,17 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
 - Alternative/Exception flows:
   - Time expiration:
     - If the countdown reaches zero, the system shall auto submit the last saved answers and notify the student
-  - Attempt exists:
-    - If an attempt for this quiz already exists, the system shall prevent starting a new attempt and show a clear message
+  - Maximum attempts reached:
+    - If the student has already reached the maximum number of allowed attempts for this quiz, the system shall prevent starting a new attempt and show a message indicating the limit has been reached and displaying all previous attempt scores
 - Postconditions:
   - The attempt is marked as submitted and the data is ready for the grading process
 - Acceptance criteria:
-  - A student cannot have more than one existing attempt for the same quiz
+  - A student cannot exceed the maximum attempts limit configured for the quiz
   - Answers are stored correctly even if the attempt is auto submitted due to time expiration
+  - Each attempt is recorded separately with its own timestamp and score
 
-### FR-05 Auto grading and results
-- Description: After a student submits a quiz, the system shall automatically calculate the score based on the pre defined correct options and store the results
+### UC-05 Auto grading and results
+- Description: After a student submits a quiz, the system automatically calculates the score based on the pre-defined correct options and stores the results
 - Primary actor: system
 - Preconditions: The student has successfully submitted the quiz attempt (FR-04)
 - Main flow:
@@ -122,22 +245,22 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   2. The system compares answers and calculates the total score based on the scoring rules defined in FR-03
   3. The system generates an "Attempt summary" including total score, number of correct answers, number of incorrect answers, and completion time
   4. The system stores the score and summary in the student's history
-  5. The system applies the visibility rule: results shall be shown immediately to the student unless configured otherwise by the teacher in FR-03
-  6. If the quiz result visibility is set to "manual release", the system shall store the result but shall not display it to the student until the teacher releases results for that quiz
+  5. The system applies the visibility rule based on the configuration: if set to "immediate", results are shown right away; if set to "after quiz end", results are hidden until the scheduled end time of the quiz passes; if set to "manual release", results are hidden until the teacher explicitly releases them
+  6. When result visibility is "after quiz end" or "manual release", the system shall store the result but shall not display it to the student until the condition is met
 - Postconditions: The quiz result is permanently stored and linked to the student's account
 - Acceptance criteria:
   - Grading must be accurate based on the answer key
   - During the project demo under 30 concurrent students, results must be stored in the database within 5 seconds after submission
 
-### FR-06 View and export reports
-- Description: The system shall allow teachers and admins to view a list of student attempts for a specific quiz and export these results to a CSV file
+### UC-06 View and export reports
+- Description: The system allows teachers and admins to view a list of student attempts for a specific quiz and export these results to a CSV file
 - Primary actors: Teacher, admin
 - Preconditions: The user is logged in with appropriate permissions and at least one quiz attempt exists
 - Main flow:
   1. User selects a specific quiz from the management dashboard
-  2. System displays a table of all existing attempts (student username, completion date, score, time spent)
+  2. System displays a table of all existing attempts (student username, attempt number, completion date, score, time spent). When a student has multiple attempts, all attempts are listed separately
   3. User chooses the "Export to CSV" option
-  4. System generates and downloads a CSV file containing all displayed data
+  4. System generates and downloads a CSV file containing all displayed data including all attempts for each student
 - Alternative/Exception flows:
   - No attempts found:
     - If no attempts exist for the quiz, the system shall display a message: "No results available to display or export"
@@ -146,8 +269,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - The displayed report must match the data in the database for that specific quiz
   - The exported CSV file must be readable by spreadsheet software (e.g., Excel) and contain all required fields
 
-### FR-07 Schedule and assign quiz
-- Description: The system shall allow a teacher to schedule a quiz by specifying a start time and an end time, and assign the quiz to specific students (or a class or group), so that only authorized students can access the quiz during the scheduled time window
+### UC-07 Schedule and assign quiz
+- Description: The system allows a teacher to schedule a quiz by specifying a start time and an end time, and assign the quiz to specific students (or a class or group)
 - Primary actor: teacher
 - Supporting actors: student
 - Data fields:
@@ -175,8 +298,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - Assigned students can start the quiz only during the scheduled time window
   - The system rejects invalid time windows and empty assignments
 
-### FR-08 Manage user accounts
-- Description: The system shall allow an admin to manage user accounts including creating accounts, disabling accounts, resetting passwords, and assigning roles for student and teacher
+### UC-08 Manage user accounts
+- Description: The system allows an admin to manage user accounts including creating accounts, disabling accounts, resetting passwords, and assigning roles
 - Primary actor: Admin
 - Preconditions:
   - Admin is authenticated (FR-01)
@@ -196,8 +319,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - Admin can disable an account and the disabled user cannot log in
   - Admin can reset a password and the user can log in using the new password
 
-### FR-09 Delete and purge quiz
-- Description: The system shall allow teacher to delete a quiz only when it has no existing attempts and allow admin to purge a quiz permanently even if it has attempts
+### UC-09 Delete and purge quiz
+- Description: The system allows teacher to delete a quiz only when it has no existing attempts and allows admin to purge a quiz permanently even if it has attempts
 - Primary actors: Teacher, admin
 - Preconditions:
   - User is authenticated (FR-01)
@@ -229,8 +352,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - Admin can purge a quiz even when the quiz has one or more submitted attempts
   - After admin purge, related attempts results are removed and the quiz no longer appears in reports
 
-### FR-10 Delete student attempt
-- Description: The system shall allow teacher and admin to permanently delete a student's quiz attempt from the database so the student can start a new attempt
+### UC-10 Delete student attempt
+- Description: The system allows teacher and admin to permanently delete a student's quiz attempt from the database (useful for removing invalid attempts or granting additional attempts beyond the configured limit)
 - Primary actors: Teacher, admin
 - Preconditions:
   - User is authenticated (FR-01)
@@ -256,13 +379,13 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
     - If the attempt no longer exists the system shall show an error message and refresh the attempt list
 - Postconditions:
   - The deleted attempt is removed from the database and is no longer accessible
-  - The student is allowed to create a new attempt for that quiz
+  - If the student has not reached the maximum attempts limit after deletion, they can start a new attempt for that quiz
 - Acceptance criteria:
   - Teacher admin can delete an attempt and the student can start a new attempt
   - After deletion the attempt and its related answers do not appear in any report export or history query
 
-### FR-11 User logout
-- Description: The system shall allow an authenticated user (Student/Teacher/Admin) to log out and terminate the current authenticated session
+### UC-11 User logout
+- Description: The system allows an authenticated user (Student/Teacher/Admin) to log out and terminate the current authenticated session
 - Primary actors: Student, teacher, admin
 - Preconditions:
   - The user is authenticated (FR-01) and has an active session
@@ -280,8 +403,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - After logout, using the browser back button (or reopening the app window) shall not restore access to authenticated pages
   - Any request made with the old session/token after logout shall be rejected by the backend
 
-### FR-12 Change password
-- Description: The system shall allow an authenticated user (Student/Teacher/Admin) to change their password
+### UC-12 Change password
+- Description: The system allows an authenticated user (Student/Teacher/Admin) to change their password
 - Primary actors: Student, teacher, admin
 - Preconditions:
   - The user is authenticated (FR-01)
@@ -314,8 +437,8 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - The user cannot log in using the old password after a successful password change
   - The user can log in using the new password after a successful password change
 
-### FR-13 Forgot password
-- Description: The system shall not provide a self-service "Forgot password" feature for end users. Password reset shall be performed only by admin via user management functions (FR-08)
+### UC-13 Forgot password
+- Description: The system does not provide a self-service "Forgot password" feature for end users. Password reset is performed only by admin via user management functions
 - Primary actor: Admin
 - Supporting actors: Student, teacher
 - Preconditions:
@@ -342,12 +465,10 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - After admin reset, the old password can no longer be used
   - All existing sessions of the target user are invalidated after reset (if the system uses sessions/tokens)
 
----
-
-## Non-Functional Requirements
+## Non-functional requirements specifications
 
 ### NFR-01 Performance
-- Requirement:
+- Requirements:
   - During the project demo, the system shall respond to the "auto-save answer" action within 2 seconds for at least 95 percent of requests under 30 concurrent students
   - During the project demo, the system shall respond to the "start quiz attempt" action within 3 seconds under 30 concurrent students
   - During the project demo, the system shall generate and download the CSV report within 5 seconds for a quiz with up to 100 attempts
@@ -356,7 +477,7 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   - Confirm that at least 95 percent of measured response times satisfy the thresholds
 
 ### NFR-02 Security
-- Requirement:
+- Requirements:
   - The system shall not store user passwords in plain text
   - The system shall store passwords using bcrypt with a configurable work factor
   - The bcrypt work factor shall be at least 10
@@ -369,22 +490,22 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   3. Access control testing by attempting to access teacher or admin features using a student account to confirm requests are blocked
 
 ### NFR-03 Availability
-- Requirement:
+- Requirements:
   - During a scheduled demo session of at least 2 hours, the system shall operate without service interruption that prevents students from starting or submitting a quiz
   - Planned maintenance during the demo session shall not be performed
 - Verification:
   - Observe system operation during the demo session and record any downtime incidents
 
 ### NFR-04 Usability
-- Requirement: A student shall be able to start a quiz attempt in ≤ 3 steps after logging in
+- Requirements: A student shall be able to start a quiz attempt in ≤ 3 steps after logging in
 - Verification: Usability walkthrough with test users
 
 ### NFR-05 Maintainability
-- Requirement: The project shall provide comprehensive documentation in a README file (hosted on GitHub) including environment setup, build instructions, and a logical module architecture (auth, quiz, question, result). The source code shall follow a consistent coding standard to ensure understandability
+- Requirements: The project shall provide comprehensive documentation in a README file (hosted on GitHub) including environment setup, build instructions, and a logical module architecture (auth, quiz, question, result). The source code shall follow a consistent coding standard to ensure understandability
 - Verification: A technical review where a new developer (not in the original team) can successfully set up the development environment and run the system following the README instructions within <= 60 minutes
 
 ### NFR-06 Deployment (Docker)
-- Requirement:
+- Requirements:
   - The backend service shall be runnable using Docker
   - The database shall be hosted on Supabase (cloud) and is not packaged in Docker
   - The UI application runs natively on Windows and communicates with the backend via HTTP on localhost during demo
@@ -393,7 +514,7 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   2. Run the container and confirm the backend is accessible on localhost and can connect to the Supabase Postgres database.
 
 ### NFR-07 Privileged deletion safety and referential integrity
-- Requirement:
+- Requirements:
   - The system shall enforce referential integrity when deleting data that has relationships using the database foreign key delete rules
   - The system shall support admin purge by deleting related attempts results together with the quiz to avoid foreign key constraint errors
   - The system shall log admin purge actions with admin identity and timestamp
@@ -403,107 +524,78 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
   3. Attempt teacher delete on a quiz with attempts and confirm it is blocked
 
 ### NFR-08 Referential integrity for attempt deletion
-- Requirement:
+- Requirements:
   - The system shall ensure referential integrity when permanently deleting attempts and their related answer records
   - The database schema shall support deleting an attempt together with its related answer records without foreign key constraint errors
 - Verification:
   1. Create a quiz and submit an attempt then delete the attempt and confirm the attempt and related answers are removed
   2. Confirm the student can start a new attempt after deletion
 
----
-
-## Data Flow Diagram
-
-### DFD Level 0
-![DFD Level 0](dfd/image/DFD-level0.png)
-
-### DFD Level 1
-![DFD Level 1](dfd/image/DFD_level1.png)
-
-### DFD Level 2 - Authentication
-![DFD Level 2 - Authentication](dfd/image/DFD_level2-Authentication.png)
-
-### DFD Level 2 - Question Bank Management
-![DFD Level 2 - Question Bank Management](dfd/image/DFD_level2-Question%20Bank%20Management.png)
-
-### DFD Level 2 - Quiz Management
-![DFD Level 2 - Quiz Management](dfd/image/DFD_level2-Quiz%20Management.png)
-
-### DFD Level 2 - Attempt Management
-![DFD Level 2 - Attempt Management](dfd/image/DFD-level2_Attempt%20Management.png)
-
-### DFD Level 2 - Grading and Results
-![DFD Level 2 - Grading and Results](dfd/image/DFD-level2_Grading_Results.png)
-
-## Use Case Diagram
-
-![Use Case Diagram](uc/uc.png)
-
-## Class Diagram
+## Class diagram
 
 ![Class Diagram](classdiagram/classdiagram.png)
 
-## Data Model
+## Data model
 
 ![Data Model](datamodel/datamodel.png)
 
-## Interface Design Description
+## Interface design description
 
-### Login Screen
+### Login screen
 ![Login Screen](ui/Slide_001.png)
 
-### Student Dashboard
+### Student dashboard
 ![Student Dashboard](ui/Slide_002.png)
 
-### Quiz Selection
+### Quiz selection
 ![Quiz Selection](ui/Slide_003.png)
 
-### Quiz Instructions
+### Quiz instructions
 ![Quiz Instructions](ui/Slide_004.png)
 
-### Quiz Attempt
+### Quiz attempt
 ![Quiz Attempt](ui/Slide_005.png)
 
-### Quiz Submit Confirmation
+### Quiz submit confirmation
 ![Quiz Submit Confirmation](ui/Slide_006.png)
 
-### Quiz Result
+### Quiz result
 ![Quiz Result](ui/Slide_007.png)
 
-### Teacher Dashboard
+### Teacher dashboard
 ![Teacher Dashboard](ui/Slide_008.png)
 
-### Question Bank Management
+### Question bank management
 ![Question Bank Management](ui/Slide_009.png)
 
-### Add New Question
+### Add new question
 ![Add New Question](ui/Slide_010.png)
 
-### Edit Question
+### Edit question
 ![Edit Question](ui/Slide_011.png)
 
-### Quiz Management
+### Quiz management
 ![Quiz Management](ui/Slide_012.png)
 
-### Create New Quiz
+### Create new quiz
 ![Create New Quiz](ui/Slide_013.png)
 
-### Configure Quiz Settings
+### Configure quiz settings
 ![Configure Quiz Settings](ui/Slide_014.png)
 
-### Schedule and Assign Quiz
+### Schedule and assign quiz
 ![Schedule and Assign Quiz](ui/Slide_015.png)
 
-### View Quiz Results
+### View quiz results
 ![View Quiz Results](ui/Slide_016.png)
 
-### Admin Dashboard
+### Admin dashboard
 ![Admin Dashboard](ui/Slide_017.png)
 
-### User Management
+### User management
 ![User Management](ui/Slide_018.png)
 
-### System Reports
+### System reports
 ![System Reports](ui/Slide_019.png)
 
 ## Tools
