@@ -4,8 +4,8 @@
 Project: Quiz examination system  
 Course: Software Engineering  
 Group: 05
-Version: v1.3  
-Date: 2026-01-12
+Version: v1.4  
+Date: 2026-01-14
 Repository Github: https://github.com/TeoSushi1014/se-quiz-examination-system.git  
 Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZHbpk6U7AmSn6TJQVEOCwnLIksFs/edit?usp=sharing
 
@@ -16,6 +16,7 @@ Task assignment sheet: https://docs.google.com/spreadsheets/d/1GyHSU7Leg57oTAMZH
 | v1.1    | 2026-01-04 | Enhance SRS document with detailed functional requirements and system scope |
 | v1.2    | 2026-01-05 | Add functional requirement for managing quiz lifecycle and data retention |
 | v1.3    | 2026-01-12 | Add multiple attempts feature, restructure FR as narrative, add use case descriptions and actor/UC tables |
+| v1.4    | 2026-01-14 | Remove UC-05 (Auto grading) as system cannot be primary actor; integrate grading logic into UC-04 postconditions |
 
 ## Functional requirements
 
@@ -230,29 +231,19 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - Maximum attempts reached:
     - If the student has already reached the maximum number of allowed attempts for this quiz, the system shall prevent starting a new attempt and show a message indicating the limit has been reached and displaying all previous attempt scores
 - Postconditions:
-  - The attempt is marked as submitted and the data is ready for the grading process
+  - The attempt is marked as submitted
+  - The system automatically calculates the score by comparing the student's answers against the correct answers from the question bank based on the scoring rules (UC-03)
+  - The system generates an attempt summary including total score, number of correct answers, number of incorrect answers, and completion time
+  - The system stores the results permanently in the student's history
+  - The system applies the result visibility rule: if set to "immediate", results are shown right away; if set to "after quiz end", results are hidden until the scheduled end time passes; if set to "manual release", results are hidden until the teacher explicitly releases them
 - Acceptance criteria:
   - A student cannot exceed the maximum attempts limit configured for the quiz
   - Answers are stored correctly even if the attempt is auto submitted due to time expiration
   - Each attempt is recorded separately with its own timestamp and score
-
-### UC-05 Auto grading and results
-- Description: After a student submits a quiz, the system automatically calculates the score based on the pre-defined correct options and stores the results
-- Primary actor: system
-- Preconditions: The student has successfully submitted the quiz attempt (FR-04)
-- Main flow:
-  1. The system retrieves the student's answers and the correct answers for the quiz from the database
-  2. The system compares answers and calculates the total score based on the scoring rules defined in FR-03
-  3. The system generates an "Attempt summary" including total score, number of correct answers, number of incorrect answers, and completion time
-  4. The system stores the score and summary in the student's history
-  5. The system applies the visibility rule based on the configuration: if set to "immediate", results are shown right away; if set to "after quiz end", results are hidden until the scheduled end time of the quiz passes; if set to "manual release", results are hidden until the teacher explicitly releases them
-  6. When result visibility is "after quiz end" or "manual release", the system shall store the result but shall not display it to the student until the condition is met
-- Postconditions: The quiz result is permanently stored and linked to the student's account
-- Acceptance criteria:
   - Grading must be accurate based on the answer key
   - During the project demo under 30 concurrent students, results must be stored in the database within 5 seconds after submission
 
-### UC-06 View and export reports
+### UC-05 View and export reports
 - Description: The system allows teachers and admins to view a list of student attempts for a specific quiz and export these results to a CSV file
 - Primary actors: Teacher, admin
 - Preconditions: The user is logged in with appropriate permissions and at least one quiz attempt exists
@@ -269,7 +260,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - The displayed report must match the data in the database for that specific quiz
   - The exported CSV file must be readable by spreadsheet software (e.g., Excel) and contain all required fields
 
-### UC-07 Schedule and assign quiz
+### UC-06 Schedule and assign quiz
 - Description: The system allows a teacher to schedule a quiz by specifying a start time and an end time, and assign the quiz to specific students (or a class or group)
 - Primary actor: teacher
 - Supporting actors: student
@@ -298,7 +289,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - Assigned students can start the quiz only during the scheduled time window
   - The system rejects invalid time windows and empty assignments
 
-### UC-08 Manage user accounts
+### UC-07 Manage user accounts
 - Description: The system allows an admin to manage user accounts including creating accounts, disabling accounts, resetting passwords, and assigning roles
 - Primary actor: Admin
 - Preconditions:
@@ -319,7 +310,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - Admin can disable an account and the disabled user cannot log in
   - Admin can reset a password and the user can log in using the new password
 
-### UC-09 Delete and purge quiz
+### UC-08 Delete and purge quiz
 - Description: The system allows teacher to delete a quiz only when it has no existing attempts and allows admin to purge a quiz permanently even if it has attempts
 - Primary actors: Teacher, admin
 - Preconditions:
@@ -352,7 +343,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - Admin can purge a quiz even when the quiz has one or more submitted attempts
   - After admin purge, related attempts results are removed and the quiz no longer appears in reports
 
-### UC-10 Delete student attempt
+### UC-09 Delete student attempt
 - Description: The system allows teacher and admin to permanently delete a student's quiz attempt from the database (useful for removing invalid attempts or granting additional attempts beyond the configured limit)
 - Primary actors: Teacher, admin
 - Preconditions:
@@ -384,7 +375,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - Teacher admin can delete an attempt and the student can start a new attempt
   - After deletion the attempt and its related answers do not appear in any report export or history query
 
-### UC-11 User logout
+### UC-10 User logout
 - Description: The system allows an authenticated user (Student/Teacher/Admin) to log out and terminate the current authenticated session
 - Primary actors: Student, teacher, admin
 - Preconditions:
@@ -403,7 +394,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - After logout, using the browser back button (or reopening the app window) shall not restore access to authenticated pages
   - Any request made with the old session/token after logout shall be rejected by the backend
 
-### UC-12 Change password
+### UC-11 Change password
 - Description: The system allows an authenticated user (Student/Teacher/Admin) to change their password
 - Primary actors: Student, teacher, admin
 - Preconditions:
@@ -437,7 +428,7 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
   - The user cannot log in using the old password after a successful password change
   - The user can log in using the new password after a successful password change
 
-### UC-13 Forgot password
+### UC-12 Forgot password
 - Description: The system does not provide a self-service "Forgot password" feature for end users. Password reset is performed only by admin via user management functions
 - Primary actor: Admin
 - Supporting actors: Student, teacher
