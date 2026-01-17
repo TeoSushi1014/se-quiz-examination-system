@@ -139,15 +139,14 @@ The Quiz Examination System is a robust, scalable, and secure platform for condu
 | 2   | Manage question bank        | Manage (create, edit, delete) multiple choice questions in the question bank                       |
 | 3   | Create and configure quiz   | Create a new quiz by selecting questions and configuring parameters                                |
 | 4   | Take quiz attempt           | Student selects a quiz, performs the attempt within time limit, and submits responses              |
-| 5   | Auto grading and results    | System automatically calculates score based on correct answers and stores results                  |
-| 6   | View and export reports     | View list of student attempts for a specific quiz and export results to CSV file                   |
-| 7   | Schedule and assign quiz    | Schedule and assign quiz to specific students within a time window                                 |
-| 8   | Manage user accounts        | Manage user accounts (create, disable, reset password, assign roles)                               |
-| 9   | Delete and purge quiz       | Delete quiz (teacher: only with no attempts, admin: permanently delete even with attempts)         |
-| 10  | Delete student attempt      | Permanently delete a student's attempt so the student can start a new attempt                      |
-| 11  | User logout                 | Log out and terminate the current authenticated session                                            |
-| 12  | Change password             | Change own password                                                                                |
-| 13  | Forgot password             | Admin resets password for users (no self-service reset feature)                                    |
+| 5   | View and export reports     | View list of student attempts for a specific quiz and export results to CSV file                   |
+| 6   | Schedule and assign quiz    | Schedule and assign quiz to specific students within a time window                                 |
+| 7   | Manage user accounts        | Manage user accounts (create, disable, reset password, assign roles)                               |
+| 8   | Delete and purge quiz       | Delete quiz (teacher: only with no attempts, admin: permanently delete even with attempts)         |
+| 9   | Delete student attempt      | Permanently delete a student's attempt so the student can start a new attempt                      |
+| 10  | User logout                 | Log out and terminate the current authenticated session                                            |
+| 11  | Change password             | Change own password                                                                                |
+| 12  | Forgot password             | Admin resets password for users (no self-service reset feature)                                    |
 
 ## Use case specifications
 
