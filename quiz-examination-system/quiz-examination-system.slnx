@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="quiz-examination-system.vcxproj" Id="20bf3077-2cc2-465d-906d-bf200d1ab5be">
+    <Deploy />
+  </Project>
+</Solution>
