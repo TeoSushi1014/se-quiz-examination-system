@@ -7,22 +7,112 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="Transparent"
+    Loaded="Page_Loaded">
 
-    <ScrollViewer Padding="32,24">
-        <StackPanel Spacing="24">
+    <Grid>
+        <ScrollViewer Padding="32,24">
+        <StackPanel Spacing="32">
             <StackPanel Spacing="8">
                 <TextBlock Text="Available Quizzes" Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock Text="Select a quiz to take the exam" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Text="Select a quiz to begin the exam" 
+                           Style="{StaticResource BodyTextBlockStyle}" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
-            <StackPanel Spacing="12">
-                <TextBlock Text="Your Quizzes" Style="{StaticResource SubtitleTextBlockStyle}" />
-                <Button x:Name="TakeQuizBtn" Content="Take Quiz" HorizontalAlignment="Left" Click="TakeQuiz_Click" Padding="16,8" Style="{StaticResource AccentButtonStyle}" />
-                <TextBlock Text="Access the quizzes assigned to you by instructors" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </StackPanel>
+            <GridView x:Name="QuizzesGridView" 
+                      SelectionMode="Single" 
+                      SelectionChanged="QuizzesGridView_SelectionChanged"
+                      ItemsSource="{x:Bind Quizzes, Mode=OneWay}">
+                <GridView.ItemTemplate>
+                    <DataTemplate x:DataType="local:QuizItemStudent">
+                        <Grid Width="280" 
+                              Height="180" 
+                              Padding="20" 
+                              CornerRadius="8" 
+                              BorderThickness="1"
+                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                            
+                            <StackPanel Spacing="12" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind Title, Mode=OneWay}" 
+                                           Style="{StaticResource SubtitleTextBlockStyle}" 
+                                           TextWrapping="Wrap"
+                                           MaxLines="2"/>
+                                
+                                <StackPanel Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE916;" 
+                                                  FontSize="16" 
+                                                  Foreground="{ThemeResource AccentFillColorDefaultBrush}"/>
+                                        <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                                            <Run Text="{x:Bind TimeLimit, Mode=OneWay}"/>
+                                            <Run Text=" minutes"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE9F9;" 
+                                                  FontSize="16" 
+                                                  Foreground="{ThemeResource AccentFillColorDefaultBrush}"/>
+                                        <TextBlock Text="{x:Bind TotalPoints, Mode=OneWay}" 
+                                                   Style="{StaticResource CaptionTextBlockStyle}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE81C;" 
+                                                  FontSize="16" 
+                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                                            <Run Text="Attempts: "/>
+                                            <Run Text="{x:Bind AttemptsUsed, Mode=OneWay}"/>
+                                            <Run Text="/"/>
+                                            <Run Text="{x:Bind MaxAttempts, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
 
-            <InfoBar x:Name="ActionMessage" IsOpen="False" Severity="Informational" IsClosable="True" />
+                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" 
+                                        CornerRadius="4" 
+                                        Padding="8,4"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{x:Bind Status, Mode=OneWay}" 
+                                               Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="White"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+
+            <Button x:Name="StartExamButton" 
+                    Click="StartExam_Click" 
+                    Style="{StaticResource AccentButtonStyle}"
+                    IsEnabled="False"
+                    MinWidth="200"
+                    HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE768;"/>
+                    <TextBlock Text="Start Exam" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <ProgressRing x:Name="LoadingRing" IsActive="False" Width="48" Height="48"/>
         </StackPanel>
     </ScrollViewer>
+
+        <InfoBar x:Name="ActionMessage" 
+                 IsOpen="False" 
+                 Severity="Informational" 
+                 IsClosable="True"
+                 VerticalAlignment="Bottom"
+                 HorizontalAlignment="Right"
+                 MaxWidth="400"
+                 Margin="24">
+            <InfoBar.Shadow>
+                <ThemeShadow />
+            </InfoBar.Shadow>
+        </InfoBar>
+    </Grid>
 </Page>

@@ -1,215 +1,135 @@
 #include "pch.h"
 #include "StudentDashboardPage.xaml.h"
+#include "ExamPage.xaml.h"
+#include "QuizItemStudent.h"
 #if __has_include("StudentDashboardPage.g.cpp")
 #include "StudentDashboardPage.g.cpp"
 #endif
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
+using namespace Microsoft::UI::Xaml::Controls;
+using namespace Microsoft::UI::Xaml::Interop;
 
 namespace winrt::quiz_examination_system::implementation
 {
     StudentDashboardPage::StudentDashboardPage()
     {
         InitializeComponent();
+        m_quizzes = single_threaded_observable_vector<quiz_examination_system::QuizItemStudent>();
         m_supabaseClient = std::make_unique<::quiz_examination_system::SupabaseClient>();
+        m_currentUserId = L"";
     }
 
-    void StudentDashboardPage::TakeQuiz_Click(winrt::Windows::Foundation::IInspectable const &, RoutedEventArgs const &)
+    Windows::Foundation::Collections::IObservableVector<quiz_examination_system::QuizItemStudent> StudentDashboardPage::Quizzes()
     {
-        ActionMessage().IsOpen(false);
+        return m_quizzes;
+    }
 
+    void StudentDashboardPage::Page_Loaded(IInspectable const &, RoutedEventArgs const &)
+    {
+        LoadQuizzes();
+    }
+
+    void StudentDashboardPage::LoadQuizzes()
+    {
         if (!m_supabaseClient)
         {
-            ActionMessage().Message(L"Database client not initialized");
-            ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            ActionMessage().IsOpen(true);
+            ShowMessage(L"Error: Cannot connect to database", InfoBarSeverity::Error);
             return;
         }
 
-        m_supabaseClient->OnQuizQuestionsLoaded = [this](bool success, std::vector<::quiz_examination_system::SupabaseClient::QuestionData> questions)
+        LoadingRing().IsActive(true);
+        ShowMessage(L"Loading quiz list...", InfoBarSeverity::Informational);
+
+        auto dispatcher = Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+
+        m_supabaseClient->OnStudentQuizzesLoaded = [this, dispatcher](bool success, std::vector<::quiz_examination_system::SupabaseClient::QuizData> quizzes)
         {
-            if (success && !questions.empty())
-            {
-                hstring message = hstring(L"Loaded ") + to_hstring(questions.size()) + L" questions. Demo: Question 1 is '" + questions[0].question_text + L"'";
-                ActionMessage().Message(message);
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Success);
-            }
-            else
-            {
-                ActionMessage().Message(L"Failed to load quiz questions");
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            }
-            ActionMessage().IsOpen(true);
-        };
+            dispatcher.TryEnqueue([this, success, quizzes]()
+                                  {
+                LoadingRing().IsActive(false);
+                ActionMessage().IsOpen(false);
 
-        m_supabaseClient->GetQuizQuestions(L"Q01");
-    }
-
-    void StudentDashboardPage::DemoSubmitAttempt_Click(winrt::Windows::Foundation::IInspectable const &, RoutedEventArgs const &)
-    {
-        ActionMessage().IsOpen(false);
-
-        if (!m_supabaseClient)
-        {
-            ActionMessage().Message(L"Database client not initialized");
-            ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            ActionMessage().IsOpen(true);
-            return;
-        }
-
-        // Demo: Create sample answers for quiz Q01
-        // Assuming student 004 takes quiz Q01 with answers for questions Q001, Q002, Q003
-        JsonArray answersArray;
-
-        JsonObject answer1;
-        answer1.Insert(L"question_id", JsonValue::CreateStringValue(L"Q001"));
-        answer1.Insert(L"selected_option", JsonValue::CreateStringValue(L"A"));
-        answersArray.Append(answer1);
-
-        JsonObject answer2;
-        answer2.Insert(L"question_id", JsonValue::CreateStringValue(L"Q002"));
-        answer2.Insert(L"selected_option", JsonValue::CreateStringValue(L"B"));
-        answersArray.Append(answer2);
-
-        JsonObject answer3;
-        answer3.Insert(L"question_id", JsonValue::CreateStringValue(L"Q003"));
-        answer3.Insert(L"selected_option", JsonValue::CreateStringValue(L"C"));
-        answersArray.Append(answer3);
-
-        m_supabaseClient->OnAttemptSubmitted = [this](::quiz_examination_system::SupabaseClient::AttemptResult result)
-        {
-            if (result.success)
-            {
-                hstring message = hstring(L"Attempt submitted!\nID: ") + result.attempt_id +
-                                  L"\nScore: " + to_hstring(result.score) + L"/" + to_hstring(result.total_points) +
-                                  L"\nCorrect: " + to_hstring(result.correct_count);
-                ActionMessage().Message(message);
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Success);
-            }
-            else
-            {
-                ActionMessage().Message(hstring(L"Failed to submit: ") + result.message);
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            }
-            ActionMessage().IsOpen(true);
-        };
-
-        m_supabaseClient->SubmitQuizAttempt(L"004", L"Q01", answersArray.Stringify(), 120);
-    }
-
-    void StudentDashboardPage::DemoLoadQuizzes_Click(winrt::Windows::Foundation::IInspectable const &, RoutedEventArgs const &)
-    {
-        ActionMessage().IsOpen(false);
-
-        if (!m_supabaseClient)
-        {
-            ActionMessage().Message(L"Database client not initialized");
-            ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            ActionMessage().IsOpen(true);
-            return;
-        }
-
-        m_supabaseClient->OnStudentQuizzesLoaded = [this](bool success, std::vector<::quiz_examination_system::SupabaseClient::QuizData> quizzes)
-        {
-            if (success && !quizzes.empty())
-            {
-                hstring message = hstring(L"Loaded ") + to_hstring(quizzes.size()) + L" available quizzes\n";
-                for (size_t i = 0; i < quizzes.size() && i < 3; ++i)
+                if (!success)
                 {
-                    message = message + L"\n- " + quizzes[i].quiz_title +
-                              L" (Attempts: " + to_hstring(quizzes[i].attempts_used) + L"/" + quizzes[i].max_attempts + L")";
+                    ShowMessage(L"Failed to load quiz list", InfoBarSeverity::Error);
+                    return;
                 }
-                ActionMessage().Message(message);
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Success);
-            }
-            else
-            {
-                ActionMessage().Message(L"Failed to load quizzes or no quizzes available");
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Warning);
-            }
-            ActionMessage().IsOpen(true);
+
+                if (quizzes.empty())
+                {
+                    ShowMessage(L"No quizzes assigned to you yet", InfoBarSeverity::Warning);
+                    return;
+                }
+
+                m_quizzes.Clear();
+
+                for (const auto &quiz : quizzes)
+                {
+                    auto item = make<QuizItemStudent>();
+                    item.QuizId(quiz.quiz_id);
+                    item.Title(quiz.quiz_title);
+                    item.TimeLimit(quiz.time_limit_minutes);
+                    item.TotalPoints(quiz.total_points);
+                    item.AttemptsUsed(quiz.attempts_used);
+                    item.MaxAttempts(quiz.max_attempts);
+                    item.Status(L"Available");
+
+                    m_quizzes.Append(item);
+                }
+
+                ShowMessage(hstring(L"Loaded ") + to_hstring(quizzes.size()) + L" quizzes", InfoBarSeverity::Success); });
         };
 
-        m_supabaseClient->GetStudentQuizzes(L"004");
+        m_supabaseClient->GetStudentQuizzes(m_currentUserId);
     }
 
-    void StudentDashboardPage::DemoViewAttemptResults_Click(winrt::Windows::Foundation::IInspectable const &, RoutedEventArgs const &)
+    void StudentDashboardPage::QuizzesGridView_SelectionChanged(IInspectable const &, SelectionChangedEventArgs const &)
     {
-        ActionMessage().IsOpen(false);
-
-        if (!m_supabaseClient)
+        int index = QuizzesGridView().SelectedIndex();
+        if (index >= 0 && index < static_cast<int>(m_quizzes.Size()))
         {
-            ActionMessage().Message(L"Database client not initialized");
-            ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            ActionMessage().IsOpen(true);
+            m_selectedQuiz = m_quizzes.GetAt(index);
+            StartExamButton().IsEnabled(true);
+        }
+        else
+        {
+            StartExamButton().IsEnabled(false);
+        }
+    }
+
+    void StudentDashboardPage::StartExam_Click(IInspectable const &, RoutedEventArgs const &)
+    {
+        if (!m_selectedQuiz || m_selectedQuiz.QuizId().empty())
+        {
+            ShowMessage(L"Please select a quiz", InfoBarSeverity::Warning);
             return;
         }
 
-        m_supabaseClient->OnAttemptResultsLoaded = [this](bool success, std::vector<::quiz_examination_system::SupabaseClient::AttemptData> attempts)
+        if (m_selectedQuiz.MaxAttempts() != L"unlimited")
         {
-            if (success && !attempts.empty())
+            int maxAttempts = std::stoi(m_selectedQuiz.MaxAttempts().c_str());
+            if (m_selectedQuiz.AttemptsUsed() >= maxAttempts)
             {
-                hstring message = hstring(L"Found ") + to_hstring(attempts.size()) + L" attempts:\n";
-                for (size_t i = 0; i < attempts.size() && i < 3; ++i)
-                {
-                    message = message + L"\nAttempt #" + to_hstring(attempts[i].attempt_number) +
-                              L": " + to_hstring(attempts[i].score) + L"/" + to_hstring(attempts[i].total_points);
-                }
-                ActionMessage().Message(message);
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Success);
+                ShowMessage(L"You have reached the maximum attempts for this quiz", InfoBarSeverity::Error);
+                return;
             }
-            else
-            {
-                ActionMessage().Message(L"No attempts found");
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Warning);
-            }
-            ActionMessage().IsOpen(true);
-        };
-
-        m_supabaseClient->GetAttemptResults(L"004", L"Q01");
-    }
-
-    void StudentDashboardPage::DemoViewAttemptDetails_Click(winrt::Windows::Foundation::IInspectable const &, RoutedEventArgs const &)
-    {
-        ActionMessage().IsOpen(false);
-
-        if (!m_supabaseClient)
-        {
-            ActionMessage().Message(L"Database client not initialized");
-            ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            ActionMessage().IsOpen(true);
-            return;
         }
 
-        m_supabaseClient->OnAttemptDetailsLoaded = [this](bool success, std::vector<::quiz_examination_system::SupabaseClient::AnswerDetail> answers)
-        {
-            if (success && !answers.empty())
-            {
-                hstring message = hstring(L"Attempt details (") + to_hstring(answers.size()) + L" questions):\n";
-                int correctCount = 0;
-                for (size_t i = 0; i < answers.size() && i < 2; ++i)
-                {
-                    if (answers[i].is_correct)
-                        correctCount++;
-                    std::wstring qText = answers[i].question_text.c_str();
-                    if (qText.length() > 30)
-                        qText = qText.substr(0, 30);
-                    message = message + L"\nQ: " + hstring(qText) +
-                              (answers[i].is_correct ? L" [✓]" : L" [✗]");
-                }
-                message = message + hstring(L"\n\nTotal Correct: ") + to_hstring(correctCount) + L"/" + to_hstring(answers.size());
-                ActionMessage().Message(message);
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Success);
-            }
-            else
-            {
-                ActionMessage().Message(L"Failed to load attempt details");
-                ActionMessage().Severity(Microsoft::UI::Xaml::Controls::InfoBarSeverity::Error);
-            }
-            ActionMessage().IsOpen(true);
-        };
+        Frame().Navigate(xaml_typename<quiz_examination_system::ExamPage>());
 
-        m_supabaseClient->GetAttemptDetailsWithAnswers(L"ATM000");
+        auto page = Frame().Content().try_as<quiz_examination_system::ExamPage>();
+        if (page)
+        {
+            page.as<quiz_examination_system::implementation::ExamPage>()->SetQuizData(m_selectedQuiz.QuizId(), m_currentUserId);
+        }
+    }
+
+    void StudentDashboardPage::ShowMessage(hstring const &message, InfoBarSeverity severity)
+    {
+        ActionMessage().Message(message);
+        ActionMessage().Severity(severity);
+        ActionMessage().IsOpen(true);
     }
 }

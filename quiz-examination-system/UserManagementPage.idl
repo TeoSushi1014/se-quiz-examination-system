@@ -1,0 +1,11 @@
+import "UserItem.idl";
+
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass UserManagementPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        UserManagementPage();
+        Windows.Foundation.Collections.IObservableVector<UserItem> Users { get; };
+    }
+}

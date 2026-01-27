@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="quiz_examination_system.QuestionBankPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:quiz_examination_system"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="Transparent"
+    Loaded="Page_Loaded">
+
+    <Grid Padding="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="16" Margin="0,0,0,24">
+            <TextBlock Text="Question bank" Style="{StaticResource TitleTextBlockStyle}"/>
+            
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button x:Name="AddQuestionBtn" Content="Add question" Click="AddQuestion_Click">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="N" Modifiers="Control"/>
+                    </Button.KeyboardAccelerators>
+                </Button>
+                <Button Content="Import from file" Click="ImportQuestions_Click"/>
+                <Button Content="Refresh" Click="RefreshQuestions_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <InfoBar x:Name="ActionMessage" 
+                 Grid.Row="1"
+                 IsOpen="False" 
+                 IsClosable="True"
+                 VerticalAlignment="Bottom"
+                 HorizontalAlignment="Right"
+                 MaxWidth="400"
+                 Margin="24">
+            <InfoBar.Shadow>
+                <ThemeShadow />
+            </InfoBar.Shadow>
+        </InfoBar>
+
+        <Grid Grid.Row="1">
+            <ProgressRing x:Name="LoadingRing" IsActive="False" Width="60" Height="60"/>
+            
+            <ListView x:Name="QuestionListView" SelectionMode="Single">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:QuestionItem">
+                        <Grid Padding="12" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Spacing="8">
+                                <TextBlock Text="{x:Bind QuestionText, Mode=OneWay}" 
+                                         TextWrapping="Wrap" 
+                                         FontWeight="SemiBold"/>
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <TextBlock Text="{x:Bind DifficultyLevel, Mode=OneWay}" 
+                                             Foreground="{ThemeResource SystemAccentColor}"/>
+                                    <TextBlock Text="•"/>
+                                    <TextBlock Text="{x:Bind Topic, Mode=OneWay}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="Edit" 
+                                  Tag="{x:Bind QuestionId, Mode=OneWay}"
+                                  Click="EditQuestion_Click"/>
+                            <Button Grid.Column="2" Content="Delete" 
+                                  Tag="{x:Bind QuestionId, Mode=OneWay}"
+                                  Click="DeleteQuestion_Click"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <ContentDialog x:Name="AddQuestionDialog"
+                      Title="Add new question"
+                      PrimaryButtonText="Save"
+                      CloseButtonText="Cancel"
+                      DefaultButton="Primary">
+            <ScrollViewer>
+                <StackPanel Spacing="16">
+                    <TextBox x:Name="InputQuestionText" 
+                           Header="Question text" 
+                           PlaceholderText="Enter question..."
+                           TextWrapping="Wrap"
+                           AcceptsReturn="True"
+                           Height="100"/>
+
+                    <TextBox x:Name="InputOptionA" Header="Option A"/>
+                    <TextBox x:Name="InputOptionB" Header="Option B"/>
+                    <TextBox x:Name="InputOptionC" Header="Option C"/>
+                    <TextBox x:Name="InputOptionD" Header="Option D"/>
+
+                    <ComboBox x:Name="ComboCorrectOption" Header="Correct option" SelectedIndex="0">
+                        <ComboBoxItem Content="A"/>
+                        <ComboBoxItem Content="B"/>
+                        <ComboBoxItem Content="C"/>
+                        <ComboBoxItem Content="D"/>
+                    </ComboBox>
+
+                    <ComboBox x:Name="ComboDifficulty" Header="Difficulty" SelectedIndex="1">
+                        <ComboBoxItem Content="easy"/>
+                        <ComboBoxItem Content="medium"/>
+                        <ComboBoxItem Content="hard"/>
+                    </ComboBox>
+
+                    <TextBox x:Name="InputTopic" Header="Topic" PlaceholderText="e.g., Data Structures"/>
+                </StackPanel>
+            </ScrollViewer>
+        </ContentDialog>
+    </Grid>
+</Page>

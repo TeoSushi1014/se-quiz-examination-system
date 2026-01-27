@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  quiz-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quiz-examination-system
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - app-data:/app/data
+    restart: unless-stopped
+    networks:
+      - quiz-network
+    # Note: WinUI 3 apps require Windows containers
+    # Ensure Docker Desktop is configured for Windows containers
+    
+  # Optional: Add a reverse proxy or monitoring service
+  # nginx:
+  #   image: nginx:latest
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - quiz-network
+
+volumes:
+  app-data:
+    driver: local
+
+networks:
+  quiz-network:
+    driver: bridge
+
+# To run:
+# 1. Create .env file with SUPABASE_URL and SUPABASE_ANON_KEY
+# 2. Run: docker-compose up -d
+# 3. To stop: docker-compose down
+# 4. To view logs: docker-compose logs -f quiz-app

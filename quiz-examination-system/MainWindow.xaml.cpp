@@ -1,5 +1,11 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
+#include "TeacherDashboardPage.xaml.h"
+#include "StudentDashboardPage.xaml.h"
+#include "AdminDashboardPage.xaml.h"
+#include "SupabaseClientManager.h"
+#include "SupabaseClientAsync.h"
+#include <winrt/Windows.Data.Json.h>
 #if __has_include("MainWindow.g.cpp")
 #include "MainWindow.g.cpp"
 #endif
@@ -7,99 +13,118 @@
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
-using namespace Windows::UI::Xaml::Interop;
-using namespace Windows::Foundation;
+using namespace Windows::Data::Json;
 
 namespace winrt::quiz_examination_system::implementation
 {
     MainWindow::MainWindow()
     {
         InitializeComponent();
-        Closed({this, &MainWindow::OnClosed});
+        m_client = std::make_unique<::quiz_examination_system::SupabaseClientAsync>();
 
-        m_supabaseClient = std::make_unique<::quiz_examination_system::SupabaseClient>();
-        m_supabaseClient->OnLoginSuccess = [this](hstring username, hstring displayRole, hstring dbRole, hstring userId)
+        auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
+        if (manager.HasActiveSession())
         {
-            OnLoginSuccess(username, displayRole, dbRole, userId);
-        };
-        m_supabaseClient->OnLoginFailed = [this](hstring message)
-        {
-            OnLoginFailed(message);
-        };
-        m_supabaseClient->OnPasswordChanged = [this](hstring message)
-        {
-            OnPasswordChanged(message);
-        };
-        m_supabaseClient->OnPasswordChangeFailed = [this](hstring message)
-        {
-            OnPasswordChangeFailed(message);
-        };
-
-        m_dbConnected = ConnectDatabase(L"");
-
-        UpdateView();
-    }
-
-    void MainWindow::OnClosed(IInspectable const &, Microsoft::UI::Xaml::WindowEventArgs const &)
-    {
-        m_isClosing = true;
-        if (m_supabaseClient)
-        {
-            m_supabaseClient->OnLoginSuccess = nullptr;
-            m_supabaseClient->OnLoginFailed = nullptr;
-            m_supabaseClient->OnPasswordChanged = nullptr;
-            m_supabaseClient->OnPasswordChangeFailed = nullptr;
+            m_authenticated = true;
+            m_currentUser = manager.GetUsername();
+            m_currentDbRole = manager.GetRole();
+            m_currentRole = (m_currentDbRole == L"Admin") ? L"Administrator" : (m_currentDbRole == L"Teacher") ? L"Lecturer"
+                                                                                                               : L"Student";
+            UpdateView();
         }
     }
 
-    void MainWindow::ManageUsers_Click(IInspectable const &, RoutedEventArgs const &) {}
-    void MainWindow::ManageQuestions_Click(IInspectable const &, RoutedEventArgs const &) {}
-    void MainWindow::ManageQuizzes_Click(IInspectable const &, RoutedEventArgs const &) {}
-    void MainWindow::ReviewAttempts_Click(IInspectable const &, RoutedEventArgs const &) {}
-    void MainWindow::TakeQuiz_Click(IInspectable const &, RoutedEventArgs const &) {}
-
-    void MainWindow::Login_Click(IInspectable const &, RoutedEventArgs const &)
+    winrt::fire_and_forget MainWindow::Login_Click(IInspectable const &, RoutedEventArgs const &)
     {
+        auto lifetime = get_strong();
+
         auto username = UsernameBox().Text();
         auto password = PasswordBox().Password();
 
         LoginMessage().IsOpen(false);
-        if (!m_dbConnected)
-        {
-            LoginMessage().Message(L"Database is not connected");
-            LoginMessage().Severity(InfoBarSeverity::Error);
-            LoginMessage().IsOpen(true);
-            return;
-        }
 
         if (username.empty() || password.empty())
         {
             LoginMessage().Message(L"Enter username and password");
             LoginMessage().Severity(InfoBarSeverity::Warning);
             LoginMessage().IsOpen(true);
-            return;
+            co_return;
         }
 
+        LoginButton().IsEnabled(false);
+        LoginProgressRing().IsActive(true);
         LoginMessage().Message(L"Signing in...");
         LoginMessage().Severity(InfoBarSeverity::Informational);
         LoginMessage().IsOpen(true);
-        m_supabaseClient->Login(username, password);
+
+        try
+        {
+            auto resultJson = co_await m_client->LoginAsync(username, password);
+
+            // Debug: Show raw JSON response
+            OutputDebugStringW((L"Login Response: " + resultJson + L"\n").c_str());
+
+            auto result = JsonObject::Parse(resultJson);
+            bool success = result.GetNamedBoolean(L"success", false);
+
+            if (success)
+            {
+                m_authenticated = true;
+                m_currentUser = result.GetNamedString(L"username", L"");
+                m_currentUserId = result.GetNamedString(L"userId", L"");
+                m_currentDbRole = result.GetNamedString(L"role", L"");
+                m_currentRole = result.GetNamedString(L"displayRole", L"");
+
+                auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
+                manager.SaveSession(m_currentUserId, m_currentUser, m_currentDbRole);
+
+                LoginMessage().IsOpen(false);
+                UpdateView();
+            }
+            else
+            {
+                auto errorMessage = result.GetNamedString(L"errorMessage", L"Login failed");
+                OutputDebugStringW((L"Login Error: " + errorMessage + L"\n").c_str());
+                LoginMessage().Message(errorMessage);
+                LoginMessage().Severity(InfoBarSeverity::Error);
+                LoginMessage().IsOpen(true);
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            LoginMessage().Message(ex.message());
+            LoginMessage().Severity(InfoBarSeverity::Error);
+            LoginMessage().IsOpen(true);
+        }
+
+        LoginButton().IsEnabled(true);
+        LoginProgressRing().IsActive(false);
     }
 
     void MainWindow::Logout_Click(IInspectable const &, RoutedEventArgs const &)
     {
-        m_authenticated = false;
-        m_currentUser = L"";
-        m_currentUserId = L"";
-        m_currentRole = L"";
-        m_currentDbRole = L"";
-        LoginMessage().IsOpen(false);
-        UpdateView();
-    }
+        ContentDialog confirmDialog;
+        confirmDialog.XamlRoot(this->Content().XamlRoot());
+        confirmDialog.Title(box_value(L"Confirm logout"));
+        confirmDialog.Content(box_value(L"Are you sure you want to log out?"));
+        confirmDialog.PrimaryButtonText(L"Logout");
+        confirmDialog.CloseButtonText(L"Cancel");
+        confirmDialog.DefaultButton(ContentDialogButton::Close);
 
-    void MainWindow::ChangePassword_Click(IInspectable const &, RoutedEventArgs const &)
-    {
-        // Implement password change in a future modal
+        confirmDialog.PrimaryButtonClick([this](auto &&, auto &&)
+                                         {
+            auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
+            manager.ClearSession();
+
+            m_authenticated = false;
+            m_currentUser = L"";
+            m_currentUserId = L"";
+            m_currentRole = L"";
+            m_currentDbRole = L"";
+            LoginMessage().IsOpen(false);
+            UpdateView(); });
+
+        confirmDialog.ShowAsync();
     }
 
     void MainWindow::UpdateView()
@@ -112,100 +137,23 @@ namespace winrt::quiz_examination_system::implementation
             WelcomeText().Text(hstring(L"Welcome, ") + m_currentUser);
             RoleText().Text(hstring(L"(") + m_currentRole + hstring(L")"));
 
-            if (DashboardNav().MenuItems().Size() > 0)
-            {
-                DashboardNav().SelectedItem(DashboardNav().MenuItems().GetAt(0));
-            }
-
             if (m_currentRole == L"Administrator")
             {
-                TypeName adminType;
-                adminType.Name = L"quiz_examination_system.AdminDashboardPage";
-                adminType.Kind = TypeKind::Metadata;
-                ContentFrame().Navigate(adminType);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::AdminDashboardPage>());
             }
             else if (m_currentRole == L"Lecturer")
             {
-                TypeName teacherType;
-                teacherType.Name = L"quiz_examination_system.TeacherDashboardPage";
-                teacherType.Kind = TypeKind::Metadata;
-                ContentFrame().Navigate(teacherType);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::TeacherDashboardPage>());
             }
             else if (m_currentRole == L"Student")
             {
-                TypeName studentType;
-                studentType.Name = L"quiz_examination_system.StudentDashboardPage";
-                studentType.Kind = TypeKind::Metadata;
-                ContentFrame().Navigate(studentType);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
             }
         }
-    }
-
-    bool MainWindow::ConnectDatabase(hstring const &)
-    {
-        return true;
-    }
-
-    void MainWindow::ApplyPermissions(hstring const &role)
-    {
-        if (role == L"ADMIN")
+        else
         {
+            UsernameBox().Text(L"");
+            PasswordBox().Password(L"");
         }
-        else if (role == L"TEACHER")
-        {
-        }
-        else if (role == L"STUDENT")
-        {
-        }
-    }
-
-    void MainWindow::OnLoginSuccess(hstring username, hstring displayRole, hstring dbRole, hstring userId)
-    {
-        if (m_isClosing)
-            return;
-        m_authenticated = true;
-        m_currentUser = username;
-        m_currentUserId = userId;
-        m_currentRole = displayRole;
-        m_currentDbRole = dbRole;
-        m_supabaseClient->SetCurrentUserRole(dbRole);
-        UsernameBox().Text(L"");
-        PasswordBox().Password(L"");
-        LoginMessage().IsOpen(false);
-        ApplyPermissions(dbRole);
-        UpdateView();
-    }
-
-    void MainWindow::OnLoginFailed(hstring message)
-    {
-        if (m_isClosing)
-            return;
-        m_authenticated = false;
-        m_currentUser = L"";
-        m_currentUserId = L"";
-        m_currentRole = L"";
-        m_currentDbRole = L"";
-        LoginMessage().Message(message);
-        LoginMessage().Severity(InfoBarSeverity::Error);
-        LoginMessage().IsOpen(true);
-        UpdateView();
-    }
-
-    void MainWindow::OnPasswordChanged(hstring)
-    {
-        if (m_isClosing)
-            return;
-    }
-
-    void MainWindow::OnPasswordChangeFailed(hstring)
-    {
-        if (m_isClosing)
-            return;
-    }
-
-    void MainWindow::DashboardNav_SelectionChanged(IInspectable const &, IInspectable const &)
-    {
-        if (m_isClosing)
-            return;
     }
 }

@@ -1,0 +1,17 @@
+namespace quiz_examination_system
+{
+    [bindable]
+    [default_interface]
+    runtimeclass QuizItemStudent : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        QuizItemStudent();
+        
+        String QuizId;
+        String Title;
+        Int32 TimeLimit;
+        Int32 TotalPoints;
+        Int32 AttemptsUsed;
+        String MaxAttempts;
+        String Status;
+    }
+}

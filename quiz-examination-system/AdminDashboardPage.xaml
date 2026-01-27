@@ -7,22 +7,61 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="Transparent">
 
-    <ScrollViewer Padding="32,24">
-        <StackPanel Spacing="24">
-            <StackPanel Spacing="8">
-                <TextBlock Text="Administrator Dashboard" Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock Text="Manage system users and monitor activities" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </StackPanel>
+    <NavigationView x:Name="AdminNavView" 
+                   IsBackButtonVisible="Collapsed" 
+                   IsSettingsVisible="False" 
+                   PaneDisplayMode="Left"
+                   SelectionChanged="AdminNav_SelectionChanged">
+        
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="Dashboard" Tag="dashboard">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE80F;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            
+            <NavigationViewItem Content="Users" Tag="users">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE716;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            
+            <NavigationViewItem Content="All quizzes" Tag="quizzes">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE8F1;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            
+            <NavigationViewItem Content="Reports" Tag="reports">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE9F9;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            
+            <NavigationViewItem Content="Audit logs" Tag="logs">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE7C3;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
 
-            <StackPanel Spacing="12">
-                <TextBlock Text="Management Actions" Style="{StaticResource SubtitleTextBlockStyle}" />
-                <Button x:Name="ManageUsersBtn" Content="Manage Users" HorizontalAlignment="Left" Click="ManageUsers_Click" Padding="16,8" Style="{StaticResource AccentButtonStyle}" />
-                <TextBlock Text="View, create, reset passwords, and manage user status" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </StackPanel>
-
-            <InfoBar x:Name="ActionMessage" IsOpen="False" Severity="Informational" IsClosable="True" />
-        </StackPanel>
-    </ScrollViewer>
+        <Grid>
+            <Frame x:Name="ContentFrame" Padding="24"/>
+            
+            <InfoBar x:Name="ActionMessage" 
+                     IsOpen="False" 
+                     Severity="Informational" 
+                     IsClosable="True"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Right"
+                     MaxWidth="400"
+                     Margin="24">
+                <InfoBar.Shadow>
+                    <ThemeShadow />
+                </InfoBar.Shadow>
+            </InfoBar>
+        </Grid>
+    </NavigationView>
 </Page>

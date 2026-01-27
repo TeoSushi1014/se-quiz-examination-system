@@ -11,15 +11,13 @@ namespace winrt::quiz_examination_system::implementation
     {
         AdminDashboardPage();
 
-        void ManageUsers_Click(winrt::Windows::Foundation::IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
-
-        // UC08: Admin Purge Quiz Demo
-        void DemoPurgeQuiz_Click(winrt::Windows::Foundation::IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
+        void AdminNav_SelectionChanged(winrt::Microsoft::UI::Xaml::Controls::NavigationView const &, winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs const &);
 
     private:
         std::unique_ptr<::quiz_examination_system::SupabaseClient> m_supabaseClient;
         hstring m_currentUserId;
         void ShowMessage(hstring const &title, hstring const &message, Microsoft::UI::Xaml::Controls::InfoBarSeverity severity);
+        void NavigateToDashboard();
     };
 }
 

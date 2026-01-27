@@ -7,67 +7,106 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Quiz Examination System">
+    Title="Quiz examination system">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="Base"/>
+    </Window.SystemBackdrop>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
         <Grid x:Name="LoginPanel" Grid.RowSpan="2">
-            <Border MaxWidth="400" Padding="24" CornerRadius="8" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Border.Shadow>
+            <InfoBar x:Name="LoginMessage" 
+                     IsOpen="False" 
+                     IsClosable="True"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Center"
+                     MaxWidth="420"
+                     Margin="0,0,0,80">
+                <InfoBar.Shadow>
                     <ThemeShadow />
+                </InfoBar.Shadow>
+            </InfoBar>
+            
+            <Border MaxWidth="420" 
+                   Padding="32" 
+                   CornerRadius="12" 
+                   Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                   BorderThickness="1" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center">
+                <Border.Shadow>
+                    <ThemeShadow/>
                 </Border.Shadow>
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Quiz Examination System" Style="{StaticResource TitleTextBlockStyle}" />
-                    <TextBlock Text="Sign in to continue" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBox x:Name="UsernameBox" Header="Username" PlaceholderText="Enter username" />
-                    <PasswordBox x:Name="PasswordBox" Header="Password" PlaceholderText="Enter password" />
-                    <Button Content="Sign in" Click="Login_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" />
-                    <InfoBar x:Name="LoginMessage" IsOpen="False" Severity="Error" IsClosable="False" />
+                
+                <StackPanel Spacing="20">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Quiz examination system" 
+                                 Style="{StaticResource TitleTextBlockStyle}"/>
+                        <TextBlock Text="Sign in to continue" 
+                                 Style="{StaticResource BodyTextBlockStyle}" 
+                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                    
+                    <TextBox x:Name="UsernameBox" 
+                           Header="Username" 
+                           PlaceholderText="Enter username"/>
+                    
+                    <PasswordBox x:Name="PasswordBox" 
+                               Header="Password" 
+                               PlaceholderText="Enter password"/>
+                    
+                    <StackPanel Spacing="8">
+                        <Button x:Name="LoginButton" 
+                              Content="Sign in" 
+                              Click="Login_Click" 
+                              HorizontalAlignment="Stretch" 
+                              Style="{StaticResource AccentButtonStyle}">
+                            <Button.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Enter"/>
+                            </Button.KeyboardAccelerators>
+                        </Button>
+                        
+                        <ProgressRing x:Name="LoginProgressRing" 
+                                    IsActive="False" 
+                                    Width="24" 
+                                    Height="24"
+                                    HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </Grid>
 
-        <Grid x:Name="DashboardPanel" Grid.RowSpan="2" Visibility="Collapsed">
+        <Grid x:Name="DashboardPanel" Visibility="Collapsed">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Padding="24,16" Background="{ThemeResource LayerFillColorDefaultBrush}" ColumnSpacing="12">
+            <Grid Padding="24,16" 
+                 Background="{ThemeResource LayerOnMicaBaseAltFillColorTransparentBrush}" 
+                 ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <PersonPicture Width="32" Height="32" />
+                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <PersonPicture Width="40" Height="40"/>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="WelcomeText" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <TextBlock x:Name="RoleText" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="WelcomeText" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                        <TextBlock x:Name="RoleText" 
+                                 Style="{StaticResource CaptionTextBlockStyle}" 
+                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Button Content="Change password" Click="ChangePassword_Click" />
-                    <Button Content="Sign out" Click="Logout_Click" />
-                </StackPanel>
+                <Button Grid.Column="1" 
+                      Content="Sign out" 
+                      Click="Logout_Click"/>
             </Grid>
 
-            <NavigationView x:Name="DashboardNav" Grid.Row="1" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" PaneDisplayMode="Left" SelectionChanged="DashboardNav_SelectionChanged">
-                <NavigationView.MenuItems>
-                    <NavigationViewItem x:Name="DashboardNav_Dashboard" Content="Dashboard" Tag="Dashboard">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE80F;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                </NavigationView.MenuItems>
-
-                <Frame x:Name="ContentFrame" />
-            </NavigationView>
+            <Frame x:Name="ContentFrame" Grid.Row="1"/>
         </Grid>
     </Grid>
 </Window>

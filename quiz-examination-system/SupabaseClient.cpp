@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SupabaseClient.h"
-#include "PasswordHasher.h"
+#include "BCryptPasswordHasher.h"
 #include <winrt/Windows.Web.Http.Filters.h>
 #include <winrt/Microsoft.UI.Dispatching.h>
 
@@ -107,9 +107,9 @@ namespace quiz_examination_system
                                                                 auto user = users.GetObjectAt(0);
                                                                 auto userId = user.GetNamedString(L"id");
                                                                 auto storedHash = user.GetNamedString(L"password_hash");
-                                                                auto role = user.GetNamedString(L"role", L"STUDENT");
+                                                                auto role = user.GetNamedString(L"role", L"Student");
 
-                                                                if (PasswordHasher::VerifyPassword(password, storedHash))
+                                                                if (BCryptPasswordHasher::VerifyPassword(password, storedHash))
                                                                 {
                                                                     // Password correct - reset failed login count via RPC
                                                                     JsonObject resetParams;
@@ -122,8 +122,8 @@ namespace quiz_examination_system
                                                                     
                                                                     m_httpClient.SendRequestAsync(resetReq);
                                                                     
-                                                                    hstring displayRole = (role == L"ADMIN") ? L"Administrator" : 
-                                                                                         (role == L"TEACHER") ? L"Lecturer" : L"Student";
+                                                                    hstring displayRole = (role == L"Admin") ? L"Administrator" : 
+                                                                                         (role == L"Teacher") ? L"Lecturer" : L"Student";
                                                                     if (OnLoginSuccess)
                                                                     {
                                                                         OnLoginSuccess(username, displayRole, role, userId);
@@ -140,18 +140,14 @@ namespace quiz_examination_system
                                                                     rpcReq.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
                                                                     rpcReq.Content(HttpStringContent(rpcParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
                                                                     
-                                                                    OutputDebugStringW(L"[DEBUG] Calling RPC: handle_login_failure\n");
-                                                                    
                                                                     auto rpcOp = m_httpClient.SendRequestAsync(rpcReq);
                                                                     rpcOp.Completed([this, dispatcher](auto op, auto status)
                                                                     {
                                                                         if (status == AsyncStatus::Completed)
                                                                         {
-                                                                            OutputDebugStringW(L"[DEBUG] RPC response received\n");
                                                                             try
                                                                             {
                                                                                 auto rpcResponse = op.GetResults();
-                                                                                OutputDebugStringW((hstring(L"[DEBUG] RPC Status Code: ") + to_hstring(static_cast<int>(rpcResponse.StatusCode())) + L"\n").c_str());
                                                                                 rpcResponse.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto readStatus)
                                                                                 {
                                                                                     UNREFERENCED_PARAMETER(readStatus);
@@ -160,10 +156,8 @@ namespace quiz_examination_system
                                                                                         try
                                                                                         {
                                                                                             auto rpcContent = readOp.GetResults();
-                                                                                            OutputDebugStringW((hstring(L"[DEBUG] RPC response body: ") + rpcContent + L"\n").c_str());
                                                                                             auto resultObj = JsonObject::Parse(rpcContent);
                                                                                             auto rpcStatus = resultObj.GetNamedString(L"status", L"");
-                                                                                            OutputDebugStringW((hstring(L"[DEBUG] RPC status field: ") + rpcStatus + L"\n").c_str());
                                                                                             
                                                                                             if (rpcStatus == L"locked")
                                                                                             {
@@ -202,7 +196,6 @@ namespace quiz_examination_system
                                                                             }
                                                                             catch (...)
                                                                             {
-                                                                                OutputDebugStringW(L"[DEBUG] RPC response parsing error\n");
                                                                                 dispatcher.TryEnqueue([this]()
                                                                                 {
                                                                                     if (OnLoginFailed)
@@ -214,7 +207,6 @@ namespace quiz_examination_system
                                                                         }
                                                                         else
                                                                         {
-                                                                            OutputDebugStringW((hstring(L"[DEBUG] RPC async failed with status: ") + to_hstring(static_cast<int>(status)) + L"\n").c_str());
                                                                             dispatcher.TryEnqueue([this]()
                                                                             {
                                                                                 if (OnLoginFailed)
@@ -513,7 +505,7 @@ namespace quiz_examination_system
     {
         try
         {
-            if (m_currentUserRole != L"ADMIN")
+            if (m_currentUserRole != L"Admin")
             {
                 auto dispatcher = DispatcherQueue::GetForCurrentThread();
                 dispatcher.TryEnqueue([this]()
@@ -583,7 +575,7 @@ namespace quiz_examination_system
     {
         try
         {
-            if (m_currentUserRole != L"ADMIN")
+            if (m_currentUserRole != L"Admin")
             {
                 auto dispatcher = DispatcherQueue::GetForCurrentThread();
                 dispatcher.TryEnqueue([this]()
@@ -764,7 +756,7 @@ namespace quiz_examination_system
         try
         {
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
-            Uri uri(m_projectUrl + L"/rest/v1/questions?select=id,question_text,difficulty_level,created_by&created_by=eq." + createdBy);
+            Uri uri(m_projectUrl + L"/rest/v1/questions?select=id,question_text,difficulty_level,created_by,topic&created_by=eq." + createdBy);
             HttpRequestMessage request(HttpMethod::Get(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
             request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);

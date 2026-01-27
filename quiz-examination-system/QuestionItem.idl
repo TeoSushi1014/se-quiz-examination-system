@@ -1,0 +1,14 @@
+namespace quiz_examination_system
+{
+    [bindable]
+    [default_interface]
+    runtimeclass QuestionItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        QuestionItem();
+        
+        String QuestionId;
+        String QuestionText;
+        String DifficultyLevel;
+        String Topic;
+    }
+}

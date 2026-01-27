@@ -139,7 +139,19 @@
     <ClInclude Include="StudentDashboardPage.xaml.h">
       <DependentUpon>StudentDashboardPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="ExamPage.xaml.h">
+      <DependentUpon>ExamPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="QuestionItem.h" />
+    <ClInclude Include="QuizItemStudent.h" />
+    <ClInclude Include="UserItem.h" />
+    <ClInclude Include="UserManagementPage.xaml.h">
+      <DependentUpon>UserManagementPage.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="SupabaseClient.h" />
+    <ClInclude Include="SupabaseClientAsync.h" />
+    <ClInclude Include="SupabaseClientManager.h" />
+    <ClInclude Include="BCryptPasswordHasher.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -147,6 +159,8 @@
     <Page Include="AdminDashboardPage.xaml" />
     <Page Include="TeacherDashboardPage.xaml" />
     <Page Include="StudentDashboardPage.xaml" />
+    <Page Include="ExamPage.xaml" />
+    <Page Include="UserManagementPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -167,8 +181,19 @@
     <ClCompile Include="StudentDashboardPage.xaml.cpp">
       <DependentUpon>StudentDashboardPage.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="ExamPage.xaml.cpp">
+      <DependentUpon>ExamPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="QuestionItem.cpp" />
+    <ClCompile Include="QuizItemStudent.cpp" />
+    <ClCompile Include="UserItem.cpp" />
+    <ClCompile Include="UserManagementPage.xaml.cpp">
+      <DependentUpon>UserManagementPage.xaml</DependentUpon>
+    </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="SupabaseClient.cpp" />
+    <ClCompile Include="SupabaseClientAsync.cpp" />
+    <ClCompile Include="SupabaseClientManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl">
@@ -186,6 +211,23 @@
     <Midl Include="StudentDashboardPage.idl">
       <SubType>Code</SubType>
       <DependentUpon>StudentDashboardPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="ExamPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>ExamPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="QuestionItem.idl">
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="QuizItemStudent.idl">
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="UserItem.idl">
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="UserManagementPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>UserManagementPage.xaml</DependentUpon>
     </Midl>
   </ItemGroup>
   <ItemGroup>

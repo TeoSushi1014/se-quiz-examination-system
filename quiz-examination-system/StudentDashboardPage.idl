@@ -1,8 +1,11 @@
+import "QuizItemStudent.idl";
+
 namespace quiz_examination_system
 {
     [default_interface]
     runtimeclass StudentDashboardPage : Microsoft.UI.Xaml.Controls.Page
     {
         StudentDashboardPage();
+        Windows.Foundation.Collections.IObservableVector<QuizItemStudent> Quizzes{ get; };
     }
 }

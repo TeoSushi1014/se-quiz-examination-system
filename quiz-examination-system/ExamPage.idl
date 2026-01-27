@@ -1,0 +1,9 @@
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass ExamPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        ExamPage();
+        ExamPage(String quizId, String studentId);
+    }
+}

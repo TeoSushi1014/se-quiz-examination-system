@@ -7,45 +7,32 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="Transparent">
 
-    <Grid RowSpacing="0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <NavigationView x:Name="TeacherNav" 
+                   IsBackButtonVisible="Collapsed" 
+                   IsSettingsVisible="False" 
+                   PaneDisplayMode="Top"
+                   SelectionChanged="TeacherNav_SelectionChanged">
+        
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="Question bank" Tag="QuestionBank">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE8E6;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="Manage quizzes" Tag="ManageQuizzes">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE8C8;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="Review attempts" Tag="ReviewAttempts">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE81E;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
 
-        <NavigationView x:Name="TeacherNav" Grid.Row="0" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" PaneDisplayMode="Top" SelectionChanged="TeacherNav_SelectionChanged">
-            <NavigationView.MenuItems>
-                <NavigationViewItem Content="Question Bank" Tag="QuestionBank">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8E6;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Manage Quizzes" Tag="ManageQuizzes">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8C8;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Review Attempts" Tag="ReviewAttempts">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE81E;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
-        </NavigationView>
-
-        <ScrollViewer Grid.Row="1" Padding="32,24">
-            <StackPanel Spacing="24">
-                <StackPanel Spacing="8">
-                    <TextBlock x:Name="TitleText" Style="{StaticResource TitleTextBlockStyle}" />
-                    <TextBlock x:Name="DescriptionText" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                </StackPanel>
-
-                <StackPanel x:Name="ContentArea" Spacing="12" />
-
-                <InfoBar x:Name="ActionMessage" IsOpen="False" Severity="Informational" IsClosable="True" />
-            </StackPanel>
-        </ScrollViewer>
-    </Grid>
+        <Frame x:Name="ContentFrame" Padding="24"/>
+    </NavigationView>
 </Page>

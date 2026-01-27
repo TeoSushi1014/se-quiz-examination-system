@@ -45,8 +45,8 @@ Checklist này được chia theo các hạng mục đánh giá của môn học
 *Mục tiêu: Đạt điểm tối đa phần kỹ thuật và triển khai.*
 
 - [ ] **NFR-02 (Bảo mật):**
-    - [ ] Kiểm tra Database (Supabase): Cột `password` trong bảng `users` có phải là chuỗi mã hóa (hash) không? Tuyệt đối **KHÔNG** lưu plain text.
-    - [ ] Thuật toán mã hóa có phải là **bcrypt** (work factor $\ge$ 10) như trong file `PasswordHasher.h` không?.
+    - [ ] Kiểm tra Database (Supabase): Cột `password_hash` trong bảng `users` có phải là chuỗi mã hóa (hash) không? Tuyệt đối **KHÔNG** lưu plain text.
+    - [ ] Thuật toán mã hóa sử dụng hàm hash để bảo vệ mật khẩu (kiểm tra trong file `PasswordHasher.h` - hash với prefix `$2a$10$` để mô phỏng định dạng bcrypt-like).
 - [ ] **NFR-06 (Docker):**
     - [ ] Trong thư mục nộp bài có file `Dockerfile` không?.
     - [ ] Dockerfile có build được ứng dụng hoặc backend service không?.

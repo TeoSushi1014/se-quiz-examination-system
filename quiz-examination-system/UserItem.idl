@@ -1,0 +1,19 @@
+namespace quiz_examination_system
+{
+    [bindable]
+    [default_interface]
+    runtimeclass UserItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        UserItem(String id, String username, String role, Boolean isActive, String email);
+        
+        String Id { get; };
+        String Username { get; };
+        String Role { get; };
+        String Email { get; };
+        Boolean IsActive { get; set; };
+        String StatusColor { get; };
+        String StatusText { get; };
+        String RoleBadgeColor { get; };
+        String BlockButtonText { get; };
+    }
+}

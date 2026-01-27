@@ -89,3 +89,11 @@ quiz-examination-system/packages/
 *.rsuser
 *.vcxproj.user
 *.tlog
+
+# Docker & Environment Files
+.env
+docker-compose.override.yml
+
+# Documentation & Development Notes
+quiz-examination-system/DATABASE_SCHEMA.md
+quiz-examination-system/checklist.md
