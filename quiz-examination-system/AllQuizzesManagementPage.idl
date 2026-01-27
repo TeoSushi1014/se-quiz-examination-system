@@ -1,0 +1,21 @@
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass QuizManagementItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        QuizManagementItem(String quizId, String title, String teacherName, String createdAt, Int32 attemptCount);
+        
+        String QuizId { get; };
+        String Title { get; };
+        String TeacherName { get; };
+        String CreatedAt { get; };
+        Int32 AttemptCount { get; };
+    }
+
+    [default_interface]
+    runtimeclass AllQuizzesManagementPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        AllQuizzesManagementPage();
+        Windows.Foundation.Collections.IObservableVector<QuizManagementItem> Quizzes { get; };
+    }
+}

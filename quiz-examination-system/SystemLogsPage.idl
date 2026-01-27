@@ -1,0 +1,11 @@
+import "LogItem.idl";
+
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass SystemLogsPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        SystemLogsPage();
+        Windows.Foundation.Collections.IObservableVector<LogItem> Logs { get; };
+    }
+}

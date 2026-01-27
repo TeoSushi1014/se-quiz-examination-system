@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "SupabaseClientAsync.h"
 #include "BCryptPasswordHasher.h"
+#include <winrt/Windows.Storage.Streams.h>
+#include <winrt/Windows.Data.Json.h>
+#include <winrt/Windows.Web.Http.h>
 #include <winrt/Windows.Web.Http.Filters.h>
+#include <winrt/Windows.Web.Http.Headers.h>
 
 using namespace winrt;
 using namespace Windows::Foundation;

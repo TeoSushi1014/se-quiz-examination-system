@@ -7,12 +7,16 @@
 #include "BCryptPasswordHasher.h"
 #include "SupabaseClientManager.h"
 #include <algorithm>
+#include <winrt/Windows.Web.Http.h>
+#include <winrt/Windows.Web.Http.Headers.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
 using namespace Windows::Foundation;
 using namespace Windows::Data::Json;
+using namespace Windows::Web::Http;
+using namespace Windows::Web::Http::Headers;
 
 namespace winrt::quiz_examination_system::implementation
 {
@@ -177,7 +181,8 @@ namespace winrt::quiz_examination_system::implementation
                     OutputDebugStringW(L"[CreateUser] User created successfully in Supabase\n");
                     ShowMessage(L"User created successfully", InfoBarSeverity::Success);
 
-                    // Use DispatcherQueue to ensure refresh happens on UI thread
+                    InsertAuditLog(L"CREATE_USER", L"users", L"", L"Created user: " + username + L" with role: " + role);
+
                     OutputDebugStringW(L"[CreateUser] Queueing LoadUsers refresh...\n");
                     DispatcherQueue().TryEnqueue(Microsoft::UI::Dispatching::DispatcherQueuePriority::Normal, [lifetime]()
                                                  { 
@@ -420,6 +425,7 @@ namespace winrt::quiz_examination_system::implementation
                 if (success)
                 {
                     ShowMessage(L"Password reset successfully", InfoBarSeverity::Success);
+                    InsertAuditLog(L"RESET_PASSWORD", L"users", userId, L"Password reset for user: " + userId);
                 }
                 else
                 {
@@ -505,6 +511,9 @@ namespace winrt::quiz_examination_system::implementation
                 OutputDebugStringW(L"[UpdateUserStatus] Database updated, refreshing UI list...\n");
                 ShowMessage(isActive ? L"User activated" : L"User deactivated", InfoBarSeverity::Success);
 
+                InsertAuditLog(isActive ? L"ENABLE_USER" : L"DISABLE_USER", L"users", userId,
+                               L"User status changed to " + (isActive ? hstring(L"Active") : hstring(L"Inactive")));
+
                 LoadUsers();
             }
             else
@@ -523,5 +532,65 @@ namespace winrt::quiz_examination_system::implementation
         MessageBar().Message(message);
         MessageBar().Severity(severity);
         MessageBar().IsOpen(true);
+    }
+
+    winrt::fire_and_forget UserManagementPage::InsertAuditLog(hstring action, hstring targetTable, hstring targetId, hstring details)
+    {
+        auto lifetime = get_strong();
+
+        try
+        {
+            auto actorUsername = ::quiz_examination_system::SupabaseClientManager::GetInstance().GetUsername();
+            auto actorId = ::quiz_examination_system::SupabaseClientManager::GetInstance().GetUserId();
+
+            JsonObject logData;
+            logData.SetNamedValue(L"action", JsonValue::CreateStringValue(action));
+            logData.SetNamedValue(L"actor_id", JsonValue::CreateStringValue(actorId));
+
+            if (!targetTable.empty())
+            {
+                logData.SetNamedValue(L"target_table", JsonValue::CreateStringValue(targetTable));
+            }
+
+            if (!targetId.empty())
+            {
+                logData.SetNamedValue(L"target_id", JsonValue::CreateStringValue(targetId));
+            }
+
+            JsonObject detailsObj;
+            detailsObj.SetNamedValue(L"description", JsonValue::CreateStringValue(details));
+            logData.SetNamedValue(L"details", detailsObj);
+
+            hstring jsonBody = logData.Stringify();
+
+            hstring uriString = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/audit_logs";
+            Uri uri(uriString);
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+            request.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+            request.Headers().Insert(L"Content-Type", L"application/json");
+
+            auto bodyString = Windows::Storage::Streams::InMemoryRandomAccessStream();
+            auto writer = Windows::Storage::Streams::DataWriter(bodyString);
+            writer.WriteString(jsonBody);
+            co_await writer.StoreAsync();
+            writer.DetachStream();
+            bodyString.Seek(0);
+
+            request.Content(HttpStreamContent(bodyString));
+
+            HttpClient client;
+            auto response = co_await client.SendRequestAsync(request);
+
+            OutputDebugStringW((L"[InsertAuditLog] Log inserted: " + action + L"\n").c_str());
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[InsertAuditLog] ERROR: " + ex.message() + L"\n").c_str());
+        }
+        catch (...)
+        {
+            OutputDebugStringW(L"[InsertAuditLog] Unknown error\n");
+        }
     }
 }

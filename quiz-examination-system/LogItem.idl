@@ -1,0 +1,21 @@
+namespace quiz_examination_system
+{
+    [bindable]
+    [default_interface]
+    runtimeclass LogItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        LogItem(String id, String action, String actorId, String actorUsername, String targetTable, String targetId, String details, String timestamp);
+        
+        String Id { get; };
+        String Action { get; };
+        String ActorId { get; };
+        String ActorUsername { get; };
+        String TargetTable { get; };
+        String TargetId { get; };
+        String Details { get; };
+        String Timestamp { get; };
+        Microsoft.UI.Xaml.Media.SolidColorBrush ActionColor { get; };
+        Microsoft.UI.Xaml.Media.SolidColorBrush ActionBadgeColor { get; };
+        String FormattedTimestamp { get; };
+    }
+}

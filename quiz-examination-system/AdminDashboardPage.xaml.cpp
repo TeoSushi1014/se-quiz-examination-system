@@ -4,6 +4,8 @@
 #include "AdminDashboardPage.g.cpp"
 #endif
 #include "UserManagementPage.xaml.h"
+#include "AllQuizzesManagementPage.xaml.h"
+#include "SystemLogsPage.xaml.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -35,7 +37,7 @@ namespace winrt::quiz_examination_system::implementation
             }
             else if (tag == L"quizzes")
             {
-                ShowMessage(L"Feature in development", L"Quiz management page will be available soon", InfoBarSeverity::Informational);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::AllQuizzesManagementPage>());
             }
             else if (tag == L"reports")
             {
@@ -43,7 +45,20 @@ namespace winrt::quiz_examination_system::implementation
             }
             else if (tag == L"logs")
             {
-                ShowMessage(L"Feature in development", L"Audit logs page will be available soon", InfoBarSeverity::Informational);
+                OutputDebugStringW(L"[AdminDashboard] Navigating to SystemLogsPage\n");
+                try
+                {
+                    ContentFrame().Navigate(xaml_typename<quiz_examination_system::SystemLogsPage>());
+                    OutputDebugStringW(L"[AdminDashboard] Navigation initiated successfully\n");
+                }
+                catch (hresult_error const &ex)
+                {
+                    OutputDebugStringW((L"[AdminDashboard] Navigation error: " + ex.message() + L"\n").c_str());
+                }
+                catch (...)
+                {
+                    OutputDebugStringW(L"[AdminDashboard] Unknown navigation error\n");
+                }
             }
         }
     }

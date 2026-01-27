@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="quiz_examination_system.AllQuizzesManagementPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:quiz_examination_system"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="Transparent">
+
+    <Grid Padding="32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
+            <TextBlock Text="System quiz management" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="View and manage all quizzes from teachers in the system" 
+                       FontSize="14" 
+                       Opacity="0.7"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+            <AutoSuggestBox x:Name="SearchBox"
+                            PlaceholderText="Search by quiz title or teacher name"
+                            Width="400"
+                            TextChanged="OnSearchTextChanged">
+                <AutoSuggestBox.QueryIcon>
+                    <SymbolIcon Symbol="Find"/>
+                </AutoSuggestBox.QueryIcon>
+            </AutoSuggestBox>
+
+            <ProgressRing x:Name="LoadingRing" 
+                          Width="32" 
+                          Height="32" 
+                          IsActive="False"
+                          VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2">
+            <ItemsRepeater ItemsSource="{x:Bind Quizzes, Mode=OneWay}">
+                <ItemsRepeater.Layout>
+                    <StackLayout Spacing="12"/>
+                </ItemsRepeater.Layout>
+                
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="local:QuizManagementItem">
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="8">
+                                    <TextBlock Text="{x:Bind Title}" 
+                                               FontSize="18" 
+                                               FontWeight="SemiBold"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="16">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE77B;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}"/>
+                                            <TextBlock Text="{x:Bind TeacherName}" FontSize="13" Opacity="0.8"/>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE787;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}"/>
+                                            <TextBlock Text="{x:Bind CreatedAt}" FontSize="13" Opacity="0.8"/>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE716;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}"/>
+                                            <TextBlock FontSize="13" Opacity="0.8">
+                                                <Run Text="{x:Bind AttemptCount}"/>
+                                                <Run Text=" attempts"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button Grid.Column="1" 
+                                        Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Tag="{x:Bind QuizId}"
+                                        Click="OnPurgeClicked"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="16"/>
+                                        <TextBlock Text="Purge" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </ScrollViewer>
+
+        <InfoBar x:Name="ActionMessage"
+                 Grid.Row="2"
+                 IsOpen="False"
+                 Severity="Informational"
+                 IsClosable="True"
+                 VerticalAlignment="Bottom"
+                 HorizontalAlignment="Center"
+                 MaxWidth="600"
+                 Margin="24">
+            <InfoBar.Shadow>
+                <ThemeShadow />
+            </InfoBar.Shadow>
+        </InfoBar>
+    </Grid>
+</Page>

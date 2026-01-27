@@ -30,6 +30,7 @@ namespace winrt::quiz_examination_system::implementation
         fire_and_forget ShowResetPasswordDialog(hstring userId);
         fire_and_forget UpdateUserStatus(hstring userId, bool isActive);
         void ShowMessage(hstring const &message, Microsoft::UI::Xaml::Controls::InfoBarSeverity severity);
+        fire_and_forget InsertAuditLog(hstring action, hstring targetTable, hstring targetId, hstring details);
     };
 }
 

@@ -3,6 +3,7 @@
 #include <unknwn.h>
 #include <restrictederrorinfo.h>
 #include <hstring.h>
+#include <coroutine>
 
 #undef GetCurrentTime
 
