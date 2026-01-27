@@ -47,6 +47,7 @@ namespace quiz_examination_system
                                     if (users.Size() > 0)
                                     {
                                         auto user = users.GetObjectAt(0);
+                                        auto userId = user.GetNamedString(L"id");
                                         auto storedHash = user.GetNamedString(L"password_hash");
                                         auto role = user.GetNamedString(L"role", L"STUDENT");
                                         
@@ -56,7 +57,7 @@ namespace quiz_examination_system
                                                                  (role == L"TEACHER") ? L"Lecturer" : L"Student";
                                             if (OnLoginSuccess)
                                             {
-                                                OnLoginSuccess(username, displayRole, role);
+                                                OnLoginSuccess(username, displayRole, role, userId);
                                             }
                                         }
                                         else
@@ -466,6 +467,398 @@ namespace quiz_examination_system
         {
             if (OnUserActionFailed)
                 OnUserActionFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::GetQuizzes(hstring const &createdBy)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            Uri uri(m_projectUrl + L"/rest/v1/quizzes?select=id,title,time_limit_minutes,total_points,created_by&created_by=eq." + createdBy);
+            HttpRequestMessage request(HttpMethod::Get(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([=]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    if (OnQuizzesFetched)
+                                        OnQuizzesFetched(content);
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizCreationFailed)
+                                        OnQuizCreationFailed(L"Parse error");
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([=]()
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to fetch quizzes");
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([=]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::GetQuestions(hstring const &createdBy)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            Uri uri(m_projectUrl + L"/rest/v1/questions?select=id,question_text,difficulty_level,created_by&created_by=eq." + createdBy);
+            HttpRequestMessage request(HttpMethod::Get(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([=]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    if (OnQuestionsFetched)
+                                        OnQuestionsFetched(content);
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizCreationFailed)
+                                        OnQuizCreationFailed(L"Parse error");
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([=]()
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to fetch questions");
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([=]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::CreateQuiz(hstring const &quizId, hstring const &title, int timeLimit, int totalPoints, hstring const &createdBy)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            JsonObject quizData;
+            quizData.Insert(L"id", JsonValue::CreateStringValue(quizId));
+            quizData.Insert(L"title", JsonValue::CreateStringValue(title));
+            quizData.Insert(L"time_limit_minutes", JsonValue::CreateNumberValue(timeLimit));
+            quizData.Insert(L"total_points", JsonValue::CreateNumberValue(totalPoints));
+            quizData.Insert(L"created_by", JsonValue::CreateStringValue(createdBy));
+            quizData.Insert(L"shuffle_questions", JsonValue::CreateBooleanValue(false));
+            quizData.Insert(L"shuffle_answers", JsonValue::CreateBooleanValue(false));
+
+            Uri uri(m_projectUrl + L"/rest/v1/quizzes");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Headers().Insert(L"Content-Type", L"application/json");
+            request.Headers().Insert(L"Prefer", L"return=representation");
+            request.Content(HttpStringContent(quizData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    dispatcher.TryEnqueue([this, response]()
+                    {
+                        if (response.StatusCode() == HttpStatusCode::Created || response.StatusCode() == HttpStatusCode::Ok)
+                        {
+                            if (OnQuizCreated)
+                                OnQuizCreated(L"Quiz created successfully");
+                        }
+                        else
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to create quiz");
+                        }
+                    });
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::AddQuestionsToQuiz(hstring const &quizId, hstring const &questionId, int points)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            JsonObject questionData;
+            questionData.Insert(L"quiz_id", JsonValue::CreateStringValue(quizId));
+            questionData.Insert(L"question_id", JsonValue::CreateStringValue(questionId));
+            questionData.Insert(L"points", JsonValue::CreateNumberValue(points));
+
+            Uri uri(m_projectUrl + L"/rest/v1/quiz_questions");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Headers().Insert(L"Content-Type", L"application/json");
+            request.Content(HttpStringContent(questionData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    dispatcher.TryEnqueue([this, response]()
+                    {
+                        if (response.StatusCode() == HttpStatusCode::Created || response.StatusCode() == HttpStatusCode::Ok)
+                        {
+                            if (OnQuizCreated)
+                                OnQuizCreated(L"Question added to quiz");
+                        }
+                        else
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to add question");
+                        }
+                    });
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::CreateQuestion(hstring const &questionId, hstring const &questionText, hstring const &optionA, hstring const &optionB, hstring const &optionC, hstring const &optionD, hstring const &correctOption, hstring const &difficulty, hstring const &createdBy)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            JsonObject questionData;
+            questionData.Insert(L"id", JsonValue::CreateStringValue(questionId));
+            questionData.Insert(L"question_text", JsonValue::CreateStringValue(questionText));
+            questionData.Insert(L"option_a", JsonValue::CreateStringValue(optionA));
+            questionData.Insert(L"option_b", JsonValue::CreateStringValue(optionB));
+            questionData.Insert(L"option_c", JsonValue::CreateStringValue(optionC));
+            questionData.Insert(L"option_d", JsonValue::CreateStringValue(optionD));
+            questionData.Insert(L"correct_option", JsonValue::CreateStringValue(correctOption));
+            questionData.Insert(L"difficulty_level", JsonValue::CreateStringValue(difficulty));
+            questionData.Insert(L"created_by", JsonValue::CreateStringValue(createdBy));
+
+            Uri uri(m_projectUrl + L"/rest/v1/questions");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Headers().Insert(L"Content-Type", L"application/json");
+            request.Content(HttpStringContent(questionData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    dispatcher.TryEnqueue([this, response]()
+                    {
+                        if (response.StatusCode() == HttpStatusCode::Created || response.StatusCode() == HttpStatusCode::Ok)
+                        {
+                            if (OnQuizCreated)
+                                OnQuizCreated(L"Question created successfully");
+                        }
+                        else
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to create question");
+                        }
+                    });
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::GetQuestionsByTeacher(hstring const &createdBy)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            Uri uri(m_projectUrl + L"/rest/v1/questions?select=id,question_text,option_a,option_b,option_c,option_d,correct_option,difficulty_level,created_by&created_by=eq." + createdBy);
+            HttpRequestMessage request(HttpMethod::Get(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([=]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    if (OnQuestionsFetched)
+                                        OnQuestionsFetched(content);
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizCreationFailed)
+                                        OnQuizCreationFailed(L"Parse error");
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([=]()
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to fetch questions");
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([=]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::DeleteQuestion(hstring const &questionId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            Uri uri(m_projectUrl + L"/rest/v1/questions?id=eq." + questionId);
+            HttpRequestMessage request(HttpMethod::Delete(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    dispatcher.TryEnqueue([this, response]()
+                    {
+                        if (response.StatusCode() == HttpStatusCode::NoContent || response.StatusCode() == HttpStatusCode::Ok)
+                        {
+                            if (OnQuizCreated)
+                                OnQuizCreated(L"Question deleted successfully");
+                        }
+                        else
+                        {
+                            if (OnQuizCreationFailed)
+                                OnQuizCreationFailed(L"Failed to delete question");
+                        }
+                    });
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizCreationFailed)
+                            OnQuizCreationFailed(L"Request error");
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizCreationFailed)
+                OnQuizCreationFailed(L"Connection error");
         }
     }
 }

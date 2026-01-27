@@ -130,15 +130,23 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="UserManagementWindow.xaml.h">
-      <DependentUpon>UserManagementWindow.xaml</DependentUpon>
+    <ClInclude Include="AdminDashboardPage.xaml.h">
+      <DependentUpon>AdminDashboardPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="TeacherDashboardPage.xaml.h">
+      <DependentUpon>TeacherDashboardPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="StudentDashboardPage.xaml.h">
+      <DependentUpon>StudentDashboardPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="SupabaseClient.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
     <Page Include="MainWindow.xaml" />
-    <Page Include="UserManagementWindow.xaml" />
+    <Page Include="AdminDashboardPage.xaml" />
+    <Page Include="TeacherDashboardPage.xaml" />
+    <Page Include="StudentDashboardPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -150,8 +158,14 @@
     <ClCompile Include="MainWindow.xaml.cpp">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="UserManagementWindow.xaml.cpp">
-      <DependentUpon>UserManagementWindow.xaml</DependentUpon>
+    <ClCompile Include="AdminDashboardPage.xaml.cpp">
+      <DependentUpon>AdminDashboardPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="TeacherDashboardPage.xaml.cpp">
+      <DependentUpon>TeacherDashboardPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="StudentDashboardPage.xaml.cpp">
+      <DependentUpon>StudentDashboardPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="SupabaseClient.cpp" />
@@ -161,9 +175,17 @@
       <SubType>Code</SubType>
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Midl>
-    <Midl Include="UserManagementWindow.idl">
+    <Midl Include="AdminDashboardPage.idl">
       <SubType>Code</SubType>
-      <DependentUpon>UserManagementWindow.xaml</DependentUpon>
+      <DependentUpon>AdminDashboardPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="TeacherDashboardPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>TeacherDashboardPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="StudentDashboardPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>StudentDashboardPage.xaml</DependentUpon>
     </Midl>
   </ItemGroup>
   <ItemGroup>

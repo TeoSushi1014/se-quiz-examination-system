@@ -1,8 +1,0 @@
-namespace quiz_examination_system
-{
-    [default_interface]
-    runtimeclass UserManagementWindow : Microsoft.UI.Xaml.Window
-    {
-        UserManagementWindow();
-    }
-}

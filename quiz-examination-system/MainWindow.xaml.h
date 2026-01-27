@@ -1,7 +1,9 @@
 #pragma once
 
 #include "MainWindow.g.h"
-#include "UserManagementWindow.xaml.h"
+#include "AdminDashboardPage.xaml.h"
+#include "TeacherDashboardPage.xaml.h"
+#include "StudentDashboardPage.xaml.h"
 #include "SupabaseClient.h"
 #include <vector>
 
@@ -15,6 +17,7 @@ namespace winrt::quiz_examination_system::implementation
         void Logout_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
         void ChangePassword_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
         void ManageUsers_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
+        void ManageQuestions_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
         void ManageQuizzes_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
         void ReviewAttempts_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
         void TakeQuiz_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
@@ -25,7 +28,7 @@ namespace winrt::quiz_examination_system::implementation
         void UpdateView();
         bool ConnectDatabase(hstring const &connectionString);
         void ApplyPermissions(hstring const &role);
-        void OnLoginSuccess(hstring username, hstring displayRole, hstring dbRole);
+        void OnLoginSuccess(hstring username, hstring displayRole, hstring dbRole, hstring userId);
         void OnLoginFailed(hstring message);
         void OnPasswordChanged(hstring message);
         void OnPasswordChangeFailed(hstring message);
@@ -36,6 +39,7 @@ namespace winrt::quiz_examination_system::implementation
         std::unique_ptr<::quiz_examination_system::SupabaseClient> m_supabaseClient;
         bool m_authenticated{false};
         hstring m_currentUser;
+        hstring m_currentUserId;
         hstring m_currentRole;
         hstring m_currentDbRole;
         bool m_isClosing{false};

@@ -52,62 +52,21 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Button Content="Change password" Click="ChangePassword_Click" />
                     <Button Content="Sign out" Click="Logout_Click" />
                 </StackPanel>
             </Grid>
 
-            <!-- NavigationView with sidebar -->
             <NavigationView x:Name="DashboardNav" Grid.Row="1" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" PaneDisplayMode="Left" SelectionChanged="DashboardNav_SelectionChanged">
                 <NavigationView.MenuItems>
-                    <NavigationViewItem Content="Dashboard" Tag="Dashboard">
+                    <NavigationViewItem x:Name="DashboardNav_Dashboard" Content="Dashboard" Tag="Dashboard">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xE80F;" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem Content="Change Password" Tag="Password">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE72E;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
                 </NavigationView.MenuItems>
 
-                <Grid Padding="32,24">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel x:Name="DashboardView" Grid.Row="0" Spacing="24" Visibility="Visible">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Dashboard" Style="{StaticResource TitleTextBlockStyle}" />
-                            <TextBlock x:Name="ActionsText" TextWrapping="Wrap" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-
-                        <StackPanel Spacing="12">
-                            <Button x:Name="ManageUsersBtn" Content="Manage users" HorizontalAlignment="Left" IsEnabled="False" Click="ManageUsers_Click" Padding="16,8" />
-                            <Button x:Name="ManageQuizzesBtn" Content="Manage quizzes" HorizontalAlignment="Left" IsEnabled="False" Click="ManageQuizzes_Click" Padding="16,8" />
-                            <Button x:Name="ReviewAttemptsBtn" Content="Review attempts" HorizontalAlignment="Left" IsEnabled="False" Click="ReviewAttempts_Click" Padding="16,8" />
-                            <Button x:Name="TakeQuizBtn" Content="Take quiz" HorizontalAlignment="Left" IsEnabled="False" Click="TakeQuiz_Click" Padding="16,8" Style="{StaticResource AccentButtonStyle}" />
-                        </StackPanel>
-
-                        <InfoBar x:Name="ActionMessage" IsOpen="False" Severity="Informational" IsClosable="True" Margin="0,12,0,0" />
-                    </StackPanel>
-
-                    <StackPanel x:Name="PasswordView" Grid.Row="0" Spacing="24" Visibility="Collapsed">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Change Password" Style="{StaticResource TitleTextBlockStyle}" />
-                            <TextBlock Text="Update your account password" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-
-                        <StackPanel Spacing="12" MaxWidth="400">
-                            <PasswordBox x:Name="CurrentPasswordBox" Header="Current password" PlaceholderText="Enter current password" />
-                            <PasswordBox x:Name="NewPasswordBox" Header="New password" PlaceholderText="Enter new password" />
-                            <PasswordBox x:Name="ConfirmPasswordBox" Header="Confirm password" PlaceholderText="Confirm new password" />
-                            <Button Content="Update password" Click="ChangePassword_Click" Style="{StaticResource AccentButtonStyle}" Padding="16,8" />
-                            <InfoBar x:Name="PasswordMessage" IsOpen="False" Severity="Success" IsClosable="False" />
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
+                <Frame x:Name="ContentFrame" />
             </NavigationView>
         </Grid>
     </Grid>

@@ -24,11 +24,18 @@ namespace quiz_examination_system
         void ResetPassword(hstring const &userId, hstring const &newPassword);
         void ToggleUserStatus(hstring const &userId, hstring const &newStatus);
         void GetAllUsers();
+        void GetQuizzes(hstring const &createdBy);
+        void GetQuestions(hstring const &createdBy);
+        void CreateQuiz(hstring const &quizId, hstring const &title, int timeLimit, int totalPoints, hstring const &createdBy);
+        void AddQuestionsToQuiz(hstring const &quizId, hstring const &questionId, int points);
+        void CreateQuestion(hstring const &questionId, hstring const &questionText, hstring const &optionA, hstring const &optionB, hstring const &optionC, hstring const &optionD, hstring const &correctOption, hstring const &difficulty, hstring const &createdBy);
+        void GetQuestionsByTeacher(hstring const &createdBy);
+        void DeleteQuestion(hstring const &questionId);
 
         bool IsConnected() const { return m_connected; }
         hstring GetLastError() const { return m_lastError; }
 
-        std::function<void(hstring, hstring, hstring)> OnLoginSuccess;
+        std::function<void(hstring, hstring, hstring, hstring)> OnLoginSuccess;
         std::function<void(hstring)> OnLoginFailed;
         std::function<void(hstring)> OnPasswordChanged;
         std::function<void(hstring)> OnPasswordChangeFailed;
@@ -37,6 +44,10 @@ namespace quiz_examination_system
         std::function<void(hstring)> OnUsersFetched;
         std::function<void(hstring)> OnUserActionSuccess;
         std::function<void(hstring)> OnUserActionFailed;
+        std::function<void(hstring)> OnQuizzesFetched;
+        std::function<void(hstring)> OnQuestionsFetched;
+        std::function<void(hstring)> OnQuizCreated;
+        std::function<void(hstring)> OnQuizCreationFailed;
 
     private:
         HttpClient m_httpClient;
