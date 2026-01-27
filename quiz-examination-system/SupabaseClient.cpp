@@ -71,6 +71,7 @@ namespace quiz_examination_system
 
                                         if (PasswordHasher::VerifyPassword(password, storedHash))
                                         {
+                                            ResetFailedLogin(username);
                                             hstring displayRole = (role == L"ADMIN") ? L"Administrator" : 
                                                                  (role == L"TEACHER") ? L"Lecturer" : L"Student";
                                             if (OnLoginSuccess)
@@ -80,6 +81,7 @@ namespace quiz_examination_system
                                         }
                                         else
                                         {
+                                            IncrementFailedLogin(username);
                                             if (OnLoginFailed)
                                             {
                                                 OnLoginFailed(L"Invalid credentials");
@@ -134,6 +136,18 @@ namespace quiz_examination_system
     {
         try
         {
+            if (newPassword.size() > 72)
+            {
+                auto dispatcher = DispatcherQueue::GetForCurrentThread();
+                dispatcher.TryEnqueue([this]()
+                                      {
+                    if (OnPasswordChangeFailed)
+                    {
+                        OnPasswordChangeFailed(L"Password must not exceed 72 bytes");
+                    } });
+                return;
+            }
+
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
             Uri uri(m_projectUrl + L"/rest/v1/users?select=id,username,password_hash,role&username=eq." + username);
             HttpRequestMessage request(HttpMethod::Get(), uri);
@@ -267,6 +281,16 @@ namespace quiz_examination_system
     {
         try
         {
+            if (password.size() > 72)
+            {
+                auto dispatcher = DispatcherQueue::GetForCurrentThread();
+                dispatcher.TryEnqueue([this]()
+                                      {
+                    if (OnUserCreationFailed)
+                        OnUserCreationFailed(L"Password must not exceed 72 bytes"); });
+                return;
+            }
+
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
             JsonObject newUser;
             newUser.Insert(L"username", JsonValue::CreateStringValue(username));
@@ -321,6 +345,26 @@ namespace quiz_examination_system
     {
         try
         {
+            if (m_currentUserRole != L"ADMIN")
+            {
+                auto dispatcher = DispatcherQueue::GetForCurrentThread();
+                dispatcher.TryEnqueue([this]()
+                                      {
+                    if (OnUserActionFailed)
+                        OnUserActionFailed(L"Permission denied: Only administrators can reset passwords"); });
+                return;
+            }
+
+            if (newPassword.size() > 72)
+            {
+                auto dispatcher = DispatcherQueue::GetForCurrentThread();
+                dispatcher.TryEnqueue([this]()
+                                      {
+                    if (OnUserActionFailed)
+                        OnUserActionFailed(L"Password must not exceed 72 bytes"); });
+                return;
+            }
+
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
             JsonObject updateData;
             updateData.Insert(L"password_hash", JsonValue::CreateStringValue(newPassword));
@@ -371,6 +415,16 @@ namespace quiz_examination_system
     {
         try
         {
+            if (m_currentUserRole != L"ADMIN")
+            {
+                auto dispatcher = DispatcherQueue::GetForCurrentThread();
+                dispatcher.TryEnqueue([this]()
+                                      {
+                    if (OnUserActionFailed)
+                        OnUserActionFailed(L"Permission denied: Only administrators can change user status"); });
+                return;
+            }
+
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
             JsonObject updateData;
             updateData.Insert(L"status", JsonValue::CreateStringValue(newStatus));
@@ -866,6 +920,105 @@ namespace quiz_examination_system
         {
             if (OnQuizCreationFailed)
                 OnQuizCreationFailed(L"Connection error");
+        }
+    }
+
+    void SupabaseClient::IncrementFailedLogin(hstring const &username)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            Uri uri(m_projectUrl + L"/rest/v1/users?select=failed_login_count&username=eq." + username);
+            HttpRequestMessage request(HttpMethod::Get(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            m_httpClient.SendRequestAsync(request).Completed([this, username, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, username, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, username, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    JsonArray users = JsonArray::Parse(content);
+                                    
+                                    if (users.Size() > 0)
+                                    {
+                                        auto user = users.GetObjectAt(0);
+                                        auto failedCount = static_cast<int>(user.GetNamedNumber(L"failed_login_count", 0)) + 1;
+
+                                        JsonObject updateData;
+                                        updateData.Insert(L"failed_login_count", JsonValue::CreateNumberValue(failedCount));
+
+                                        if (failedCount >= 5)
+                                        {
+                                            hstring lockExpiry = PasswordHasher::GetLockExpiryTime();
+                                            updateData.Insert(L"locked_until", JsonValue::CreateStringValue(lockExpiry));
+                                        }
+
+                                        Uri updateUri(m_projectUrl + L"/rest/v1/users?username=eq." + username);
+                                        HttpRequestMessage updateRequest(HttpMethod::Patch(), updateUri);
+                                        updateRequest.Headers().Insert(L"apikey", m_anonKey);
+                                        updateRequest.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+                                        updateRequest.Headers().Insert(L"Content-Type", L"application/json");
+                                        updateRequest.Content(HttpStringContent(updateData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+                                        m_httpClient.SendRequestAsync(updateRequest).Completed([this](auto const &updateOp, auto)
+                                        {
+                                        });
+                                    }
+                                }
+                                catch (...)
+                                {
+                                }
+                            });
+                        });
+                    }
+                }
+                catch (...)
+                {
+                } });
+        }
+        catch (...)
+        {
+        }
+    }
+
+    void SupabaseClient::ResetFailedLogin(hstring const &username)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+            JsonObject updateData;
+            updateData.Insert(L"failed_login_count", JsonValue::CreateNumberValue(0));
+            updateData.Insert(L"locked_until", JsonValue::CreateNullValue());
+
+            Uri uri(m_projectUrl + L"/rest/v1/users?username=eq." + username);
+            HttpRequestMessage request(HttpMethod::Patch(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Headers().Insert(L"Content-Type", L"application/json");
+            request.Content(HttpStringContent(updateData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                }
+                catch (...)
+                {
+                } });
+        }
+        catch (...)
+        {
         }
     }
 }

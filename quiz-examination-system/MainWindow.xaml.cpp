@@ -141,8 +141,17 @@ namespace winrt::quiz_examination_system::implementation
         return true;
     }
 
-    void MainWindow::ApplyPermissions(hstring const &)
+    void MainWindow::ApplyPermissions(hstring const &role)
     {
+        if (role == L"ADMIN")
+        {
+        }
+        else if (role == L"TEACHER")
+        {
+        }
+        else if (role == L"STUDENT")
+        {
+        }
     }
 
     void MainWindow::OnLoginSuccess(hstring username, hstring displayRole, hstring dbRole, hstring userId)
@@ -154,9 +163,11 @@ namespace winrt::quiz_examination_system::implementation
         m_currentUserId = userId;
         m_currentRole = displayRole;
         m_currentDbRole = dbRole;
+        m_supabaseClient->SetCurrentUserRole(dbRole);
         UsernameBox().Text(L"");
         PasswordBox().Password(L"");
         LoginMessage().IsOpen(false);
+        ApplyPermissions(dbRole);
         UpdateView();
     }
 
