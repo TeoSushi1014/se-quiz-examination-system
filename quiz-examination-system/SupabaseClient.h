@@ -32,6 +32,22 @@ namespace quiz_examination_system
         void GetQuestionsByTeacher(hstring const &createdBy);
         void DeleteQuestion(hstring const &questionId);
 
+        // --- Question Bank Management (UC02) ---
+        void CreateQuestionValidated(
+            hstring const &id,
+            hstring const &teacherId,
+            hstring const &text,
+            hstring const &optA, hstring const &optB, hstring const &optC, hstring const &optD,
+            hstring const &correctOpt,
+            hstring const &difficulty,
+            hstring const &topic);
+
+        void DeleteQuestionSafe(hstring const &questionId);
+
+        // --- Quiz Management (UC08) ---
+        void DeleteQuizAsTeacher(hstring const &quizId, hstring const &teacherId);
+        void PurgeQuizAsAdmin(hstring const &quizId, hstring const &adminId);
+
         bool IsConnected() const { return m_connected; }
         hstring GetLastError() const { return m_lastError; }
 
@@ -48,6 +64,14 @@ namespace quiz_examination_system
         std::function<void(hstring)> OnQuestionsFetched;
         std::function<void(hstring)> OnQuizCreated;
         std::function<void(hstring)> OnQuizCreationFailed;
+
+        // --- UC02 Question Bank Callbacks ---
+        std::function<void(bool, hstring)> OnQuestionValidatedCreated;
+        std::function<void(hstring, hstring, int)> OnQuestionDeleteResult; // status, message, quiz_count
+
+        // --- UC08 Quiz Management Callbacks ---
+        std::function<void(bool, hstring, int)> OnQuizDeleteResult; // success, message, attempt_count
+        std::function<void(bool, int, hstring)> OnQuizPurgeResult;  // success, attempts_deleted, message
 
         void SetCurrentUserRole(hstring const &role) { m_currentUserRole = role; }
 

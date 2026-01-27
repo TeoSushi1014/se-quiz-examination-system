@@ -1087,4 +1087,358 @@ namespace quiz_examination_system
                 OnQuizCreationFailed(L"Connection error");
         }
     }
+
+    // =====================================================
+    // UC02: Question Bank Management - Create with Validation
+    // =====================================================
+    void SupabaseClient::CreateQuestionValidated(
+        hstring const &id,
+        hstring const &teacherId,
+        hstring const &text,
+        hstring const &optA, hstring const &optB, hstring const &optC, hstring const &optD,
+        hstring const &correctOpt,
+        hstring const &difficulty,
+        hstring const &topic)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            // Build JSON parameters matching RPC signature
+            JsonObject params;
+            params.Insert(L"p_id", JsonValue::CreateStringValue(id));
+            params.Insert(L"p_created_by", JsonValue::CreateStringValue(teacherId));
+            params.Insert(L"p_question_text", JsonValue::CreateStringValue(text));
+            params.Insert(L"p_option_a", JsonValue::CreateStringValue(optA));
+            params.Insert(L"p_option_b", JsonValue::CreateStringValue(optB));
+            params.Insert(L"p_option_c", JsonValue::CreateStringValue(optC));
+            params.Insert(L"p_option_d", JsonValue::CreateStringValue(optD));
+            params.Insert(L"p_correct_option", JsonValue::CreateStringValue(correctOpt));
+            params.Insert(L"p_difficulty_level", JsonValue::CreateStringValue(difficulty));
+            params.Insert(L"p_topic", JsonValue::CreateStringValue(topic));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/create_question_validated");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                if (asyncOp.Status() == AsyncStatus::Completed)
+                {
+                    try
+                    {
+                        auto response = asyncOp.GetResults();
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto resultObj = JsonObject::Parse(content);
+                                    auto status = resultObj.GetNamedString(L"status", L"error");
+                                    auto message = resultObj.GetNamedString(L"message", L"Unknown error");
+
+                                    if (OnQuestionValidatedCreated)
+                                    {
+                                        OnQuestionValidatedCreated(status == L"success", message);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuestionValidatedCreated)
+                                    {
+                                        OnQuestionValidatedCreated(false, L"Failed to parse response");
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    catch (...)
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnQuestionValidatedCreated)
+                            {
+                                OnQuestionValidatedCreated(false, L"Request failed");
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuestionValidatedCreated)
+                        {
+                            OnQuestionValidatedCreated(false, L"Network error");
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuestionValidatedCreated)
+            {
+                OnQuestionValidatedCreated(false, L"Connection error");
+            }
+        }
+    }
+
+    // =====================================================
+    // UC02: Question Bank Management - Safe Delete
+    // =====================================================
+    void SupabaseClient::DeleteQuestionSafe(hstring const &questionId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"question_id_input", JsonValue::CreateStringValue(questionId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/delete_question_safe");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                if (asyncOp.Status() == AsyncStatus::Completed)
+                {
+                    try
+                    {
+                        auto response = asyncOp.GetResults();
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto resultObj = JsonObject::Parse(content);
+                                    auto status = resultObj.GetNamedString(L"status", L"error");
+                                    auto message = resultObj.GetNamedString(L"message", L"Unknown error");
+                                    int quizCount = static_cast<int>(resultObj.GetNamedNumber(L"quiz_count", 0));
+
+                                    if (OnQuestionDeleteResult)
+                                    {
+                                        OnQuestionDeleteResult(status, message, quizCount);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuestionDeleteResult)
+                                    {
+                                        OnQuestionDeleteResult(L"error", L"Failed to parse response", 0);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    catch (...)
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnQuestionDeleteResult)
+                            {
+                                OnQuestionDeleteResult(L"error", L"Request failed", 0);
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuestionDeleteResult)
+                        {
+                            OnQuestionDeleteResult(L"error", L"Network error", 0);
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuestionDeleteResult)
+            {
+                OnQuestionDeleteResult(L"error", L"Connection error", 0);
+            }
+        }
+    }
+
+    // =====================================================
+    // UC08: Quiz Management - Teacher Delete
+    // =====================================================
+    void SupabaseClient::DeleteQuizAsTeacher(hstring const &quizId, hstring const &teacherId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"quiz_id_input", JsonValue::CreateStringValue(quizId));
+            params.Insert(L"teacher_id", JsonValue::CreateStringValue(teacherId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/delete_quiz_teacher");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                if (asyncOp.Status() == AsyncStatus::Completed)
+                {
+                    try
+                    {
+                        auto response = asyncOp.GetResults();
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto resultObj = JsonObject::Parse(content);
+                                    auto status = resultObj.GetNamedString(L"status", L"error");
+                                    auto message = resultObj.GetNamedString(L"message", L"Unknown error");
+                                    int attemptCount = static_cast<int>(resultObj.GetNamedNumber(L"attempt_count", 0));
+
+                                    bool success = (status == L"success");
+
+                                    if (OnQuizDeleteResult)
+                                    {
+                                        OnQuizDeleteResult(success, message, attemptCount);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizDeleteResult)
+                                    {
+                                        OnQuizDeleteResult(false, L"Failed to parse response", 0);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    catch (...)
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnQuizDeleteResult)
+                            {
+                                OnQuizDeleteResult(false, L"Request failed", 0);
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizDeleteResult)
+                        {
+                            OnQuizDeleteResult(false, L"Network error", 0);
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizDeleteResult)
+            {
+                OnQuizDeleteResult(false, L"Connection error", 0);
+            }
+        }
+    }
+
+    // =====================================================
+    // UC08: Quiz Management - Admin Purge
+    // =====================================================
+    void SupabaseClient::PurgeQuizAsAdmin(hstring const &quizId, hstring const &adminId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"quiz_id_input", JsonValue::CreateStringValue(quizId));
+            params.Insert(L"admin_id", JsonValue::CreateStringValue(adminId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/purge_quiz_admin");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                if (asyncOp.Status() == AsyncStatus::Completed)
+                {
+                    try
+                    {
+                        auto response = asyncOp.GetResults();
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto resultObj = JsonObject::Parse(content);
+                                    auto status = resultObj.GetNamedString(L"status", L"error");
+                                    auto message = resultObj.GetNamedString(L"message", L"Unknown error");
+                                    int attemptsDeleted = static_cast<int>(resultObj.GetNamedNumber(L"attempts_deleted", 0));
+
+                                    bool success = (status == L"success");
+
+                                    if (OnQuizPurgeResult)
+                                    {
+                                        OnQuizPurgeResult(success, attemptsDeleted, message);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizPurgeResult)
+                                    {
+                                        OnQuizPurgeResult(false, 0, L"Failed to parse response");
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    catch (...)
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnQuizPurgeResult)
+                            {
+                                OnQuizPurgeResult(false, 0, L"Request failed");
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizPurgeResult)
+                        {
+                            OnQuizPurgeResult(false, 0, L"Network error");
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizPurgeResult)
+            {
+                OnQuizPurgeResult(false, 0, L"Connection error");
+            }
+        }
+    }
 }
