@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <ctime>
 #include <chrono>
+#include <debugapi.h>
 
 namespace quiz_examination_system
 {
@@ -21,7 +22,6 @@ namespace quiz_examination_system
             std::stringstream ss;
             ss << std::hex << std::setfill('0') << std::setw(8) << hash;
             std::string result = ss.str();
-            // Pad to at least 22 characters
             while (result.length() < 22)
             {
                 result = "0" + result;
@@ -34,17 +34,17 @@ namespace quiz_examination_system
         {
             try
             {
-                // For now, use simple format: $2a$10$ + password itself (padded to 22 chars)
                 std::string pwd(winrt::to_string(password));
                 std::string hash = pwd;
 
-                // Pad to 22 characters with zeros
                 while (hash.length() < 22)
                 {
                     hash = "0" + hash;
                 }
 
-                return hstring(L"$2a$10$") + winrt::to_hstring(hash.substr(0, 22));
+                std::string result = "$2a$10$" + hash.substr(0, 22);
+
+                return hstring(winrt::to_hstring(result));
             }
             catch (...)
             {
@@ -57,6 +57,22 @@ namespace quiz_examination_system
             try
             {
                 auto computedHash = HashPassword(password);
+
+                // Debug: Log comparison
+                auto pwdStr = winrt::to_string(password);
+                auto computedStr = winrt::to_string(computedHash);
+                auto storedStr = winrt::to_string(storedHash);
+
+                std::string debugMsg1 = "Password: " + pwdStr + "\n";
+                std::string debugMsg2 = "Computed: " + computedStr + "\n";
+                std::string debugMsg3 = "Stored:   " + storedStr + "\n";
+                std::string debugMsg4 = "Match: " + std::string(computedHash == storedHash ? "YES" : "NO") + "\n\n";
+
+                OutputDebugStringA(debugMsg1.c_str());
+                OutputDebugStringA(debugMsg2.c_str());
+                OutputDebugStringA(debugMsg3.c_str());
+                OutputDebugStringA(debugMsg4.c_str());
+
                 return computedHash == storedHash;
             }
             catch (...)
