@@ -24,103 +24,268 @@ namespace quiz_examination_system
         try
         {
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
-            Uri uri(m_projectUrl + L"/rest/v1/users?select=id,username,password_hash,role,failed_login_count,locked_until&username=eq." + username);
-            HttpRequestMessage request(HttpMethod::Get(), uri);
-            request.Headers().Insert(L"apikey", m_anonKey);
-            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
 
-            m_httpClient.SendRequestAsync(request).Completed([this, username, password, dispatcher](auto const &asyncOp, auto)
-                                                             {
-                try
+            // Step 1: Check account status (locked, inactive, or active)
+            JsonObject statusParams;
+            statusParams.Insert(L"input_username", JsonValue::CreateStringValue(username));
+            Uri statusUri(m_projectUrl + L"/rest/v1/rpc/check_account_status");
+            HttpRequestMessage statusReq(HttpMethod::Post(), statusUri);
+            statusReq.Headers().Insert(L"apikey", m_anonKey);
+            statusReq.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            statusReq.Content(HttpStringContent(statusParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto statusOp = m_httpClient.SendRequestAsync(statusReq);
+            statusOp.Completed([this, username, password, dispatcher](auto op, auto status)
+                               {
+                if (status == AsyncStatus::Completed)
                 {
-                    auto response = asyncOp.GetResults();
-                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    try
                     {
-                        response.Content().ReadAsStringAsync().Completed([this, username, password, dispatcher](auto const &readOp, auto)
-                        {
-                            dispatcher.TryEnqueue([this, username, password, readOp]()
-                            {
+                        auto statusResponse = op.GetResults();
+                        statusResponse.Content().ReadAsStringAsync().Completed([this, username, password, dispatcher](auto readOp, auto readStatus)
+                                                                               { dispatcher.TryEnqueue([this, username, password, dispatcher, readOp]()
+                                                                                                       {
                                 try
                                 {
-                                    auto content = readOp.GetResults();
-                                    JsonArray users = JsonArray::Parse(content);
-                                    
-                                    if (users.Size() > 0)
-                                    {
-                                        auto user = users.GetObjectAt(0);
-                                        auto userId = user.GetNamedString(L"id");
-                                        auto storedHash = user.GetNamedString(L"password_hash");
-                                        auto role = user.GetNamedString(L"role", L"STUDENT");
-                                        auto failedCount = static_cast<int>(user.GetNamedNumber(L"failed_login_count", 0));
+                                    auto statusContent = readOp.GetResults();
+                                    auto statusObj = JsonObject::Parse(statusContent);
+                                    auto checkStatus = statusObj.GetNamedString(L"status", L"");
                                         
-                                        hstring lockedUntilStr;
-                                        try {
-                                            lockedUntilStr = user.GetNamedString(L"locked_until", L"");
-                                        } catch (...) {
-                                            lockedUntilStr = L"";
-                                        }
-                                        
-                                        if (!lockedUntilStr.empty())
-                                        {
-                                            if (OnLoginFailed)
-                                            {
-                                                OnLoginFailed(L"Account is locked. Please try again later.");
-                                            }
-                                            return;
-                                        }
-
-                                        if (PasswordHasher::VerifyPassword(password, storedHash))
-                                        {
-                                            ResetFailedLogin(username);
-                                            hstring displayRole = (role == L"ADMIN") ? L"Administrator" : 
-                                                                 (role == L"TEACHER") ? L"Lecturer" : L"Student";
-                                            if (OnLoginSuccess)
-                                            {
-                                                OnLoginSuccess(username, displayRole, role, userId);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            IncrementFailedLogin(username);
-                                            if (OnLoginFailed)
-                                            {
-                                                OnLoginFailed(L"Invalid credentials");
-                                            }
-                                        }
-                                    }
-                                    else
+                                    if (checkStatus == L"user_not_found")
                                     {
                                         if (OnLoginFailed)
                                         {
                                             OnLoginFailed(L"User not found");
                                         }
+                                        return;
                                     }
-                                }
-                                catch (...)
-                                {
-                                    if (OnLoginFailed)
+                                    else if (checkStatus == L"locked")
                                     {
-                                        OnLoginFailed(L"Parse error");
+                                        auto minutesRemaining = static_cast<int>(statusObj.GetNamedNumber(L"minutes_remaining", 30));
+                                        hstring message = hstring(L"Account is locked. Try again in ") + to_hstring(minutesRemaining) + L" minutes.";
+                                        if (OnLoginFailed)
+                                        {
+                                            OnLoginFailed(message);
+                                        }
+                                        return;
                                     }
-                                }
-                            });
-                        });
-                    }
-                    else
+                                    else if (checkStatus == L"inactive")
+                                    {
+                                        if (OnLoginFailed)
+                                        {
+                                            OnLoginFailed(L"Account is inactive");
+                                        }
+                                        return;
+                                    }
+                                    
+                                    // Step 2: Account is active, proceed with login
+                                    Uri uri(m_projectUrl + L"/rest/v1/users?select=id,username,password_hash,role,failed_login_count,locked_until&username=eq." + username);
+                                    HttpRequestMessage request(HttpMethod::Get(), uri);
+                                    request.Headers().Insert(L"apikey", m_anonKey);
+                                    request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+                                    m_httpClient.SendRequestAsync(request).Completed([this, username, password, dispatcher](auto const &asyncOp, auto)
+                                    {
+                                        try
+                                        {
+                                            auto response = asyncOp.GetResults();
+                                            if (response.StatusCode() == HttpStatusCode::Ok)
+                                            {
+                                                response.Content().ReadAsStringAsync().Completed([this, username, password, dispatcher](auto const &readOp, auto)
+                                                {
+                                                    dispatcher.TryEnqueue([this, username, password, dispatcher, readOp]()
+                                                    {
+                                                        try
+                                                        {
+                                                            auto content = readOp.GetResults();
+                                                            JsonArray users = JsonArray::Parse(content);
+                                                            
+                                                            if (users.Size() > 0)
+                                                            {
+                                                                auto user = users.GetObjectAt(0);
+                                                                auto userId = user.GetNamedString(L"id");
+                                                                auto storedHash = user.GetNamedString(L"password_hash");
+                                                                auto role = user.GetNamedString(L"role", L"STUDENT");
+
+                                                                if (PasswordHasher::VerifyPassword(password, storedHash))
+                                                                {
+                                                                    // Password correct - reset failed login count via RPC
+                                                                    JsonObject resetParams;
+                                                                    resetParams.Insert(L"input_username", JsonValue::CreateStringValue(username));
+                                                                    Uri resetUri(m_projectUrl + L"/rest/v1/rpc/handle_login_success");
+                                                                    HttpRequestMessage resetReq(HttpMethod::Post(), resetUri);
+                                                                    resetReq.Headers().Insert(L"apikey", m_anonKey);
+                                                                    resetReq.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+                                                                    resetReq.Content(HttpStringContent(resetParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+                                                                    
+                                                                    m_httpClient.SendRequestAsync(resetReq);
+                                                                    
+                                                                    hstring displayRole = (role == L"ADMIN") ? L"Administrator" : 
+                                                                                         (role == L"TEACHER") ? L"Lecturer" : L"Student";
+                                                                    if (OnLoginSuccess)
+                                                                    {
+                                                                        OnLoginSuccess(username, displayRole, role, userId);
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    // Password wrong - increment failed login count via RPC
+                                                                    JsonObject rpcParams;
+                                                                    rpcParams.Insert(L"input_username", JsonValue::CreateStringValue(username));
+                                                                    Uri rpcUri(m_projectUrl + L"/rest/v1/rpc/handle_login_failure");
+                                                                    HttpRequestMessage rpcReq(HttpMethod::Post(), rpcUri);
+                                                                    rpcReq.Headers().Insert(L"apikey", m_anonKey);
+                                                                    rpcReq.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+                                                                    rpcReq.Content(HttpStringContent(rpcParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+                                                                    
+                                                                    OutputDebugStringW(L"[DEBUG] Calling RPC: handle_login_failure\n");
+                                                                    
+                                                                    auto rpcOp = m_httpClient.SendRequestAsync(rpcReq);
+                                                                    rpcOp.Completed([this, dispatcher](auto op, auto status)
+                                                                    {
+                                                                        if (status == AsyncStatus::Completed)
+                                                                        {
+                                                                            OutputDebugStringW(L"[DEBUG] RPC response received\n");
+                                                                            try
+                                                                            {
+                                                                                auto rpcResponse = op.GetResults();
+                                                                                OutputDebugStringW((hstring(L"[DEBUG] RPC Status Code: ") + to_hstring(static_cast<int>(rpcResponse.StatusCode())) + L"\n").c_str());
+                                                                                rpcResponse.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto readStatus)
+                                                                                {
+                                                                                    dispatcher.TryEnqueue([this, dispatcher, readOp]()
+                                                                                    {
+                                                                                        try
+                                                                                        {
+                                                                                            auto rpcContent = readOp.GetResults();
+                                                                                            OutputDebugStringW((hstring(L"[DEBUG] RPC response body: ") + rpcContent + L"\n").c_str());
+                                                                                            auto resultObj = JsonObject::Parse(rpcContent);
+                                                                                            auto rpcStatus = resultObj.GetNamedString(L"status", L"");
+                                                                                            OutputDebugStringW((hstring(L"[DEBUG] RPC status field: ") + rpcStatus + L"\n").c_str());
+                                                                                            
+                                                                                            if (rpcStatus == L"locked")
+                                                                                            {
+                                                                                                auto message = resultObj.GetNamedString(L"message", L"Account locked");
+                                                                                                if (OnLoginFailed)
+                                                                                                {
+                                                                                                    OnLoginFailed(message);
+                                                                                                }
+                                                                                            }
+                                                                                            else if (rpcStatus == L"failed")
+                                                                                            {
+                                                                                                int attemptsLeft = static_cast<int>(resultObj.GetNamedNumber(L"attempts_left", 4));
+                                                                                                hstring message = hstring(L"Invalid credentials. Attempts left: ") + to_hstring(attemptsLeft);
+                                                                                                if (OnLoginFailed)
+                                                                                                {
+                                                                                                    OnLoginFailed(message);
+                                                                                                }
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                if (OnLoginFailed)
+                                                                                                {
+                                                                                                    OnLoginFailed(L"Invalid credentials. Please check your username and password.");
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                        catch (...)
+                                                                                        {
+                                                                                            if (OnLoginFailed)
+                                                                                            {
+                                                                                                OnLoginFailed(L"Invalid credentials");
+                                                                                            }
+                                                                                        }
+                                                                                    });
+                                                                                });
+                                                                            }
+                                                                            catch (...)
+                                                                            {
+                                                                                OutputDebugStringW(L"[DEBUG] RPC response parsing error\n");
+                                                                                dispatcher.TryEnqueue([this]()
+                                                                                {
+                                                                                    if (OnLoginFailed)
+                                                                                    {
+                                                                                        OnLoginFailed(L"Invalid credentials");
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            OutputDebugStringW((hstring(L"[DEBUG] RPC async failed with status: ") + to_hstring(static_cast<int>(status)) + L"\n").c_str());
+                                                                            dispatcher.TryEnqueue([this]()
+                                                                            {
+                                                                                if (OnLoginFailed)
+                                                                                {
+                                                                                    OnLoginFailed(L"Login failed");
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                if (OnLoginFailed)
+                                                                {
+                                                                    OnLoginFailed(L"User not found");
+                                                                }
+                                                            }
+                                                        }
+                                                        catch (...)
+                                                        {
+                                                            if (OnLoginFailed)
+                                                            {
+                                                                OnLoginFailed(L"Parse error");
+                                                            }
+                                                        }
+                                                    });
+                                                });
+                                            }
+                                            else
+                                            {
+                                                dispatcher.TryEnqueue([this, response]()
+                                                {
+                                                    if (OnLoginFailed)
+                                                    {
+                                                        OnLoginFailed(hstring(L"API error: ") + to_hstring(static_cast<int>(response.StatusCode())));
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        catch (...)
+                                        {
+                                            dispatcher.TryEnqueue([this]()
+                                            {
+                                                if (OnLoginFailed)
+                                                {
+                                                    OnLoginFailed(L"Request error");
+                                                }
+                                            });
+                                        }
+                                    });
+                }  
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
                     {
-                        auto statusCode = response.StatusCode();
                         if (OnLoginFailed)
                         {
-                            OnLoginFailed(hstring(L"API error: ") + to_hstring(static_cast<int>(statusCode)));
+                            OnLoginFailed(L"Status check error");
                         }
-                    }
+                    });
+                }
+            });
+                    });
                 }
                 catch (...)
                 {
-                    if (OnLoginFailed)
-                    {
-                        OnLoginFailed(L"Request error");
-                    }
+                    dispatcher.TryEnqueue([this]()
+                                          {
+                            if (OnLoginFailed)
+                            {
+                                OnLoginFailed(L"Status check failed");
+                            } });
+                }
                 } });
         }
         catch (...)
@@ -920,105 +1085,6 @@ namespace quiz_examination_system
         {
             if (OnQuizCreationFailed)
                 OnQuizCreationFailed(L"Connection error");
-        }
-    }
-
-    void SupabaseClient::IncrementFailedLogin(hstring const &username)
-    {
-        try
-        {
-            auto dispatcher = DispatcherQueue::GetForCurrentThread();
-            Uri uri(m_projectUrl + L"/rest/v1/users?select=failed_login_count&username=eq." + username);
-            HttpRequestMessage request(HttpMethod::Get(), uri);
-            request.Headers().Insert(L"apikey", m_anonKey);
-            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
-
-            m_httpClient.SendRequestAsync(request).Completed([this, username, dispatcher](auto const &asyncOp, auto)
-                                                             {
-                try
-                {
-                    auto response = asyncOp.GetResults();
-                    if (response.StatusCode() == HttpStatusCode::Ok)
-                    {
-                        response.Content().ReadAsStringAsync().Completed([this, username, dispatcher](auto const &readOp, auto)
-                        {
-                            dispatcher.TryEnqueue([this, username, readOp]()
-                            {
-                                try
-                                {
-                                    auto content = readOp.GetResults();
-                                    JsonArray users = JsonArray::Parse(content);
-                                    
-                                    if (users.Size() > 0)
-                                    {
-                                        auto user = users.GetObjectAt(0);
-                                        auto failedCount = static_cast<int>(user.GetNamedNumber(L"failed_login_count", 0)) + 1;
-
-                                        JsonObject updateData;
-                                        updateData.Insert(L"failed_login_count", JsonValue::CreateNumberValue(failedCount));
-
-                                        if (failedCount >= 5)
-                                        {
-                                            hstring lockExpiry = PasswordHasher::GetLockExpiryTime();
-                                            updateData.Insert(L"locked_until", JsonValue::CreateStringValue(lockExpiry));
-                                        }
-
-                                        Uri updateUri(m_projectUrl + L"/rest/v1/users?username=eq." + username);
-                                        HttpRequestMessage updateRequest(HttpMethod::Patch(), updateUri);
-                                        updateRequest.Headers().Insert(L"apikey", m_anonKey);
-                                        updateRequest.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
-                                        updateRequest.Headers().Insert(L"Content-Type", L"application/json");
-                                        updateRequest.Content(HttpStringContent(updateData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
-
-                                        m_httpClient.SendRequestAsync(updateRequest).Completed([this](auto const &updateOp, auto)
-                                        {
-                                        });
-                                    }
-                                }
-                                catch (...)
-                                {
-                                }
-                            });
-                        });
-                    }
-                }
-                catch (...)
-                {
-                } });
-        }
-        catch (...)
-        {
-        }
-    }
-
-    void SupabaseClient::ResetFailedLogin(hstring const &username)
-    {
-        try
-        {
-            auto dispatcher = DispatcherQueue::GetForCurrentThread();
-            JsonObject updateData;
-            updateData.Insert(L"failed_login_count", JsonValue::CreateNumberValue(0));
-            updateData.Insert(L"locked_until", JsonValue::CreateNullValue());
-
-            Uri uri(m_projectUrl + L"/rest/v1/users?username=eq." + username);
-            HttpRequestMessage request(HttpMethod::Patch(), uri);
-            request.Headers().Insert(L"apikey", m_anonKey);
-            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
-            request.Headers().Insert(L"Content-Type", L"application/json");
-            request.Content(HttpStringContent(updateData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
-
-            m_httpClient.SendRequestAsync(request).Completed([this](auto const &asyncOp, auto)
-                                                             {
-                try
-                {
-                    auto response = asyncOp.GetResults();
-                }
-                catch (...)
-                {
-                } });
-        }
-        catch (...)
-        {
         }
     }
 }
