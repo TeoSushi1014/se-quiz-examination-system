@@ -89,3 +89,121 @@ Phải có các Test Case khớp với Use Case trong SRS. Ví dụ mẫu:
 - [ ] **Mở sẵn công cụ:** Trước khi lên bảng, mở sẵn Git, Supabase Dashboard, và file Excel Test Case để show cho giáo viên xem khi được hỏi.
 
 **Lưu ý quan trọng nhất:** Hãy sửa lại code phần kết nối Database nếu bạn vẫn đang dùng dữ liệu giả (`vector users` trong `main.cpp`). SRS yêu cầu rõ ràng database phải host trên Supabase Cloud.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Dựa trên tài liệu SRS, nguyên lý thiết kế giao diện (UI Design Principles) từ nguồn, và trạng thái hiện tại của dự án (Backend đã xong, UI chưa tương tác), đây là **Checklist hướng dẫn triển khai UI (No-code)** để biến giao diện tĩnh thành một ứng dụng tương tác hoàn chỉnh.
+
+Mục tiêu là kết nối các RPC bạn vừa viết với các sự kiện (Events) trên màn hình XAML.
+
+---
+
+### PHẦN 1: TEACHER DASHBOARD (Ưu tiên cao nhất - Vì cần dữ liệu để Student test)
+
+Màn hình này thực hiện **UC-02 (Question Bank)** và **UC-03 (Create Quiz)**.
+
+#### 1. Tab "Question Bank" (Ngân hàng câu hỏi)
+- [ ] **Hiển thị danh sách (Data Binding):**
+    - Tạo một `ListView` hoặc `DataGrid` trong XAML.
+    - **Sự kiện `Page_Loaded`:** Gọi hàm `SupabaseClient::GetQuestions()`.
+    - **UI Update:** Khi dữ liệu về (callback), gán vào `ItemsSource` của ListView.
+- [ ] **Chức năng Thêm mới (Add Question):**
+    - Tạo nút "Add Question".
+    - **Sự kiện `Click`:** Mở một `ContentDialog` chứa các TextBox (Câu hỏi, 4 đáp án) và ComboBox (Đáp án đúng, Độ khó).
+    - **Nút "Save" trong Dialog:** Gọi `SupabaseClient::CreateQuestionValidated()`.
+    - **Phản hồi:** Nếu thành công $\rightarrow$ Đóng Dialog, hiện thông báo xanh (TeachingTip), reload lại danh sách.
+- [ ] **Chức năng Xóa (Delete Question):**
+    - Thêm nút "Delete" vào mỗi dòng (hoặc nút trên Toolbar xử lý dòng đang chọn).
+    - **Sự kiện `Click`:** Gọi `SupabaseClient::DeleteQuestionSafe()`.
+    - **Xử lý lỗi (Quan trọng):** Nếu server trả về `blocked` (do câu hỏi đang nằm trong Quiz active) $\rightarrow$ Hiện thông báo lỗi đỏ: "Không thể xóa câu hỏi đang được sử dụng".
+
+#### 2. Tab "Manage Quizzes" (Quản lý đề thi)
+- [ ] **Hiển thị danh sách Quiz:**
+    - Tương tự Question Bank, load danh sách Quiz do giáo viên tạo.
+- [ ] **Tạo đề thi (Create Quiz Flow):**
+    - **Bước 1 (Info):** Nhập Tên đề, Thời gian, Số lần làm bài (Max Attempts).
+    - **Bước 2 (Select Questions):** Hiện danh sách câu hỏi với `CheckBox` để giáo viên tích chọn.
+    - **Bước 3 (Submit):** Gọi hàm tạo Quiz, gửi kèm danh sách ID các câu hỏi đã chọn.
+- [ ] **Xem Báo cáo (View Report - UC-05):**
+    - Chọn một Quiz từ danh sách $\rightarrow$ Hiện nút "View Report".
+    - **Sự kiện:** Gọi `GetQuizAttemptsReport`.
+    - **UI:** Đổ dữ liệu vào bảng thống kê (Tên HS, Điểm, Thời gian nộp).
+    - **Nút "Export CSV":** Gọi hàm download CSV bạn đã cấu hình header `Accept: text/csv`.
+
+---
+
+### PHẦN 2: STUDENT DASHBOARD (Luồng cốt lõi UC-04)
+
+Đây là phần quan trọng nhất để Demo. Theo **NFR-04**, sinh viên phải vào thi được trong vòng 3 bước.
+
+#### 1. Màn hình chính (Dashboard)
+- [ ] **Danh sách đề thi (Available Quizzes):**
+    - **Sự kiện `Page_Loaded`:** Gọi `GetStudentQuizzes()`.
+    - **UI:** Sử dụng `GridView` (dạng thẻ bài) hiện Tên đề, Thời gian, Trạng thái (Chưa làm/Đã làm).
+    - **Tương tác:** Click vào thẻ $\rightarrow$ Điều hướng sang trang `ExamPage`.
+
+#### 2. Màn hình làm bài (Exam Page) - Quan trọng
+*Lưu ý: Màn hình này cần thiết kế cẩn thận để tránh gian lận.*
+
+- [ ] **Load đề thi:**
+    - Gọi `GetQuizQuestions()`.
+    - **Lưu ý:** Dữ liệu trả về **KHÔNG** được chứa trường `is_correct` (đáp án đúng) để đảm bảo bảo mật NFR-02.
+- [ ] **Giao diện thi:**
+    - Chia màn hình: Bên trái là danh sách số câu (Navigation), Bên phải là Nội dung câu hỏi hiện tại.
+    - Dùng `RadioButton` cho 4 đáp án.
+- [ ] **Điều hướng & Auto-save:**
+    - Khi bấm nút "Next" hoặc "Previous" $\rightarrow$ Lưu tạm đáp án vào biến cục bộ (hoặc gọi API save nháp nếu muốn xịn).
+- [ ] **Đồng hồ đếm ngược (Timer):**
+    - Sử dụng `DispatcherTimer` của WinUI.
+    - **Logic:** Khi timer = 0 $\rightarrow$ Tự động gọi hàm `SubmitAttempt`.
+- [ ] **Nộp bài (Submit):**
+    - Nút "Submit" cần hiện `ContentDialog` xác nhận: "Bạn có chắc muốn nộp bài?".
+    - **Hành động:** Gọi RPC `submit_quiz_attempt` gửi kèm danh sách câu trả lời.
+    - **Kết quả:** Server trả về điểm số ngay lập tức $\rightarrow$ Hiện Dialog thông báo điểm số.
+
+---
+
+### PHẦN 3: ADMIN DASHBOARD (Quản trị hệ thống)
+
+#### 1. Tab "User Management"
+- [ ] **Quản lý trạng thái:**
+    - Danh sách User có `ToggleSwitch` cho cột "Active/Disabled".
+    - **Sự kiện `Toggled`:** Gọi RPC update status.
+- [ ] **Reset Mật khẩu:**
+    - Nút "Reset Password" (UC-12).
+    - **Logic:** Gọi API reset về mật khẩu mặc định (ví dụ: "123456") và hiện thông báo copy cho Admin.
+
+#### 2. Tab "System Audit"
+- [ ] **Xem Log:**
+    - Chỉ cần `DataGrid` read-only hiển thị bảng `audit_logs` từ Supabase.
+    - Giúp Admin theo dõi ai vừa login sai 5 lần (tính năng bảo mật bạn vừa làm).
+
+---
+
+### PHẦN 4: UI FEEDBACK & UX (Trải nghiệm người dùng)
+
+Theo nguồn về thiết kế UI, bạn cần đảm bảo:
+
+- [ ] **Feedback:** Mọi hành động gọi xuống Supabase (Async) đều phải hiện `ProgressRing` (vòng xoay loading) và làm mờ màn hình để người dùng biết hệ thống đang xử lý.
+- [ ] **Consistency:** Các nút "Xóa" nên luôn có màu đỏ, nút "Lưu/Thêm" màu xanh (Accent Color).
+- [ ] **Error Handling:** Khi RPC trả về lỗi (mất mạng, lỗi logic), phải hiện `TeachingTip` hoặc `ContentDialog` báo lỗi rõ ràng, không để app bị crash.
+
+### Bước tiếp theo bạn cần làm:
+Hãy mở file **`StudentDashboardPage.xaml`** trước.
+1.  Vẽ một `GridView` có tên là `QuizListGrid`.
+2.  Trong file `.cpp`, viết hàm `LoadQuizzes` gọi RPC `get_student_quizzes`.
+3.  Khi có data, loop qua và thêm item vào `QuizListGrid`.
+
+Bạn có muốn tôi viết mẫu đoạn XAML cho cái `GridView` hiển thị bài thi đẹp mắt không?

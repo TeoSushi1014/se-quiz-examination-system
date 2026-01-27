@@ -43,7 +43,9 @@ namespace quiz_examination_system
                     {
                         auto statusResponse = op.GetResults();
                         statusResponse.Content().ReadAsStringAsync().Completed([this, username, password, dispatcher](auto readOp, auto readStatus)
-                                                                               { dispatcher.TryEnqueue([this, username, password, dispatcher, readOp]()
+                                                                               {
+                            UNREFERENCED_PARAMETER(readStatus);
+                            dispatcher.TryEnqueue([this, username, password, dispatcher, readOp]()
                                                                                                        {
                                 try
                                 {
@@ -152,6 +154,7 @@ namespace quiz_examination_system
                                                                                 OutputDebugStringW((hstring(L"[DEBUG] RPC Status Code: ") + to_hstring(static_cast<int>(rpcResponse.StatusCode())) + L"\n").c_str());
                                                                                 rpcResponse.Content().ReadAsStringAsync().Completed([this, dispatcher](auto readOp, auto readStatus)
                                                                                 {
+                                                                                    UNREFERENCED_PARAMETER(readStatus);
                                                                                     dispatcher.TryEnqueue([this, dispatcher, readOp]()
                                                                                     {
                                                                                         try
@@ -1438,6 +1441,663 @@ namespace quiz_examination_system
             if (OnQuizPurgeResult)
             {
                 OnQuizPurgeResult(false, 0, L"Connection error");
+            }
+        }
+    }
+
+    void SupabaseClient::GetQuizQuestions(hstring const &quizId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"input_quiz_id", JsonValue::CreateStringValue(quizId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_quiz_questions");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto questionsArray = JsonArray::Parse(content);
+
+                                    std::vector<QuestionData> questions;
+                                    for (uint32_t i = 0; i < questionsArray.Size(); ++i)
+                                    {
+                                        auto questionObj = questionsArray.GetObjectAt(i);
+                                        QuestionData q;
+                                        q.quiz_question_id = questionObj.GetNamedString(L"quiz_question_id");
+                                        q.question_id = questionObj.GetNamedString(L"question_id");
+                                        q.question_text = questionObj.GetNamedString(L"question_text");
+                                        q.option_a = questionObj.GetNamedString(L"option_a");
+                                        q.option_b = questionObj.GetNamedString(L"option_b");
+                                        q.option_c = questionObj.GetNamedString(L"option_c");
+                                        q.option_d = questionObj.GetNamedString(L"option_d");
+                                        q.difficulty_level = questionObj.GetNamedString(L"difficulty_level");
+                                        q.points = static_cast<int>(questionObj.GetNamedNumber(L"points"));
+                                        q.order_num = static_cast<int>(questionObj.GetNamedNumber(L"order_num"));
+
+                                        questions.push_back(q);
+                                    }
+
+                                    if (OnQuizQuestionsLoaded)
+                                    {
+                                        OnQuizQuestionsLoaded(true, questions);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizQuestionsLoaded)
+                                    {
+                                        OnQuizQuestionsLoaded(false, std::vector<QuestionData>());
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnQuizQuestionsLoaded)
+                            {
+                                OnQuizQuestionsLoaded(false, std::vector<QuestionData>());
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizQuestionsLoaded)
+                        {
+                            OnQuizQuestionsLoaded(false, std::vector<QuestionData>());
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizQuestionsLoaded)
+            {
+                OnQuizQuestionsLoaded(false, std::vector<QuestionData>());
+            }
+        }
+    }
+
+    void SupabaseClient::SubmitQuizAttempt(
+        hstring const &studentId,
+        hstring const &quizId,
+        hstring const &answersJson,
+        int timeSpentSeconds)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            // Parse answersJson and convert to JSONB
+            auto answersArray = JsonArray::Parse(answersJson);
+
+            JsonObject params;
+            params.Insert(L"input_student_id", JsonValue::CreateStringValue(studentId));
+            params.Insert(L"input_quiz_id", JsonValue::CreateStringValue(quizId));
+            params.Insert(L"input_answers", answersArray);
+            params.Insert(L"input_time_spent_seconds", JsonValue::CreateNumberValue(static_cast<double>(timeSpentSeconds)));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/submit_quiz_attempt");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto resultArray = JsonArray::Parse(content);
+
+                                    if (resultArray.Size() > 0)
+                                    {
+                                        auto resultObj = resultArray.GetObjectAt(0);
+                                        AttemptResult result;
+                                        result.success = resultObj.GetNamedBoolean(L"success", false);
+                                        result.attempt_id = resultObj.GetNamedString(L"attempt_id", L"");
+                                        result.score = static_cast<int>(resultObj.GetNamedNumber(L"score", 0.0));
+                                        result.total_points = static_cast<int>(resultObj.GetNamedNumber(L"total_points", 0.0));
+                                        result.correct_count = static_cast<int>(resultObj.GetNamedNumber(L"correct_count", 0.0));
+                                        result.incorrect_count = static_cast<int>(resultObj.GetNamedNumber(L"incorrect_count", 0.0));
+                                        result.message = resultObj.GetNamedString(L"message", L"");
+
+                                        if (OnAttemptSubmitted)
+                                        {
+                                            OnAttemptSubmitted(result);
+                                        }
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnAttemptSubmitted)
+                                    {
+                                        AttemptResult result;
+                                        result.success = false;
+                                        result.message = L"Failed to parse response";
+                                        OnAttemptSubmitted(result);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnAttemptSubmitted)
+                            {
+                                AttemptResult result;
+                                result.success = false;
+                                result.message = L"HTTP error";
+                                OnAttemptSubmitted(result);
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnAttemptSubmitted)
+                        {
+                            AttemptResult result;
+                            result.success = false;
+                            result.message = L"Request failed";
+                            OnAttemptSubmitted(result);
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnAttemptSubmitted)
+            {
+                AttemptResult result;
+                result.success = false;
+                result.message = L"Connection error";
+                OnAttemptSubmitted(result);
+            }
+        }
+    }
+
+    void SupabaseClient::GetStudentQuizzes(hstring const &studentId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"input_student_id", JsonValue::CreateStringValue(studentId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_student_quizzes");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto quizzesArray = JsonArray::Parse(content);
+
+                                    std::vector<QuizData> quizzes;
+                                    for (uint32_t i = 0; i < quizzesArray.Size(); ++i)
+                                    {
+                                        auto quizObj = quizzesArray.GetObjectAt(i);
+                                        QuizData q;
+                                        q.quiz_id = quizObj.GetNamedString(L"quiz_id");
+                                        q.quiz_title = quizObj.GetNamedString(L"quiz_title");
+                                        q.time_limit_minutes = static_cast<int>(quizObj.GetNamedNumber(L"time_limit_minutes"));
+                                        q.total_points = static_cast<int>(quizObj.GetNamedNumber(L"total_points"));
+                                        q.max_attempts = quizObj.GetNamedString(L"max_attempts");
+                                        q.attempts_used = static_cast<int>(quizObj.GetNamedNumber(L"attempts_used"));
+                                        q.result_visibility = quizObj.GetNamedString(L"result_visibility");
+
+                                        quizzes.push_back(q);
+                                    }
+
+                                    if (OnStudentQuizzesLoaded)
+                                    {
+                                        OnStudentQuizzesLoaded(true, quizzes);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnStudentQuizzesLoaded)
+                                    {
+                                        OnStudentQuizzesLoaded(false, std::vector<QuizData>());
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnStudentQuizzesLoaded)
+                            {
+                                OnStudentQuizzesLoaded(false, std::vector<QuizData>());
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnStudentQuizzesLoaded)
+                        {
+                            OnStudentQuizzesLoaded(false, std::vector<QuizData>());
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnStudentQuizzesLoaded)
+            {
+                OnStudentQuizzesLoaded(false, std::vector<QuizData>());
+            }
+        }
+    }
+
+    void SupabaseClient::GetAttemptResults(hstring const &studentId, hstring const &quizId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"input_student_id", JsonValue::CreateStringValue(studentId));
+            params.Insert(L"input_quiz_id", JsonValue::CreateStringValue(quizId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_attempt_results");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto attemptsArray = JsonArray::Parse(content);
+
+                                    std::vector<AttemptData> attempts;
+                                    for (uint32_t i = 0; i < attemptsArray.Size(); ++i)
+                                    {
+                                        auto attemptObj = attemptsArray.GetObjectAt(i);
+                                        AttemptData a;
+                                        a.attempt_id = attemptObj.GetNamedString(L"attempt_id");
+                                        a.attempt_number = static_cast<int>(attemptObj.GetNamedNumber(L"attempt_number"));
+                                        a.score = static_cast<int>(attemptObj.GetNamedNumber(L"score"));
+                                        a.total_points = static_cast<int>(attemptObj.GetNamedNumber(L"total_points"));
+                                        a.correct_count = static_cast<int>(attemptObj.GetNamedNumber(L"correct_count"));
+                                        a.incorrect_count = static_cast<int>(attemptObj.GetNamedNumber(L"incorrect_count"));
+
+                                        attempts.push_back(a);
+                                    }
+
+                                    if (OnAttemptResultsLoaded)
+                                    {
+                                        OnAttemptResultsLoaded(true, attempts);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnAttemptResultsLoaded)
+                                    {
+                                        OnAttemptResultsLoaded(false, std::vector<AttemptData>());
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnAttemptResultsLoaded)
+                            {
+                                OnAttemptResultsLoaded(false, std::vector<AttemptData>());
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnAttemptResultsLoaded)
+                        {
+                            OnAttemptResultsLoaded(false, std::vector<AttemptData>());
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnAttemptResultsLoaded)
+            {
+                OnAttemptResultsLoaded(false, std::vector<AttemptData>());
+            }
+        }
+    }
+
+    void SupabaseClient::GetAttemptDetailsWithAnswers(hstring const &attemptId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"input_attempt_id", JsonValue::CreateStringValue(attemptId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_attempt_details_with_answers");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto answersArray = JsonArray::Parse(content);
+
+                                    std::vector<AnswerDetail> answers;
+                                    for (uint32_t i = 0; i < answersArray.Size(); ++i)
+                                    {
+                                        auto answerObj = answersArray.GetObjectAt(i);
+                                        AnswerDetail a;
+                                        a.question_id = answerObj.GetNamedString(L"question_id");
+                                        a.question_text = answerObj.GetNamedString(L"question_text");
+                                        a.selected_option = answerObj.GetNamedString(L"selected_option", L"");
+                                        a.correct_option = answerObj.GetNamedString(L"correct_option");
+                                        a.is_correct = answerObj.GetNamedBoolean(L"is_correct", false);
+                                        a.points_earned = static_cast<int>(answerObj.GetNamedNumber(L"points_earned", 0.0));
+                                        a.total_possible_points = static_cast<int>(answerObj.GetNamedNumber(L"total_possible_points", 0.0));
+
+                                        answers.push_back(a);
+                                    }
+
+                                    if (OnAttemptDetailsLoaded)
+                                    {
+                                        OnAttemptDetailsLoaded(true, answers);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnAttemptDetailsLoaded)
+                                    {
+                                        OnAttemptDetailsLoaded(false, std::vector<AnswerDetail>());
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnAttemptDetailsLoaded)
+                            {
+                                OnAttemptDetailsLoaded(false, std::vector<AnswerDetail>());
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnAttemptDetailsLoaded)
+                        {
+                            OnAttemptDetailsLoaded(false, std::vector<AnswerDetail>());
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnAttemptDetailsLoaded)
+            {
+                OnAttemptDetailsLoaded(false, std::vector<AnswerDetail>());
+            }
+        }
+    }
+
+    void SupabaseClient::GetQuizAttemptsReport(hstring const &quizId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"input_quiz_id", JsonValue::CreateStringValue(quizId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_quiz_attempts_report");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto content = readOp.GetResults();
+                                    auto reportsArray = JsonArray::Parse(content);
+
+                                    std::vector<AttemptReportRow> reports;
+                                    for (uint32_t i = 0; i < reportsArray.Size(); ++i)
+                                    {
+                                        auto reportObj = reportsArray.GetObjectAt(i);
+                                        AttemptReportRow r;
+                                        r.student_id = reportObj.GetNamedString(L"student_id");
+                                        r.username = reportObj.GetNamedString(L"username");
+                                        r.attempt_number = static_cast<int>(reportObj.GetNamedNumber(L"attempt_number"));
+                                        r.score = static_cast<int>(reportObj.GetNamedNumber(L"score"));
+                                        r.total_points = static_cast<int>(reportObj.GetNamedNumber(L"total_points"));
+                                        r.correct_count = static_cast<int>(reportObj.GetNamedNumber(L"correct_count"));
+                                        r.incorrect_count = static_cast<int>(reportObj.GetNamedNumber(L"incorrect_count"));
+                                        r.time_spent_seconds = static_cast<int>(reportObj.GetNamedNumber(L"time_spent_seconds", 0.0));
+
+                                        reports.push_back(r);
+                                    }
+
+                                    if (OnQuizReportLoaded)
+                                    {
+                                        OnQuizReportLoaded(true, reports);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnQuizReportLoaded)
+                                    {
+                                        OnQuizReportLoaded(false, std::vector<AttemptReportRow>());
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnQuizReportLoaded)
+                            {
+                                OnQuizReportLoaded(false, std::vector<AttemptReportRow>());
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnQuizReportLoaded)
+                        {
+                            OnQuizReportLoaded(false, std::vector<AttemptReportRow>());
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnQuizReportLoaded)
+            {
+                OnQuizReportLoaded(false, std::vector<AttemptReportRow>());
+            }
+        }
+    }
+
+    void SupabaseClient::GetQuizReportCsv(hstring const &quizId)
+    {
+        try
+        {
+            auto dispatcher = DispatcherQueue::GetForCurrentThread();
+
+            JsonObject params;
+            params.Insert(L"input_quiz_id", JsonValue::CreateStringValue(quizId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_quiz_attempts_report");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Headers().Insert(L"Accept", L"text/csv");
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            m_httpClient.SendRequestAsync(request).Completed([this, dispatcher](auto const &asyncOp, auto)
+                                                             {
+                try
+                {
+                    auto response = asyncOp.GetResults();
+                    if (response.StatusCode() == HttpStatusCode::Ok)
+                    {
+                        response.Content().ReadAsStringAsync().Completed([this, dispatcher](auto const &readOp, auto)
+                        {
+                            dispatcher.TryEnqueue([this, readOp]()
+                            {
+                                try
+                                {
+                                    auto csvContent = readOp.GetResults();
+                                    if (OnCsvReportLoaded)
+                                    {
+                                        OnCsvReportLoaded(true, csvContent);
+                                    }
+                                }
+                                catch (...)
+                                {
+                                    if (OnCsvReportLoaded)
+                                    {
+                                        OnCsvReportLoaded(false, L"");
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else
+                    {
+                        dispatcher.TryEnqueue([this]()
+                        {
+                            if (OnCsvReportLoaded)
+                            {
+                                OnCsvReportLoaded(false, L"");
+                            }
+                        });
+                    }
+                }
+                catch (...)
+                {
+                    dispatcher.TryEnqueue([this]()
+                    {
+                        if (OnCsvReportLoaded)
+                        {
+                            OnCsvReportLoaded(false, L"");
+                        }
+                    });
+                } });
+        }
+        catch (...)
+        {
+            if (OnCsvReportLoaded)
+            {
+                OnCsvReportLoaded(false, L"");
             }
         }
     }

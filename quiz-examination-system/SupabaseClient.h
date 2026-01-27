@@ -73,6 +73,97 @@ namespace quiz_examination_system
         std::function<void(bool, hstring, int)> OnQuizDeleteResult; // success, message, attempt_count
         std::function<void(bool, int, hstring)> OnQuizPurgeResult;  // success, attempts_deleted, message
 
+        // --- UC04 Take Quiz & UC05 Grading ---
+        void GetQuizQuestions(hstring const &quizId);
+        void SubmitQuizAttempt(
+            hstring const &studentId,
+            hstring const &quizId,
+            hstring const &answersJson,
+            int timeSpentSeconds);
+        void GetStudentQuizzes(hstring const &studentId);
+        void GetAttemptResults(hstring const &studentId, hstring const &quizId);
+        void GetAttemptDetailsWithAnswers(hstring const &attemptId);
+        void GetQuizAttemptsReport(hstring const &quizId);
+        void GetQuizReportCsv(hstring const &quizId);
+
+        // Callbacks for UC04/UC05
+        struct QuestionData
+        {
+            hstring quiz_question_id;
+            hstring question_id;
+            hstring question_text;
+            hstring option_a;
+            hstring option_b;
+            hstring option_c;
+            hstring option_d;
+            hstring difficulty_level;
+            int points;
+            int order_num;
+        };
+
+        struct QuizData
+        {
+            hstring quiz_id;
+            hstring quiz_title;
+            int time_limit_minutes;
+            int total_points;
+            hstring max_attempts;
+            int attempts_used;
+            hstring result_visibility;
+        };
+
+        struct AttemptData
+        {
+            hstring attempt_id;
+            int attempt_number;
+            int score;
+            int total_points;
+            int correct_count;
+            int incorrect_count;
+        };
+
+        struct AnswerDetail
+        {
+            hstring question_id;
+            hstring question_text;
+            hstring selected_option;
+            hstring correct_option;
+            bool is_correct;
+            int points_earned;
+            int total_possible_points;
+        };
+
+        struct AttemptReportRow
+        {
+            hstring student_id;
+            hstring username;
+            int attempt_number;
+            int score;
+            int total_points;
+            int correct_count;
+            int incorrect_count;
+            int time_spent_seconds;
+        };
+
+        struct AttemptResult
+        {
+            bool success;
+            hstring attempt_id;
+            int score;
+            int total_points;
+            int correct_count;
+            int incorrect_count;
+            hstring message;
+        };
+
+        std::function<void(bool, std::vector<QuestionData>)> OnQuizQuestionsLoaded;  // success, questions
+        std::function<void(bool, std::vector<QuizData>)> OnStudentQuizzesLoaded;     // success, quizzes
+        std::function<void(bool, std::vector<AttemptData>)> OnAttemptResultsLoaded;  // success, attempts
+        std::function<void(bool, std::vector<AnswerDetail>)> OnAttemptDetailsLoaded; // success, answer details
+        std::function<void(bool, std::vector<AttemptReportRow>)> OnQuizReportLoaded; // success, report rows
+        std::function<void(AttemptResult)> OnAttemptSubmitted;                       // result
+        std::function<void(bool, hstring)> OnCsvReportLoaded;                        // success, csv_content
+
         void SetCurrentUserRole(hstring const &role) { m_currentUserRole = role; }
 
     private:

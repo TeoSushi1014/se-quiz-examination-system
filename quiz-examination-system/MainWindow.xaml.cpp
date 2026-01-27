@@ -112,6 +112,11 @@ namespace winrt::quiz_examination_system::implementation
             WelcomeText().Text(hstring(L"Welcome, ") + m_currentUser);
             RoleText().Text(hstring(L"(") + m_currentRole + hstring(L")"));
 
+            if (DashboardNav().MenuItems().Size() > 0)
+            {
+                DashboardNav().SelectedItem(DashboardNav().MenuItems().GetAt(0));
+            }
+
             if (m_currentRole == L"Administrator")
             {
                 TypeName adminType;
