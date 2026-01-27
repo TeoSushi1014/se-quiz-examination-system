@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SupabaseClient.h"
+#include "PasswordHasher.h"
 #include <winrt/Windows.Web.Http.Filters.h>
 #include <winrt/Microsoft.UI.Dispatching.h>
 
@@ -23,7 +24,7 @@ namespace quiz_examination_system
         try
         {
             auto dispatcher = DispatcherQueue::GetForCurrentThread();
-            Uri uri(m_projectUrl + L"/rest/v1/users?select=id,username,password_hash,role&username=eq." + username);
+            Uri uri(m_projectUrl + L"/rest/v1/users?select=id,username,password_hash,role,failed_login_count,locked_until&username=eq." + username);
             HttpRequestMessage request(HttpMethod::Get(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
             request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
@@ -37,7 +38,7 @@ namespace quiz_examination_system
                     {
                         response.Content().ReadAsStringAsync().Completed([this, username, password, dispatcher](auto const &readOp, auto)
                         {
-                            dispatcher.TryEnqueue([=]()
+                            dispatcher.TryEnqueue([this, username, password, readOp]()
                             {
                                 try
                                 {
@@ -50,8 +51,25 @@ namespace quiz_examination_system
                                         auto userId = user.GetNamedString(L"id");
                                         auto storedHash = user.GetNamedString(L"password_hash");
                                         auto role = user.GetNamedString(L"role", L"STUDENT");
+                                        auto failedCount = static_cast<int>(user.GetNamedNumber(L"failed_login_count", 0));
                                         
-                                        if (storedHash == password)
+                                        hstring lockedUntilStr;
+                                        try {
+                                            lockedUntilStr = user.GetNamedString(L"locked_until", L"");
+                                        } catch (...) {
+                                            lockedUntilStr = L"";
+                                        }
+                                        
+                                        if (!lockedUntilStr.empty())
+                                        {
+                                            if (OnLoginFailed)
+                                            {
+                                                OnLoginFailed(L"Account is locked. Please try again later.");
+                                            }
+                                            return;
+                                        }
+
+                                        if (PasswordHasher::VerifyPassword(password, storedHash))
                                         {
                                             hstring displayRole = (role == L"ADMIN") ? L"Administrator" : 
                                                                  (role == L"TEACHER") ? L"Lecturer" : L"Student";
@@ -89,29 +107,18 @@ namespace quiz_examination_system
                     else
                     {
                         auto statusCode = response.StatusCode();
-                        response.Content().ReadAsStringAsync().Completed([=](auto const &errOp, auto)
+                        if (OnLoginFailed)
                         {
-                            dispatcher.TryEnqueue([=]()
-                            {
-                                if (OnLoginFailed)
-                                {
-                                    hstring body;
-                                    try { body = errOp.GetResults(); } catch (...) { body = L""; }
-                                    OnLoginFailed(hstring(L"API error: ") + to_hstring(static_cast<int>(statusCode)) + hstring(L" ") + body);
-                                }
-                            });
-                        });
+                            OnLoginFailed(hstring(L"API error: ") + to_hstring(static_cast<int>(statusCode)));
+                        }
                     }
                 }
                 catch (...)
                 {
-                    dispatcher.TryEnqueue([=]()
+                    if (OnLoginFailed)
                     {
-                        if (OnLoginFailed)
-                        {
-                            OnLoginFailed(L"Request error");
-                        }
-                    });
+                        OnLoginFailed(L"Request error");
+                    }
                 } });
         }
         catch (...)
