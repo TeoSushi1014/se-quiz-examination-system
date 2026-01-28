@@ -9,59 +9,69 @@
     mc:Ignorable="d"
     Background="Transparent">
 
-    <NavigationView x:Name="AdminNavView" 
-                   IsBackButtonVisible="Collapsed" 
-                   IsSettingsVisible="False" 
-                   PaneDisplayMode="Left"
-                   SelectionChanged="AdminNav_SelectionChanged">
-        
-        <NavigationView.MenuItems>
-            <NavigationViewItem Content="Dashboard" Tag="dashboard">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE80F;"/>
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            
-            <NavigationViewItem Content="Users" Tag="users">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE716;"/>
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            
-            <NavigationViewItem Content="All quizzes" Tag="quizzes">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE8F1;"/>
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            
-            <NavigationViewItem Content="Reports" Tag="reports">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE9F9;"/>
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            
-            <NavigationViewItem Content="Audit logs" Tag="logs">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE7C3;"/>
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.MenuItems>
+    <ScrollViewer Padding="32,24,32,24">
+        <StackPanel Spacing="24">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Administrator dashboard" FontSize="28" FontWeight="SemiBold"/>
+                <TextBlock Text="Manage users, quizzes, view reports and monitor system activities" 
+                           FontSize="14" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
 
-        <Grid>
-            <Frame x:Name="ContentFrame" Padding="24"/>
-            
-            <InfoBar x:Name="ActionMessage" 
-                     IsOpen="False" 
-                     Severity="Informational" 
-                     IsClosable="True"
-                     VerticalAlignment="Bottom"
-                     HorizontalAlignment="Right"
-                     MaxWidth="400"
-                     Margin="24">
-                <InfoBar.Shadow>
-                    <ThemeShadow />
-                </InfoBar.Shadow>
-            </InfoBar>
-        </Grid>
-    </NavigationView>
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Column="0" Grid.Row="0" 
+                        Style="{StaticResource CardStyle}"
+                        MinHeight="160">
+                    <StackPanel Spacing="8">
+                        <FontIcon Glyph="&#xE716;" FontSize="32" Foreground="{StaticResource AdminBadgeBrush}"/>
+                        <TextBlock Text="User management" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock Text="Create, edit and manage user accounts" 
+                                   FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Grid.Row="0" 
+                        Style="{StaticResource CardStyle}"
+                        MinHeight="160">
+                    <StackPanel Spacing="8">
+                        <FontIcon Glyph="&#xE8F1;" FontSize="32" Foreground="{StaticResource AdminBadgeBrush}"/>
+                        <TextBlock Text="Quiz management" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock Text="View and permanently delete quizzes with related data" 
+                                   FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="0" Grid.Row="1" 
+                        Style="{StaticResource CardStyle}"
+                        MinHeight="160">
+                    <StackPanel Spacing="8">
+                        <FontIcon Glyph="&#xE9F9;" FontSize="32" Foreground="{StaticResource AdminBadgeBrush}"/>
+                        <TextBlock Text="Reports and analytics" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock Text="View exam results and export CSV reports" 
+                                   FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Grid.Row="1" 
+                        Style="{StaticResource CardStyle}"
+                        MinHeight="160">
+                    <StackPanel Spacing="8">
+                        <FontIcon Glyph="&#xE7C3;" FontSize="32" Foreground="{StaticResource AdminBadgeBrush}"/>
+                        <TextBlock Text="Audit logs" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock Text="Monitor and view system activity history" 
+                                   FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
 </Page>
