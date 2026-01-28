@@ -107,6 +107,10 @@
                                                Orientation="Horizontal" 
                                                Spacing="8"
                                                VerticalAlignment="Center">
+                                        <Button Content="Assign" 
+                                               Tag="{x:Bind QuizId, Mode=OneWay}"
+                                               Click="AssignQuiz_Click"
+                                               Padding="12,6"/>
                                         <Button Content="Edit" 
                                                Tag="{x:Bind QuizId, Mode=OneWay}"
                                                Click="EditQuiz_Click"
@@ -254,6 +258,88 @@
                     </StackPanel>
                 </Grid>
             </ScrollViewer>
+        </ContentDialog>
+
+        <!-- Assign Quiz Dialog -->
+        <ContentDialog x:Name="AssignQuizDialog"
+                      Title="Assign quiz to students"
+                      PrimaryButtonText="Assign"
+                      CloseButtonText="Cancel"
+                      DefaultButton="Primary"
+                      MinWidth="600"
+                      MaxWidth="700">
+            <StackPanel Spacing="16" Padding="0,16,0,0">
+                <TextBlock x:Name="AssignQuizTitle" 
+                          Text="Quiz: " 
+                          FontWeight="SemiBold"
+                          FontSize="16"/>
+                
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <DatePicker x:Name="AssignStartDate" 
+                               Header="Start date"
+                               HorizontalAlignment="Stretch"/>
+                    
+                    <TimePicker x:Name="AssignStartTime" 
+                               Header="Start time"
+                               Grid.Column="1"
+                               HorizontalAlignment="Stretch"
+                               ClockIdentifier="24HourClock"/>
+                </Grid>
+                
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <DatePicker x:Name="AssignEndDate" 
+                               Header="End date"
+                               HorizontalAlignment="Stretch"/>
+                    
+                    <TimePicker x:Name="AssignEndTime" 
+                               Header="End time"
+                               Grid.Column="1"
+                               HorizontalAlignment="Stretch"
+                               ClockIdentifier="24HourClock"/>
+                </Grid>
+                
+                <TextBlock Text="Select students" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Select All" Click="SelectAllStudents_Click"/>
+                    <Button Content="Clear All" Click="ClearAllStudents_Click"/>
+                </StackPanel>
+                
+                <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                       BorderThickness="1"
+                       CornerRadius="4"
+                       Height="300">
+                    <ScrollViewer>
+                        <ListView x:Name="StudentSelectionList" 
+                                SelectionMode="Multiple">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Padding="8,4" Spacing="12">
+                                        <FontIcon Glyph="&#xE77B;" FontSize="16"/>
+                                        <TextBlock Text="{Binding Username}" 
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+                </Border>
+                
+                <TextBlock x:Name="AssignSelectedCount" 
+                          Text="0 students selected"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          FontSize="12"/>
+            </StackPanel>
         </ContentDialog>
     </Grid>
 </Page>

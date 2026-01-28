@@ -6,9 +6,12 @@
 #include "PageHelper.h"
 #include <winrt/Windows.Web.Http.h>
 #include <winrt/Windows.Storage.Streams.h>
+#include <winrt/Windows.Foundation.Collections.h>
 #include <algorithm>
 #include <limits>
 #include <cmath>
+#include <chrono>
+#include <ctime>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -480,5 +483,225 @@ namespace winrt::quiz_examination_system::implementation
                 }
             }
         }
+    }
+
+    winrt::fire_and_forget QuizManagementPage::LoadStudents()
+    {
+        auto lifetime = get_strong();
+
+        try
+        {
+            OutputDebugStringW(L"[LoadStudents] Fetching students...\n");
+
+            hstring endpoint = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/users?select=id,username&role=eq.Student&status=eq.Active&order=username";
+
+            Windows::Web::Http::HttpClient httpClient;
+            Windows::Web::Http::HttpRequestMessage request(Windows::Web::Http::HttpMethod::Get(), Uri(endpoint));
+            request.Headers().Insert(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+            request.Headers().Insert(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+
+            auto response = co_await httpClient.SendRequestAsync(request);
+            auto responseJson = co_await response.Content().ReadAsStringAsync();
+
+            OutputDebugStringW((L"[LoadStudents] Response: " + responseJson + L"\n").c_str());
+
+            auto studentsArray = Windows::Data::Json::JsonArray::Parse(responseJson);
+
+            m_students.clear();
+            for (uint32_t i = 0; i < studentsArray.Size(); ++i)
+            {
+                auto studentObj = studentsArray.GetObjectAt(i);
+                StudentInfo info;
+                info.Id = studentObj.GetNamedString(L"id");
+                info.Username = studentObj.GetNamedString(L"username");
+                m_students.push_back(info);
+            }
+
+            OutputDebugStringW((L"[LoadStudents] Loaded " + std::to_wstring(m_students.size()) + L" students\n").c_str());
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[LoadStudents] Error: " + std::wstring(ex.message()) + L"\n").c_str());
+        }
+    }
+
+    winrt::fire_and_forget QuizManagementPage::AssignQuiz_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &)
+    {
+        auto lifetime = get_strong();
+
+        auto btn = sender.as<Button>();
+        auto quizId = unbox_value<hstring>(btn.Tag());
+
+        // Find quiz title
+        hstring quizTitle = L"";
+        for (uint32_t i = 0; i < m_quizzes.Size(); ++i)
+        {
+            auto quiz = m_quizzes.GetAt(i);
+            if (quiz.QuizId() == quizId)
+            {
+                quizTitle = quiz.Title();
+                break;
+            }
+        }
+
+        m_currentAssignQuizId = quizId;
+        AssignQuizTitle().Text(L"Quiz: " + quizTitle);
+
+        // Load students
+        co_await LoadStudents();
+
+        // Populate student list
+        StudentSelectionList().Items().Clear();
+        for (const auto &student : m_students)
+        {
+            Windows::Foundation::Collections::PropertySet item;
+            item.Insert(L"Id", box_value(student.Id));
+            item.Insert(L"Username", box_value(student.Username));
+            StudentSelectionList().Items().Append(item);
+        }
+
+        // Set default dates (now to 7 days from now)
+        auto now = winrt::clock::now();
+        auto nowTime = winrt::clock::to_time_t(now);
+
+        // Convert to local time
+        std::tm localTm;
+        localtime_s(&localTm, &nowTime);
+
+        Windows::Foundation::DateTime startDateTime = now;
+        Windows::Foundation::DateTime endDateTime = now + std::chrono::hours(24 * 7);
+
+        AssignStartDate().Date(startDateTime);
+        AssignEndDate().Date(endDateTime);
+        AssignStartTime().Time(Windows::Foundation::TimeSpan{std::chrono::hours(localTm.tm_hour).count() * 10000000LL + std::chrono::minutes(localTm.tm_min).count() * 10000000LL / 60});
+        AssignEndTime().Time(Windows::Foundation::TimeSpan{std::chrono::hours(23).count() * 10000000LL + std::chrono::minutes(59).count() * 10000000LL / 60});
+
+        AssignSelectedCount().Text(L"0 students selected");
+
+        // Register selection changed handler
+        auto selectionChangedToken = StudentSelectionList().SelectionChanged([this](auto const &, auto const &)
+                                                                             {
+            auto count = StudentSelectionList().SelectedItems().Size();
+            AssignSelectedCount().Text(to_hstring(count) + L" students selected"); });
+
+        auto dialogResult = co_await AssignQuizDialog().ShowAsync();
+
+        // Unregister handler
+        StudentSelectionList().SelectionChanged(selectionChangedToken);
+
+        if (dialogResult == ContentDialogResult::Primary)
+        {
+            auto selectedItems = StudentSelectionList().SelectedItems();
+
+            if (selectedItems.Size() == 0)
+            {
+                ShowMessage(L"Please select at least one student", InfoBarSeverity::Warning);
+                co_return;
+            }
+
+            // Get selected dates and times
+            auto startDate = AssignStartDate().Date();
+            auto endDate = AssignEndDate().Date();
+            auto startTime = AssignStartTime().Time();
+            auto endTime = AssignEndTime().Time();
+
+            // Combine date and time
+            auto startDateVal = startDate.Value();
+            auto endDateVal = endDate.Value();
+
+            // Create timestamps
+            std::wstring startTimestamp = L"";
+            std::wstring endTimestamp = L"";
+
+            // Format dates
+            {
+                auto startTimeT = winrt::clock::to_time_t(startDateVal);
+                std::tm startTm;
+                gmtime_s(&startTm, &startTimeT);
+
+                int startHours = static_cast<int>(startTime.count() / 10000000LL / 3600);
+                int startMinutes = static_cast<int>((startTime.count() / 10000000LL % 3600) / 60);
+
+                wchar_t buf[64];
+                swprintf_s(buf, L"%04d-%02d-%02dT%02d:%02d:00",
+                           startTm.tm_year + 1900, startTm.tm_mon + 1, startTm.tm_mday,
+                           startHours, startMinutes);
+                startTimestamp = buf;
+
+                auto endTimeT = winrt::clock::to_time_t(endDateVal);
+                std::tm endTm;
+                gmtime_s(&endTm, &endTimeT);
+
+                int endHours = static_cast<int>(endTime.count() / 10000000LL / 3600);
+                int endMinutes = static_cast<int>((endTime.count() / 10000000LL % 3600) / 60);
+
+                swprintf_s(buf, L"%04d-%02d-%02dT%02d:%02d:00",
+                           endTm.tm_year + 1900, endTm.tm_mon + 1, endTm.tm_mday,
+                           endHours, endMinutes);
+                endTimestamp = buf;
+            }
+
+            OutputDebugStringW((L"[AssignQuiz] Start: " + startTimestamp + L", End: " + endTimestamp + L"\n").c_str());
+
+            // Build student IDs array
+            Windows::Data::Json::JsonArray studentIdsArray;
+            for (uint32_t i = 0; i < selectedItems.Size(); ++i)
+            {
+                auto item = selectedItems.GetAt(i).as<Windows::Foundation::Collections::PropertySet>();
+                auto studentId = unbox_value<hstring>(item.Lookup(L"Id"));
+                studentIdsArray.Append(Windows::Data::Json::JsonValue::CreateStringValue(studentId));
+            }
+
+            // Call RPC
+            try
+            {
+                Windows::Data::Json::JsonObject rpcParams;
+                rpcParams.Insert(L"p_quiz_id", Windows::Data::Json::JsonValue::CreateStringValue(m_currentAssignQuizId));
+                rpcParams.Insert(L"p_student_ids", studentIdsArray);
+                rpcParams.Insert(L"p_start_time", Windows::Data::Json::JsonValue::CreateStringValue(hstring(startTimestamp)));
+                rpcParams.Insert(L"p_end_time", Windows::Data::Json::JsonValue::CreateStringValue(hstring(endTimestamp)));
+
+                Uri uri(L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/rpc/assign_quiz");
+                Windows::Web::Http::HttpRequestMessage request(Windows::Web::Http::HttpMethod::Post(), uri);
+                request.Headers().Insert(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+                request.Headers().Insert(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+                request.Content(Windows::Web::Http::HttpStringContent(rpcParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+                Windows::Web::Http::HttpClient httpClient;
+                auto response = co_await httpClient.SendRequestAsync(request);
+                auto responseJson = co_await response.Content().ReadAsStringAsync();
+
+                OutputDebugStringW((L"[AssignQuiz] Response: " + responseJson + L"\n").c_str());
+
+                auto resultObj = Windows::Data::Json::JsonObject::Parse(responseJson);
+                bool success = resultObj.GetNamedBoolean(L"success", false);
+
+                if (success)
+                {
+                    auto message = resultObj.GetNamedString(L"message", L"Quiz assigned successfully");
+                    ShowMessage(message, InfoBarSeverity::Success);
+                }
+                else
+                {
+                    auto errorMsg = resultObj.GetNamedString(L"message", L"Failed to assign quiz");
+                    ShowMessage(errorMsg, InfoBarSeverity::Error);
+                }
+            }
+            catch (hresult_error const &ex)
+            {
+                OutputDebugStringW((L"[AssignQuiz] Exception: " + std::wstring(ex.message()) + L"\n").c_str());
+                ShowMessage(ex.message(), InfoBarSeverity::Error);
+            }
+        }
+    }
+
+    void QuizManagementPage::SelectAllStudents_Click(Windows::Foundation::IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &)
+    {
+        StudentSelectionList().SelectAll();
+    }
+
+    void QuizManagementPage::ClearAllStudents_Click(Windows::Foundation::IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &)
+    {
+        StudentSelectionList().SelectedItems().Clear();
     }
 }
