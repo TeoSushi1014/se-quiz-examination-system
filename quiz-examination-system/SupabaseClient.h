@@ -32,7 +32,6 @@ namespace quiz_examination_system
         void GetQuestionsByTeacher(hstring const &createdBy);
         void DeleteQuestion(hstring const &questionId);
 
-        // --- Question Bank Management (UC02) ---
         void CreateQuestionValidated(
             hstring const &id,
             hstring const &teacherId,
@@ -44,7 +43,6 @@ namespace quiz_examination_system
 
         void DeleteQuestionSafe(hstring const &questionId);
 
-        // --- Quiz Management (UC08) ---
         void DeleteQuizAsTeacher(hstring const &quizId, hstring const &teacherId);
         void PurgeQuizAsAdmin(hstring const &quizId, hstring const &adminId);
 
@@ -65,15 +63,12 @@ namespace quiz_examination_system
         std::function<void(hstring)> OnQuizCreated;
         std::function<void(hstring)> OnQuizCreationFailed;
 
-        // --- UC02 Question Bank Callbacks ---
         std::function<void(bool, hstring)> OnQuestionValidatedCreated;
         std::function<void(hstring, hstring, int)> OnQuestionDeleteResult; // status, message, quiz_count
 
-        // --- UC08 Quiz Management Callbacks ---
         std::function<void(bool, hstring, int)> OnQuizDeleteResult; // success, message, attempt_count
         std::function<void(bool, int, hstring)> OnQuizPurgeResult;  // success, attempts_deleted, message
 
-        // --- UC04 Take Quiz & UC05 Grading ---
         void GetQuizQuestions(hstring const &quizId);
         void SubmitQuizAttempt(
             hstring const &studentId,
@@ -86,7 +81,6 @@ namespace quiz_examination_system
         void GetQuizAttemptsReport(hstring const &quizId);
         void GetQuizReportCsv(hstring const &quizId);
 
-        // Callbacks for UC04/UC05
         struct QuestionData
         {
             hstring quiz_question_id;

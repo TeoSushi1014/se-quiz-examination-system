@@ -120,6 +120,8 @@ namespace quiz_examination_system
 
         IAsyncOperation<bool> UpdateUserStatusAsync(hstring const &userId, bool isActive);
 
+        IAsyncOperation<bool> UpdateUserRoleAsync(hstring const &userId, hstring const &newRole);
+
         IAsyncOperation<hstring> GetQuizAttemptsForReviewAsync(hstring const &quizId);
 
         IAsyncOperation<hstring> DeleteQuizAttemptAsync(hstring const &attemptId, hstring const &teacherId);

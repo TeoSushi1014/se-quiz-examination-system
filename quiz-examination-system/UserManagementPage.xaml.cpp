@@ -272,11 +272,26 @@ namespace winrt::quiz_examination_system::implementation
 
             try
             {
-                ShowMessage(L"Role updated to " + newRole, InfoBarSeverity::Success);
-                DispatcherQueue().TryEnqueue(Microsoft::UI::Dispatching::DispatcherQueuePriority::Normal, [lifetime]()
-                                             {
-                                                 OutputDebugStringW(L"[EditRole] Refreshing user list\n");
-                                                 lifetime->LoadUsers(); });
+                OutputDebugStringW((L"[EditRole] Updating role to: " + std::wstring(newRole) + L" for userId: " + std::wstring(userId) + L"\n").c_str());
+                
+                auto success = co_await m_supabaseClient.UpdateUserRoleAsync(userId, newRole);
+                
+                if (success)
+                {
+                    ShowMessage(L"Role updated to " + newRole, InfoBarSeverity::Success);
+                    OutputDebugStringW(L"[EditRole] Refreshing user list\n");
+                    LoadUsers();
+                    
+                    // Log the action
+                    m_supabaseClient.InsertAuditLog(L"CHANGE_ROLE", 
+                        std::wstring(SupabaseClientManager::Instance().GetCurrentUserId()),
+                        std::wstring(userId), L"users",
+                        L"Changed role to " + std::wstring(newRole));
+                }
+                else
+                {
+                    ShowMessage(L"Failed to update role", InfoBarSeverity::Error);
+                }
             }
             catch (hresult_error const &ex)
             {

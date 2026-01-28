@@ -756,6 +756,53 @@ namespace quiz_examination_system
         }
     }
 
+    IAsyncOperation<bool> SupabaseClientAsync::UpdateUserRoleAsync(hstring const &userId, hstring const &newRole)
+    {
+        try
+        {
+            OutputDebugStringW(L"[UpdateUserRole] START\n");
+            auto trimmedUserId = TrimUserId(userId);
+            OutputDebugStringW((L"[UpdateUserRole] UserId: " + trimmedUserId + L"\n").c_str());
+            OutputDebugStringW((L"[UpdateUserRole] New role: " + std::wstring(newRole) + L"\n").c_str());
+
+            JsonObject params;
+            params.Insert(L"role", JsonValue::CreateStringValue(newRole));
+
+            auto uriString = m_projectUrl + L"/rest/v1/users?id=eq." + trimmedUserId;
+            OutputDebugStringW((L"[UpdateUserRole] URI: " + uriString + L"\n").c_str());
+            OutputDebugStringW((L"[UpdateUserRole] Body: " + params.Stringify() + L"\n").c_str());
+
+            Uri uri(uriString);
+            HttpRequestMessage request(HttpMethod::Patch(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Headers().Insert(L"Prefer", L"return=minimal");
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            OutputDebugStringW(L"[UpdateUserRole] Sending PATCH request...\n");
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+            auto statusCode = response.StatusCode();
+            OutputDebugStringW((L"[UpdateUserRole] HTTP Status: " + std::to_wstring(static_cast<int>(statusCode)) + L"\n").c_str());
+
+            auto responseBody = co_await response.Content().ReadAsStringAsync();
+            OutputDebugStringW((L"[UpdateUserRole] Response: " + responseBody + L"\n").c_str());
+
+            bool success = statusCode == HttpStatusCode::NoContent || statusCode == HttpStatusCode::Ok;
+            OutputDebugStringW((L"[UpdateUserRole] Result: " + std::wstring(success ? L"SUCCESS" : L"FAILED") + L"\n").c_str());
+            co_return success;
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[UpdateUserRole] Exception: " + ex.message() + L"\n").c_str());
+            co_return false;
+        }
+        catch (...)
+        {
+            OutputDebugStringW(L"[UpdateUserRole] Unknown exception\n");
+            co_return false;
+        }
+    }
+
     IAsyncOperation<hstring> SupabaseClientAsync::GetQuizzesJsonAsync(hstring const &createdBy)
     {
         try
