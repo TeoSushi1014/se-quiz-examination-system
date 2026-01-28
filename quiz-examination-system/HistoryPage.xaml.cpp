@@ -75,13 +75,11 @@ namespace winrt::quiz_examination_system::implementation
                 auto timeSpentSeconds = static_cast<int32_t>(obj.GetNamedNumber(L"time_spent_seconds", 0));
                 auto submittedAt = obj.GetNamedString(L"submitted_at", L"");
 
-                // Format time spent
                 int minutes = timeSpentSeconds / 60;
                 int seconds = timeSpentSeconds % 60;
                 wchar_t timeStr[32];
                 swprintf_s(timeStr, L"%d:%02d", minutes, seconds);
 
-                // Format submitted date
                 std::wstring formattedDate = std::wstring(submittedAt);
                 if (formattedDate.length() > 16)
                 {
@@ -89,7 +87,6 @@ namespace winrt::quiz_examination_system::implementation
                     std::replace(formattedDate.begin(), formattedDate.end(), 'T', ' ');
                 }
 
-                // Calculate score badge color
                 double percentage = totalPoints > 0 ? (double)score / totalPoints * 100 : 0;
                 Microsoft::UI::Xaml::Media::SolidColorBrush badgeColor{nullptr};
 

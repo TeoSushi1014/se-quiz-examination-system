@@ -16,7 +16,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
             <TextBlock Text="Quiz History" Style="{StaticResource TitleTextBlockStyle}"/>
             <TextBlock Text="View your past quiz attempts and results" 
@@ -24,13 +23,10 @@
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
         </StackPanel>
 
-        <!-- Content -->
         <Grid Grid.Row="1">
-            <!-- Loading -->
             <ProgressRing x:Name="LoadingRing" IsActive="False" Width="48" Height="48" 
                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
             
-            <!-- Empty State -->
             <StackPanel x:Name="EmptyState" Visibility="Collapsed" 
                         HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
                 <FontIcon Glyph="&#xE81C;" FontSize="64" 
@@ -43,7 +39,6 @@
                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
             </StackPanel>
 
-            <!-- History List -->
             <ListView x:Name="HistoryListView" SelectionMode="None">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="local:AttemptItem">
@@ -57,7 +52,6 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Quiz Info -->
                             <StackPanel Grid.Column="0" Spacing="4">
                                 <TextBlock Text="{x:Bind QuizTitle, Mode=OneWay}" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
@@ -79,7 +73,6 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- Score -->
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" 
                                         VerticalAlignment="Center" Margin="16,0">
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}">
@@ -92,7 +85,6 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <!-- Score Badge -->
                             <Border Grid.Column="2" 
                                     Background="{x:Bind ScoreBadgeColor, Mode=OneWay}"
                                     CornerRadius="8" Padding="16,8"
@@ -112,7 +104,6 @@
             </ListView>
         </Grid>
 
-        <!-- InfoBar -->
         <InfoBar x:Name="ActionMessage" 
                  Grid.Row="1"
                  IsOpen="False" 
