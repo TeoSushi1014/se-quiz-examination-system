@@ -283,10 +283,8 @@ namespace winrt::quiz_examination_system::implementation
                     LoadUsers();
                     
                     // Log the action
-                    m_supabaseClient.InsertAuditLog(L"CHANGE_ROLE", 
-                        std::wstring(SupabaseClientManager::Instance().GetCurrentUserId()),
-                        std::wstring(userId), L"users",
-                        L"Changed role to " + std::wstring(newRole));
+                    InsertAuditLog(L"CHANGE_ROLE", L"users", userId,
+                        L"Changed role to " + newRole);
                 }
                 else
                 {
