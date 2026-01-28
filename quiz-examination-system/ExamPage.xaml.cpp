@@ -389,7 +389,7 @@ namespace winrt::quiz_examination_system::implementation
                         }
                         else
                         {
-                            Frame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
+                            Frame().Navigate(winrt::xaml_typename<quiz_examination_system::StudentDashboardPage>());
                         }
                     });
                     timer.Start(); });
@@ -436,7 +436,7 @@ namespace winrt::quiz_examination_system::implementation
             }
             else
             {
-                Frame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
+                Frame().Navigate(winrt::xaml_typename<quiz_examination_system::StudentDashboardPage>());
             }
         }
     }
