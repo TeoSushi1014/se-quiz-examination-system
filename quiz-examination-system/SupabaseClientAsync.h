@@ -128,6 +128,8 @@ namespace quiz_examination_system
 
         IAsyncOperation<hstring> ToggleResultReleaseAsync(hstring const &quizId, hstring const &teacherId, bool released);
 
+        IAsyncOperation<hstring> GetStudentHistoryAsync(hstring const &studentId);
+
         bool IsConnected() const { return m_connected; }
         hstring GetLastError() const { return m_lastError; }
 

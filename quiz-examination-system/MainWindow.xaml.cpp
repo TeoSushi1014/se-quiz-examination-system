@@ -5,6 +5,7 @@
 #include "AdminDashboardPage.xaml.h"
 #include "UserManagementPage.xaml.h"
 #include "SystemLogsPage.xaml.h"
+#include "HistoryPage.xaml.h"
 #include "SupabaseClientManager.h"
 #include "SupabaseClientAsync.h"
 #include <winrt/Windows.Data.Json.h>
@@ -180,7 +181,7 @@ namespace winrt::quiz_examination_system::implementation
             else if (tagStr == L"History")
             {
                 NavView().SelectedItem(invokedItem);
-                ContentFrame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::HistoryPage>());
             }
         }
     }

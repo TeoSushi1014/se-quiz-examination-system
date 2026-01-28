@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AttemptItem.g.h"
+#include <winrt/Microsoft.UI.Xaml.Media.h>
 
 namespace winrt::quiz_examination_system::implementation
 {
@@ -27,6 +28,13 @@ namespace winrt::quiz_examination_system::implementation
         {
             m_studentUsername = value;
             RaisePropertyChanged(L"StudentUsername");
+        }
+
+        hstring QuizTitle() { return m_quizTitle; }
+        void QuizTitle(hstring const &value)
+        {
+            m_quizTitle = value;
+            RaisePropertyChanged(L"QuizTitle");
         }
 
         int32_t AttemptNumber() { return m_attemptNumber; }
@@ -71,6 +79,13 @@ namespace winrt::quiz_examination_system::implementation
             RaisePropertyChanged(L"TimeSpentSeconds");
         }
 
+        hstring TimeSpent() { return m_timeSpent; }
+        void TimeSpent(hstring const &value)
+        {
+            m_timeSpent = value;
+            RaisePropertyChanged(L"TimeSpent");
+        }
+
         hstring Status() { return m_status; }
         void Status(hstring const &value)
         {
@@ -92,6 +107,13 @@ namespace winrt::quiz_examination_system::implementation
             RaisePropertyChanged(L"SubmittedAt");
         }
 
+        Microsoft::UI::Xaml::Media::Brush ScoreBadgeColor() { return m_scoreBadgeColor; }
+        void ScoreBadgeColor(Microsoft::UI::Xaml::Media::Brush const &value)
+        {
+            m_scoreBadgeColor = value;
+            RaisePropertyChanged(L"ScoreBadgeColor");
+        }
+
         winrt::event_token PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const &handler)
         {
             return m_propertyChanged.add(handler);
@@ -106,15 +128,18 @@ namespace winrt::quiz_examination_system::implementation
         hstring m_attemptId;
         hstring m_studentId;
         hstring m_studentUsername;
+        hstring m_quizTitle;
         int32_t m_attemptNumber{0};
         int32_t m_score{0};
         int32_t m_totalPoints{0};
         int32_t m_correctCount{0};
         int32_t m_incorrectCount{0};
         int32_t m_timeSpentSeconds{0};
+        hstring m_timeSpent;
         hstring m_status;
         hstring m_startedAt;
         hstring m_submittedAt;
+        Microsoft::UI::Xaml::Media::Brush m_scoreBadgeColor{nullptr};
 
         winrt::event<Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
 

@@ -8,14 +8,17 @@ namespace quiz_examination_system
         String AttemptId;
         String StudentId;
         String StudentUsername;
+        String QuizTitle;
         Int32 AttemptNumber;
         Int32 Score;
         Int32 TotalPoints;
         Int32 CorrectCount;
         Int32 IncorrectCount;
         Int32 TimeSpentSeconds;
+        String TimeSpent;
         String Status;
         String StartedAt;
         String SubmittedAt;
+        Microsoft.UI.Xaml.Media.Brush ScoreBadgeColor;
     }
 }

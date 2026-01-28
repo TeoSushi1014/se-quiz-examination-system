@@ -1141,5 +1141,77 @@ namespace quiz_examination_system
 
         co_return resultJson.Stringify();
     }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::GetStudentHistoryAsync(hstring const &studentId)
+    {
+        try
+        {
+            auto trimmedStudentId = TrimUserId(studentId);
+            OutputDebugStringW((L"[GetStudentHistory] Fetching history for student: " + trimmedStudentId + L"\n").c_str());
+
+            // Query quiz_attempts with quiz title join
+            auto uriString = m_projectUrl + L"/rest/v1/quiz_attempts?student_id=eq." + trimmedStudentId + 
+                            L"&select=id,quiz_id,attempt_number,score,total_points,correct_count,incorrect_count,time_spent_seconds,status,submitted_at,quizzes(title)&order=submitted_at.desc";
+
+            Uri uri(uriString);
+            HttpRequestMessage request(HttpMethod::Get(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+            auto statusCode = response.StatusCode();
+            OutputDebugStringW((L"[GetStudentHistory] HTTP Status: " + to_hstring(static_cast<int>(statusCode)) + L"\n").c_str());
+
+            if (statusCode == HttpStatusCode::Ok)
+            {
+                auto responseBody = co_await response.Content().ReadAsStringAsync();
+                
+                // Parse and transform to include quiz_title at top level
+                JsonArray inputArray;
+                if (JsonArray::TryParse(responseBody, inputArray))
+                {
+                    JsonArray outputArray;
+                    for (uint32_t i = 0; i < inputArray.Size(); i++)
+                    {
+                        auto obj = inputArray.GetAt(i).GetObject();
+                        JsonObject newObj;
+
+                        newObj.Insert(L"id", obj.GetNamedValue(L"id"));
+                        newObj.Insert(L"quiz_id", obj.GetNamedValue(L"quiz_id"));
+                        newObj.Insert(L"attempt_number", obj.GetNamedValue(L"attempt_number"));
+                        newObj.Insert(L"score", obj.GetNamedValue(L"score"));
+                        newObj.Insert(L"total_points", obj.GetNamedValue(L"total_points"));
+                        newObj.Insert(L"correct_count", obj.GetNamedValue(L"correct_count"));
+                        newObj.Insert(L"incorrect_count", obj.GetNamedValue(L"incorrect_count"));
+                        newObj.Insert(L"time_spent_seconds", obj.GetNamedValue(L"time_spent_seconds"));
+                        newObj.Insert(L"status", obj.GetNamedValue(L"status"));
+                        newObj.Insert(L"submitted_at", obj.GetNamedValue(L"submitted_at"));
+
+                        // Extract quiz title from nested object
+                        auto quizzesVal = obj.GetNamedValue(L"quizzes");
+                        if (quizzesVal.ValueType() == JsonValueType::Object)
+                        {
+                            auto quizzesObj = quizzesVal.GetObject();
+                            newObj.Insert(L"quiz_title", quizzesObj.GetNamedValue(L"title"));
+                        }
+                        else
+                        {
+                            newObj.Insert(L"quiz_title", JsonValue::CreateStringValue(L"Unknown Quiz"));
+                        }
+
+                        outputArray.Append(newObj);
+                    }
+                    co_return outputArray.Stringify();
+                }
+                co_return responseBody;
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[GetStudentHistory] Error: " + ex.message() + L"\n").c_str());
+        }
+
+        co_return L"[]";
+    }
 }
 
