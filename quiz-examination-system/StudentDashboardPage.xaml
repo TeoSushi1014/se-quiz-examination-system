@@ -26,24 +26,27 @@
                       ItemsSource="{x:Bind Quizzes, Mode=OneWay}">
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="local:QuizItemStudent">
-                        <Grid Width="280" 
-                              Height="180" 
-                              Padding="20" 
+                        <Grid Width="220" 
+                              MinHeight="200" 
+                              Padding="16" 
                               CornerRadius="8" 
                               BorderThickness="1"
                               BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                               Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                             
-                            <StackPanel Spacing="12" VerticalAlignment="Center">
+                            <StackPanel Spacing="10" VerticalAlignment="Top">
                                 <TextBlock Text="{x:Bind Title, Mode=OneWay}" 
-                                           Style="{StaticResource SubtitleTextBlockStyle}" 
+                                           Style="{StaticResource BodyStrongTextBlockStyle}" 
                                            TextWrapping="Wrap"
-                                           MaxLines="2"/>
+                                           MaxLines="2"
+                                           TextTrimming="CharacterEllipsis"
+                                           Height="44"
+                                           ToolTipService.ToolTip="{x:Bind Title, Mode=OneWay}"/>
                                 
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE916;" 
-                                                  FontSize="16" 
+                                                  FontSize="14" 
                                                   Foreground="{ThemeResource AccentFillColorDefaultBrush}"/>
                                         <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
                                             <Run Text="{x:Bind TimeLimit, Mode=OneWay}"/>
@@ -51,22 +54,22 @@
                                         </TextBlock>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE9F9;" 
-                                                  FontSize="16" 
+                                                  FontSize="14" 
                                                   Foreground="{ThemeResource AccentFillColorDefaultBrush}"/>
                                         <TextBlock Text="{x:Bind TotalPoints, Mode=OneWay}" 
                                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE81C;" 
-                                                  FontSize="16" 
+                                                  FontSize="14" 
                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
                                             <Run Text="Attempts: "/>
                                             <Run Text="{x:Bind AttemptsUsed, Mode=OneWay}"/>
-                                            <Run Text="/"/>
+                                            <Run Text=" / "/>
                                             <Run Text="{x:Bind MaxAttempts, Mode=OneWay}"/>
                                         </TextBlock>
                                     </StackPanel>
@@ -75,7 +78,8 @@
                                 <Border Background="{x:Bind StatusBadgeColor, Mode=OneWay}" 
                                         CornerRadius="4" 
                                         Padding="8,4"
-                                        HorizontalAlignment="Left">
+                                        HorizontalAlignment="Left"
+                                        Margin="0,4,0,0">
                                     <TextBlock Text="{x:Bind Status, Mode=OneWay}" 
                                                Style="{StaticResource CaptionTextBlockStyle}"
                                                Foreground="White"
