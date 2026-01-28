@@ -993,5 +993,106 @@ namespace quiz_examination_system
             co_return resultJson.Stringify();
         }
     }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::GetQuizAttemptsForReviewAsync(hstring const &quizId)
+    {
+        try
+        {
+            JsonObject params;
+            params.Insert(L"p_quiz_id", JsonValue::CreateStringValue(quizId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/get_quiz_attempts_for_review");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+            if (response.StatusCode() == HttpStatusCode::Ok)
+            {
+                co_return co_await response.Content().ReadAsStringAsync();
+            }
+        }
+        catch (...)
+        {
+        }
+
+        co_return L"[]";
+    }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::DeleteQuizAttemptAsync(hstring const &attemptId, hstring const &teacherId)
+    {
+        JsonObject resultJson;
+        resultJson.Insert(L"success", JsonValue::CreateBooleanValue(false));
+
+        try
+        {
+            auto trimmedTeacherId = TrimUserId(teacherId);
+
+            JsonObject params;
+            params.Insert(L"p_attempt_id", JsonValue::CreateStringValue(attemptId));
+            params.Insert(L"p_teacher_id", JsonValue::CreateStringValue(trimmedTeacherId));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/delete_quiz_attempt");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+            if (response.StatusCode() == HttpStatusCode::Ok)
+            {
+                co_return co_await response.Content().ReadAsStringAsync();
+            }
+            else
+            {
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to delete attempt"));
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+        }
+
+        co_return resultJson.Stringify();
+    }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::ToggleResultReleaseAsync(hstring const &quizId, hstring const &teacherId, bool released)
+    {
+        JsonObject resultJson;
+        resultJson.Insert(L"success", JsonValue::CreateBooleanValue(false));
+
+        try
+        {
+            auto trimmedTeacherId = TrimUserId(teacherId);
+
+            JsonObject params;
+            params.Insert(L"p_quiz_id", JsonValue::CreateStringValue(quizId));
+            params.Insert(L"p_teacher_id", JsonValue::CreateStringValue(trimmedTeacherId));
+            params.Insert(L"p_released", JsonValue::CreateBooleanValue(released));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/toggle_result_release");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+            if (response.StatusCode() == HttpStatusCode::Ok)
+            {
+                co_return co_await response.Content().ReadAsStringAsync();
+            }
+            else
+            {
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to update result release status"));
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+        }
+
+        co_return resultJson.Stringify();
+    }
 }
 

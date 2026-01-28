@@ -146,6 +146,7 @@
     </ClInclude>
     <ClInclude Include="QuestionItem.h" />
     <ClInclude Include="QuizItem.h" />
+    <ClInclude Include="AttemptItem.h" />
     <ClInclude Include="QuizItemStudent.h" />
     <ClInclude Include="LogItem.h" />
     <ClInclude Include="UserItem.h" />
@@ -164,6 +165,9 @@
     </ClInclude>
     <ClInclude Include="QuizManagementPage.xaml.h">
       <DependentUpon>QuizManagementPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="ReviewAttemptsPage.xaml.h">
+      <DependentUpon>ReviewAttemptsPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="QuizEditorPage.xaml.h">
       <DependentUpon>QuizEditorPage.xaml</DependentUpon>
@@ -189,6 +193,7 @@
     <Page Include="ReportsPage.xaml" />
     <Page Include="QuestionBankPage.xaml" />
     <Page Include="QuizManagementPage.xaml" />
+    <Page Include="ReviewAttemptsPage.xaml" />
     <Page Include="QuizEditorPage.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -215,6 +220,7 @@
     </ClCompile>
     <ClCompile Include="QuestionItem.cpp" />
     <ClCompile Include="QuizItem.cpp" />
+    <ClCompile Include="AttemptItem.cpp" />
     <ClCompile Include="QuizItemStudent.cpp" />
     <ClCompile Include="LogItem.cpp" />
     <ClCompile Include="UserItem.cpp" />
@@ -230,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="QuizManagementPage.xaml.cpp">
       <DependentUpon>QuizManagementPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="ReviewAttemptsPage.xaml.cpp">
+      <DependentUpon>ReviewAttemptsPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="QuestionBankPage.xaml.cpp">
       <DependentUpon>QuestionBankPage.xaml</DependentUpon>
@@ -269,6 +278,9 @@
     <Midl Include="QuizItem.idl">
       <SubType>Code</SubType>
     </Midl>
+    <Midl Include="AttemptItem.idl">
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="QuizItemStudent.idl">
       <SubType>Code</SubType>
     </Midl>
@@ -300,6 +312,10 @@
     <Midl Include="QuizManagementPage.idl">
       <SubType>Code</SubType>
       <DependentUpon>QuizManagementPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="ReviewAttemptsPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>ReviewAttemptsPage.xaml</DependentUpon>
     </Midl>
     <Midl Include="QuizEditorPage.idl">
       <SubType>Code</SubType>

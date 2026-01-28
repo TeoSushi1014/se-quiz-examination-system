@@ -1,0 +1,21 @@
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass AttemptItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        AttemptItem();
+        
+        String AttemptId;
+        String StudentId;
+        String StudentUsername;
+        Int32 AttemptNumber;
+        Int32 Score;
+        Int32 TotalPoints;
+        Int32 CorrectCount;
+        Int32 IncorrectCount;
+        Int32 TimeSpentSeconds;
+        String Status;
+        String StartedAt;
+        String SubmittedAt;
+    }
+}

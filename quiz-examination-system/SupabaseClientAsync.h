@@ -120,6 +120,12 @@ namespace quiz_examination_system
 
         IAsyncOperation<bool> UpdateUserStatusAsync(hstring const &userId, bool isActive);
 
+        IAsyncOperation<hstring> GetQuizAttemptsForReviewAsync(hstring const &quizId);
+
+        IAsyncOperation<hstring> DeleteQuizAttemptAsync(hstring const &attemptId, hstring const &teacherId);
+
+        IAsyncOperation<hstring> ToggleResultReleaseAsync(hstring const &quizId, hstring const &teacherId, bool released);
+
         bool IsConnected() const { return m_connected; }
         hstring GetLastError() const { return m_lastError; }
 
