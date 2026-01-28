@@ -93,6 +93,11 @@
                             <FontIcon Glyph="&#xE80F;"/>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
+                    <NavigationViewItem Content="Users" Tag="Users" x:Name="NavUsers">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE716;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
                     <NavigationViewItem Content="Question bank" Tag="QuestionBank" x:Name="NavQuestionBank">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xE8F1;"/>
@@ -111,6 +116,11 @@
                     <NavigationViewItem Content="Reports" Tag="Reports" x:Name="NavReports">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xE9F9;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem Content="Audit logs" Tag="AuditLogs" x:Name="NavAuditLogs">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE7C3;"/>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
                     <NavigationViewItem Content="History" Tag="History" x:Name="NavHistory">

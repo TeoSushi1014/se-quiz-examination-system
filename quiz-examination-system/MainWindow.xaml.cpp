@@ -3,6 +3,8 @@
 #include "TeacherDashboardPage.xaml.h"
 #include "StudentDashboardPage.xaml.h"
 #include "AdminDashboardPage.xaml.h"
+#include "UserManagementPage.xaml.h"
+#include "SystemLogsPage.xaml.h"
 #include "SupabaseClientManager.h"
 #include "SupabaseClientAsync.h"
 #include <winrt/Windows.Data.Json.h>
@@ -165,6 +167,16 @@ namespace winrt::quiz_examination_system::implementation
                 NavView().SelectedItem(invokedItem);
                 ContentFrame().Navigate(xaml_typename<quiz_examination_system::ReportsPage>());
             }
+            else if (tagStr == L"Users")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::UserManagementPage>());
+            }
+            else if (tagStr == L"AuditLogs")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::SystemLogsPage>());
+            }
             else if (tagStr == L"History")
             {
                 NavView().SelectedItem(invokedItem);
@@ -187,10 +199,12 @@ namespace winrt::quiz_examination_system::implementation
             bool isTeacher = m_currentRole == L"Teacher";
             bool isAdmin = m_currentRole == L"Administrator";
 
-            NavQuestionBank().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
-            NavManageQuizzes().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
-            NavReviewAttempts().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavUsers().Visibility(isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavQuestionBank().Visibility(isTeacher ? Visibility::Visible : Visibility::Collapsed);
+            NavManageQuizzes().Visibility(isTeacher ? Visibility::Visible : Visibility::Collapsed);
+            NavReviewAttempts().Visibility(isTeacher ? Visibility::Visible : Visibility::Collapsed);
             NavReports().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavAuditLogs().Visibility(isAdmin ? Visibility::Visible : Visibility::Collapsed);
             NavHistory().Visibility(isStudent ? Visibility::Visible : Visibility::Collapsed);
 
             NavView().SelectedItem(NavDashboard());
