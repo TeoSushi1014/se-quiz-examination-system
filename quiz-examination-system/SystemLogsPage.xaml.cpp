@@ -87,11 +87,27 @@ namespace winrt::quiz_examination_system::implementation
                     OutputDebugStringW((L"[SystemLogsPage] actor_id=" + std::wstring(actorId) + L"\n").c_str());
 
                     OutputDebugStringW(L"[SystemLogsPage] Getting target_table field...\n");
-                    auto targetTable = logObj.GetNamedString(L"target_table", L"");
+                    hstring targetTable = L"";
+                    if (logObj.HasKey(L"target_table"))
+                    {
+                        auto targetTableValue = logObj.GetNamedValue(L"target_table");
+                        if (targetTableValue.ValueType() == JsonValueType::String)
+                        {
+                            targetTable = targetTableValue.GetString();
+                        }
+                    }
                     OutputDebugStringW((L"[SystemLogsPage] target_table=" + std::wstring(targetTable) + L"\n").c_str());
 
                     OutputDebugStringW(L"[SystemLogsPage] Getting target_id field...\n");
-                    auto targetId = logObj.GetNamedString(L"target_id", L"");
+                    hstring targetId = L"";
+                    if (logObj.HasKey(L"target_id"))
+                    {
+                        auto targetIdValue = logObj.GetNamedValue(L"target_id");
+                        if (targetIdValue.ValueType() == JsonValueType::String)
+                        {
+                            targetId = targetIdValue.GetString();
+                        }
+                    }
                     OutputDebugStringW((L"[SystemLogsPage] target_id=" + std::wstring(targetId) + L"\n").c_str());
 
                     OutputDebugStringW(L"[SystemLogsPage] Getting created_at field...\n");

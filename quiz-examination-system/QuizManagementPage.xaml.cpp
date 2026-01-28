@@ -296,9 +296,9 @@ namespace winrt::quiz_examination_system::implementation
                 CheckShuffleAnswers().IsChecked(quiz.ShuffleAnswers());
 
                 auto visibility = quiz.ResultVisibility();
-                if (visibility == L"immediate")
+                if (visibility == L"Immediate")
                     ComboResultVisibility().SelectedIndex(0);
-                else if (visibility == L"after_quiz_end")
+                else if (visibility == L"After quiz end")
                     ComboResultVisibility().SelectedIndex(1);
                 else
                     ComboResultVisibility().SelectedIndex(2);
@@ -318,8 +318,8 @@ namespace winrt::quiz_examination_system::implementation
                     auto shuffleAnswers = CheckShuffleAnswers().IsChecked().GetBoolean();
 
                     auto resultVisIdx = ComboResultVisibility().SelectedIndex();
-                    hstring resultVisibility = resultVisIdx == 0 ? L"immediate" : resultVisIdx == 1 ? L"after_quiz_end"
-                                                                                                    : L"manual_release";
+                    hstring resultVisibility = resultVisIdx == 0 ? L"Immediate" : resultVisIdx == 1 ? L"After quiz end"
+                                                                                                    : L"Manual release";
 
                     auto trimString = [](hstring const &str) -> hstring
                     {
@@ -335,6 +335,12 @@ namespace winrt::quiz_examination_system::implementation
 
                     title = trimString(title);
                     maxAttempts = trimString(maxAttempts);
+
+                    // Ensure maxAttempts uses correct case-sensitive value
+                    if (maxAttempts.empty() || maxAttempts == L"unlimited" || maxAttempts == L"Unlimited")
+                    {
+                        maxAttempts = L"Unlimited";
+                    }
 
                     if (title.empty())
                     {
