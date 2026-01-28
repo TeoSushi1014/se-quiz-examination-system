@@ -19,7 +19,6 @@ namespace quiz_examination_system
             auto buffer = winrt::Windows::Security::Cryptography::CryptographicBuffer::GenerateRandom(SALT_LENGTH);
             auto saltHex = winrt::Windows::Security::Cryptography::CryptographicBuffer::EncodeToHexString(buffer);
 
-            // Convert to uppercase to match database format
             std::wstring upperSalt = saltHex.c_str();
             std::transform(upperSalt.begin(), upperSalt.end(), upperSalt.begin(), ::towupper);
 
@@ -37,7 +36,6 @@ namespace quiz_examination_system
                     winrt::to_hstring(password),
                     winrt::Windows::Security::Cryptography::BinaryStringEncoding::Utf8);
 
-                // Decode hex string to bytes
                 auto saltBuffer = winrt::Windows::Security::Cryptography::CryptographicBuffer::DecodeFromHexString(
                     winrt::to_hstring(saltHex));
 
@@ -53,7 +51,6 @@ namespace quiz_examination_system
 
                 auto hashString = winrt::Windows::Security::Cryptography::CryptographicBuffer::EncodeToHexString(derivedKey);
 
-                // Convert to uppercase to match database format
                 std::wstring upperHash = hashString.c_str();
                 std::transform(upperHash.begin(), upperHash.end(), upperHash.begin(), ::towupper);
 

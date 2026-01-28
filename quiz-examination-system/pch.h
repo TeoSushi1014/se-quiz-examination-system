@@ -1,8 +1,18 @@
 #pragma once
+
+#pragma warning(disable : 4244) // Suppress STL algorithm int-to-char conversion warning
+
 #include <windows.h>
 #include <unknwn.h>
 #include <restrictederrorinfo.h>
 #include <hstring.h>
+
+// Shell headers for file pickers (before C++/WinRT)
+#include <shobjidl.h>
+
+// Disambiguate IUnknown to use classic COM version
+using IUnknown = ::IUnknown;
+
 #include <coroutine>
 
 #undef GetCurrentTime

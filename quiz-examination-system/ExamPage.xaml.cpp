@@ -3,6 +3,7 @@
 #if __has_include("ExamPage.g.cpp")
 #include "ExamPage.g.cpp"
 #endif
+#include "PageHelper.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -302,8 +303,6 @@ namespace winrt::quiz_examination_system::implementation
 
     void ExamPage::ShowMessage(hstring const &message, InfoBarSeverity severity)
     {
-        MessageBar().Message(message);
-        MessageBar().Severity(severity);
-        MessageBar().IsOpen(true);
+        ::quiz_examination_system::PageHelper::ShowInfoBar(MessageBar(), message, severity);
     }
 }

@@ -28,7 +28,7 @@ namespace winrt::quiz_examination_system::implementation
             m_authenticated = true;
             m_currentUser = manager.GetUsername();
             m_currentDbRole = manager.GetRole();
-            m_currentRole = (m_currentDbRole == L"Admin") ? L"Administrator" : (m_currentDbRole == L"Teacher") ? L"Lecturer"
+            m_currentRole = (m_currentDbRole == L"Admin") ? L"Administrator" : (m_currentDbRole == L"Teacher") ? L"Teacher"
                                                                                                                : L"Student";
             UpdateView();
         }
@@ -141,7 +141,7 @@ namespace winrt::quiz_examination_system::implementation
             {
                 ContentFrame().Navigate(xaml_typename<quiz_examination_system::AdminDashboardPage>());
             }
-            else if (m_currentRole == L"Lecturer")
+            else if (m_currentRole == L"Teacher")
             {
                 ContentFrame().Navigate(xaml_typename<quiz_examination_system::TeacherDashboardPage>());
             }

@@ -30,86 +30,163 @@
             </StackPanel>
         </StackPanel>
 
-        <InfoBar x:Name="ActionMessage" 
-                 Grid.Row="1"
-                 IsOpen="False" 
-                 IsClosable="True"
-                 VerticalAlignment="Bottom"
-                 HorizontalAlignment="Right"
-                 MaxWidth="400"
-                 Margin="24">
-            <InfoBar.Shadow>
-                <ThemeShadow />
-            </InfoBar.Shadow>
-        </InfoBar>
-
         <Grid Grid.Row="1">
-            <ProgressRing x:Name="LoadingRing" IsActive="False" Width="60" Height="60"/>
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                   BorderThickness="1"
+                   CornerRadius="8"
+                   Padding="0">
+                <Grid>
+                    <ListView x:Name="QuestionListView" SelectionMode="None">
+                        <ListView.Header>
+                            <Grid Padding="16,12" 
+                                 Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                 BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                 BorderThickness="0,0,0,1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="200"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Question" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="Difficulty" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="2" Text="Topic" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="3" Text="Actions" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:QuestionItem">
+                                <Grid Padding="16,12" 
+                                     Background="Transparent"
+                                     BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                     BorderThickness="0,0,0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="200"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" 
+                                              Text="{x:Bind QuestionText, Mode=OneWay}" 
+                                              TextWrapping="Wrap"
+                                              MaxLines="2"
+                                              TextTrimming="CharacterEllipsis"
+                                              FontWeight="SemiBold"
+                                              VerticalAlignment="Center"/>
+
+                                    <Border Grid.Column="1"
+                                           Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+                                           CornerRadius="4"
+                                           Padding="8,4"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind DifficultyLevel, Mode=OneWay}"
+                                                  Foreground="{ThemeResource SystemFillColorAttentionBrush}"
+                                                  FontWeight="SemiBold"
+                                                  FontSize="12"/>
+                                    </Border>
+
+                                    <TextBlock Grid.Column="2" 
+                                              Text="{x:Bind Topic, Mode=OneWay}" 
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              VerticalAlignment="Center"
+                                              TextWrapping="NoWrap"
+                                              TextTrimming="CharacterEllipsis"/>
+
+                                    <StackPanel Grid.Column="3" 
+                                               Orientation="Horizontal" 
+                                               Spacing="8"
+                                               VerticalAlignment="Center">
+                                        <Button Content="Edit" 
+                                               Tag="{x:Bind QuestionId, Mode=OneWay}"
+                                               Click="EditQuestion_Click"
+                                               Style="{StaticResource AccentButtonStyle}"
+                                               Padding="12,6"/>
+                                        <Button Content="Delete" 
+                                               Tag="{x:Bind QuestionId, Mode=OneWay}"
+                                               Click="DeleteQuestion_Click"
+                                               Padding="12,6"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+
+                    <ProgressRing x:Name="LoadingRing"
+                                 IsActive="False"
+                                 Width="48"
+                                 Height="48"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+
+                    <TextBlock x:Name="EmptyStateText"
+                              Text="No questions found"
+                              Visibility="Collapsed"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                              FontSize="16"/>
+                </Grid>
+            </Border>
             
-            <ListView x:Name="QuestionListView" SelectionMode="Single">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="local:QuestionItem">
-                        <Grid Padding="12" ColumnSpacing="16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0" Spacing="8">
-                                <TextBlock Text="{x:Bind QuestionText, Mode=OneWay}" 
-                                         TextWrapping="Wrap" 
-                                         FontWeight="SemiBold"/>
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <TextBlock Text="{x:Bind DifficultyLevel, Mode=OneWay}" 
-                                             Foreground="{ThemeResource SystemAccentColor}"/>
-                                    <TextBlock Text="•"/>
-                                    <TextBlock Text="{x:Bind Topic, Mode=OneWay}"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <Button Grid.Column="1" Content="Edit" 
-                                  Tag="{x:Bind QuestionId, Mode=OneWay}"
-                                  Click="EditQuestion_Click"/>
-                            <Button Grid.Column="2" Content="Delete" 
-                                  Tag="{x:Bind QuestionId, Mode=OneWay}"
-                                  Click="DeleteQuestion_Click"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <InfoBar x:Name="ActionMessage" 
+                     IsOpen="False" 
+                     IsClosable="True"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Right"
+                     MaxWidth="400"
+                     Margin="24"
+                     Canvas.ZIndex="999">
+                <InfoBar.Shadow>
+                    <ThemeShadow />
+                </InfoBar.Shadow>
+            </InfoBar>
         </Grid>
 
         <ContentDialog x:Name="AddQuestionDialog"
                       Title="Add new question"
                       PrimaryButtonText="Save"
                       CloseButtonText="Cancel"
-                      DefaultButton="Primary">
+                      DefaultButton="Primary"
+                      MinWidth="600"
+                      MaxWidth="700">
             <ScrollViewer>
-                <StackPanel Spacing="16">
+                <StackPanel Spacing="16" Padding="0,0,16,0">
                     <TextBox x:Name="InputQuestionText" 
                            Header="Question text" 
                            PlaceholderText="Enter question..."
                            TextWrapping="Wrap"
                            AcceptsReturn="True"
-                           Height="100"/>
+                           MinHeight="100"/>
 
                     <TextBox x:Name="InputOptionA" Header="Option A"/>
                     <TextBox x:Name="InputOptionB" Header="Option B"/>
                     <TextBox x:Name="InputOptionC" Header="Option C"/>
                     <TextBox x:Name="InputOptionD" Header="Option D"/>
 
-                    <ComboBox x:Name="ComboCorrectOption" Header="Correct option" SelectedIndex="0">
+                    <ComboBox x:Name="ComboCorrectOption" Header="Correct option" SelectedIndex="0" MinWidth="200">
                         <ComboBoxItem Content="A"/>
                         <ComboBoxItem Content="B"/>
                         <ComboBoxItem Content="C"/>
                         <ComboBoxItem Content="D"/>
                     </ComboBox>
 
-                    <ComboBox x:Name="ComboDifficulty" Header="Difficulty" SelectedIndex="1">
-                        <ComboBoxItem Content="easy"/>
-                        <ComboBoxItem Content="medium"/>
-                        <ComboBoxItem Content="hard"/>
+                    <ComboBox x:Name="ComboDifficulty" Header="Difficulty" SelectedIndex="1" MinWidth="200">
+                        <ComboBoxItem Content="Easy"/>
+                        <ComboBoxItem Content="Medium"/>
+                        <ComboBoxItem Content="Hard"/>
                     </ComboBox>
 
                     <TextBox x:Name="InputTopic" Header="Topic" PlaceholderText="e.g., Data Structures"/>

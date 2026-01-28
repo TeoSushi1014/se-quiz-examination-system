@@ -17,21 +17,37 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
-            <TextBlock Text="System quiz management" FontSize="28" FontWeight="SemiBold"/>
-            <TextBlock Text="View and manage all quizzes from teachers in the system" 
+            <TextBlock Text="Manage quizzes" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="Create and manage all quizzes for your classes" 
                        FontSize="14" 
                        Opacity="0.7"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+            <Button x:Name="CreateQuizBtn" 
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="OnCreateQuizClicked">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                    <TextBlock Text="Create new quiz"/>
+                </StackPanel>
+            </Button>
+            
             <AutoSuggestBox x:Name="SearchBox"
-                            PlaceholderText="Search by quiz title or teacher name"
-                            Width="400"
+                            PlaceholderText="Search by quiz title"
+                            Width="350"
                             TextChanged="OnSearchTextChanged">
                 <AutoSuggestBox.QueryIcon>
                     <SymbolIcon Symbol="Find"/>
                 </AutoSuggestBox.QueryIcon>
             </AutoSuggestBox>
+
+            <Button Click="OnRefreshClicked">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE72C;" FontSize="16"/>
+                    <TextBlock Text="Refresh"/>
+                </StackPanel>
+            </Button>
 
             <ProgressRing x:Name="LoadingRing" 
                           Width="32" 
@@ -40,80 +56,126 @@
                           VerticalAlignment="Center"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="2">
-            <ItemsRepeater ItemsSource="{x:Bind Quizzes, Mode=OneWay}">
-                <ItemsRepeater.Layout>
-                    <StackLayout Spacing="12"/>
-                </ItemsRepeater.Layout>
-                
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="local:QuizManagementItem">
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="20">
-                            <Grid>
+        <Grid Grid.Row="2">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                   BorderThickness="1"
+                   CornerRadius="8"
+                   Padding="0">
+                <Grid>
+                    <ListView x:Name="QuizListView" SelectionMode="None">
+                        <ListView.Header>
+                            <Grid Padding="16,12" 
+                                 Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                 BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                 BorderThickness="0,0,0,1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="250"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0" Spacing="8">
-                                    <TextBlock Text="{x:Bind Title}" 
-                                               FontSize="18" 
-                                               FontWeight="SemiBold"/>
-                                    
-                                    <StackPanel Orientation="Horizontal" Spacing="16">
-                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <FontIcon Glyph="&#xE77B;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}"/>
-                                            <TextBlock Text="{x:Bind TeacherName}" FontSize="13" Opacity="0.8"/>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <FontIcon Glyph="&#xE787;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}"/>
-                                            <TextBlock Text="{x:Bind CreatedAt}" FontSize="13" Opacity="0.8"/>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <FontIcon Glyph="&#xE716;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}"/>
-                                            <TextBlock FontSize="13" Opacity="0.8">
-                                                <Run Text="{x:Bind AttemptCount}"/>
-                                                <Run Text=" attempts"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <Button Grid.Column="1" 
-                                        Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                        Tag="{x:Bind QuizId}"
-                                        Click="OnPurgeClicked"
-                                        VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="16"/>
-                                        <TextBlock Text="Purge" FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                </Button>
+                                <TextBlock Grid.Column="0" Text="Quiz title" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="Duration" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="2" Text="Points" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="3" Text="Questions" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Grid.Column="4" Text="Actions" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-        </ScrollViewer>
+                        </ListView.Header>
 
-        <InfoBar x:Name="ActionMessage"
-                 Grid.Row="2"
-                 IsOpen="False"
-                 Severity="Informational"
-                 IsClosable="True"
-                 VerticalAlignment="Bottom"
-                 HorizontalAlignment="Center"
-                 MaxWidth="600"
-                 Margin="24">
-            <InfoBar.Shadow>
-                <ThemeShadow />
-            </InfoBar.Shadow>
-        </InfoBar>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:QuizManagementItem">
+                                <Grid Padding="16,12" 
+                                     Background="Transparent"
+                                     BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                     BorderThickness="0,0,0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="250"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" 
+                                              Text="{x:Bind Title}" 
+                                              FontWeight="SemiBold"
+                                              VerticalAlignment="Center"
+                                              TextWrapping="NoWrap"
+                                              TextTrimming="CharacterEllipsis"/>
+
+                                    <TextBlock Grid.Column="1" 
+                                              Text="{x:Bind FormattedTime}"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Column="2" 
+                                              Text="{x:Bind TotalPoints}"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Column="3" 
+                                              Text="{x:Bind QuestionCountText}"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              VerticalAlignment="Center"/>
+
+                                    <StackPanel Grid.Column="4" 
+                                               Orientation="Horizontal" 
+                                               Spacing="8"
+                                               VerticalAlignment="Center">
+                                        <Button Content="Assign" 
+                                               Tag="{x:Bind QuizId}"
+                                               Click="OnAssignClicked"
+                                               Style="{StaticResource AccentButtonStyle}"
+                                               Padding="12,6"/>
+                                        <Button Content="Edit" 
+                                               Tag="{x:Bind QuizId}"
+                                               Click="OnEditClicked"
+                                               Padding="12,6"/>
+                                        <Button Content="Delete" 
+                                               Tag="{x:Bind QuizId}"
+                                               Click="OnDeleteClicked"
+                                               Padding="12,6"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+
+                    <ProgressRing x:Name="LoadingRingCenter"
+                                 IsActive="False"
+                                 Width="48"
+                                 Height="48"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+
+                    <TextBlock x:Name="EmptyStateText"
+                              Text="No quizzes found. Create your first quiz!"
+                              Visibility="Collapsed"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                              FontSize="16"/>
+                </Grid>
+            </Border>
+
+            <InfoBar x:Name="ActionMessage"
+                     IsOpen="False"
+                     IsClosable="True"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Right"
+                     MaxWidth="400"
+                     Margin="0,0,0,16"/>
+        </Grid>
     </Grid>
 </Page>

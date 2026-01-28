@@ -3,12 +3,16 @@ namespace quiz_examination_system
     [default_interface]
     runtimeclass QuizManagementItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
     {
-        QuizManagementItem(String quizId, String title, String teacherName, String createdAt, Int32 attemptCount);
+        QuizManagementItem(String quizId, String title, String createdBy, Int32 timeLimitMinutes, Int32 totalPoints, Int32 questionCount, String createdAt);
         
         String QuizId { get; };
         String Title { get; };
-        String TeacherName { get; };
+        String CreatedBy { get; };
+        Int32 TimeLimitMinutes { get; };
+        Int32 TotalPoints { get; };
+        Int32 QuestionCount { get; };
         String CreatedAt { get; };
-        Int32 AttemptCount { get; };
+        String FormattedTime { get; };
+        String QuestionCountText { get; };
     }
 }

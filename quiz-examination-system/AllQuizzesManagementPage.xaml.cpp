@@ -5,13 +5,10 @@
 #endif
 #include "QuizManagementItem.h"
 #include "SupabaseClientManager.h"
+#include "PageHelper.h"
+#include "HttpHelper.h"
+#include "SupabaseConfig.h"
 #include <algorithm>
-#include <sstream>
-#include <winrt/Windows.Storage.Streams.h>
-#include <winrt/Windows.Data.Json.h>
-#include <winrt/Windows.Web.Http.h>
-#include <winrt/Windows.Web.Http.Filters.h>
-#include <winrt/Windows.Web.Http.Headers.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -30,35 +27,29 @@ namespace winrt::quiz_examination_system::implementation
         LoadQuizzes();
     }
 
-    AllQuizzesManagementPage::~AllQuizzesManagementPage()
-    {
-        if (m_messageTimer)
-        {
-            m_messageTimer.Stop();
-            m_messageTimer = nullptr;
-        }
-    }
-
     winrt::fire_and_forget AllQuizzesManagementPage::LoadQuizzes()
     {
         auto lifetime = get_strong();
 
         OutputDebugStringW(L"[LoadQuizzes] Starting to load quiz list\n");
-        LoadingRing().IsActive(true);
+        LoadingRingCenter().IsActive(true);
+        EmptyStateText().Visibility(Visibility::Collapsed);
 
         try
         {
-            hstring query = L"select=id,title,created_at,created_by,users!quizzes_created_by_fkey(username)&order=created_at.desc";
-            hstring uriString = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/quizzes?" + query;
+            auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
+            hstring currentUserId = manager.GetUserId();
 
-            Uri uri(uriString);
-            HttpRequestMessage request(HttpMethod::Get(), uri);
-            request.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-            request.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
+            if (currentUserId.empty())
+            {
+                ShowMessage(L"Error", L"User not logged in", InfoBarSeverity::Error);
+                LoadingRingCenter().IsActive(false);
+                co_return;
+            }
 
-            HttpClient client;
-            auto response = co_await client.SendRequestAsync(request);
-            auto content = co_await response.Content().ReadAsStringAsync();
+            hstring query = L"select=id,title,created_by,time_limit_minutes,total_points,created_at&created_by=eq." + currentUserId + L"&order=created_at.desc";
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quizzes?" + query);
+            hstring content = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(endpoint, L"", HttpMethod::Get());
 
             OutputDebugStringW((L"[LoadQuizzes] Response: " + std::wstring(content).substr(0, 200) + L"...\n").c_str());
 
@@ -73,36 +64,27 @@ namespace winrt::quiz_examination_system::implementation
                 auto quizObj = quizzesArray.GetObjectAt(i);
                 auto id = quizObj.GetNamedString(L"id");
                 auto title = quizObj.GetNamedString(L"title");
+                auto createdBy = quizObj.GetNamedString(L"created_by");
+                auto timeLimitMinutes = static_cast<int32_t>(quizObj.GetNamedNumber(L"time_limit_minutes"));
+                auto totalPoints = static_cast<int32_t>(quizObj.GetNamedNumber(L"total_points"));
                 auto createdAt = quizObj.GetNamedString(L"created_at");
 
-                hstring teacherName = L"Unknown";
-                if (quizObj.HasKey(L"users"))
-                {
-                    auto usersValue = quizObj.GetNamedValue(L"users");
-                    if (usersValue.ValueType() == JsonValueType::Object)
-                    {
-                        auto userObj = quizObj.GetNamedObject(L"users");
-                        teacherName = userObj.GetNamedString(L"username", L"Unknown");
-                    }
-                }
-
-                hstring attemptUriString = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/quiz_attempts?select=id&quiz_id=eq." + id;
-                Uri attemptUri(attemptUriString);
-                HttpRequestMessage attemptRequest(HttpMethod::Get(), attemptUri);
-                attemptRequest.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-                attemptRequest.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-
-                auto attemptResponse = co_await client.SendRequestAsync(attemptRequest);
-                auto attemptContent = co_await attemptResponse.Content().ReadAsStringAsync();
-                auto attemptsArray = JsonArray::Parse(attemptContent);
-                int32_t attemptCount = static_cast<int32_t>(attemptsArray.Size());
+                hstring questionEndpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quiz_questions?select=id&quiz_id=eq." + id);
+                hstring questionContent = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(questionEndpoint, L"", HttpMethod::Get());
+                auto questionsArray = JsonArray::Parse(questionContent);
+                int32_t questionCount = static_cast<int32_t>(questionsArray.Size());
 
                 std::wstring dateStr(createdAt);
                 hstring formattedDate = dateStr.size() >= 10 ? hstring(dateStr.substr(0, 10)) : createdAt;
 
-                auto quizItem = make<QuizManagementItem>(id, title, teacherName, formattedDate, attemptCount);
+                auto quizItem = make<QuizManagementItem>(id, title, createdBy, timeLimitMinutes, totalPoints, questionCount, formattedDate);
                 m_allQuizzes.push_back(quizItem);
                 m_quizzes.Append(quizItem);
+            }
+
+            if (m_quizzes.Size() == 0)
+            {
+                EmptyStateText().Visibility(Visibility::Visible);
             }
 
             OutputDebugStringW((L"[LoadQuizzes] Success - Added " + std::to_wstring(m_quizzes.Size()) + L" quizzes\n").c_str());
@@ -113,7 +95,7 @@ namespace winrt::quiz_examination_system::implementation
             ShowMessage(L"Error", L"Failed to load quiz list: " + ex.message(), InfoBarSeverity::Error);
         }
 
-        LoadingRing().IsActive(false);
+        LoadingRingCenter().IsActive(false);
     }
 
     void AllQuizzesManagementPage::OnSearchTextChanged(AutoSuggestBox const &sender, AutoSuggestBoxTextChangedEventArgs const &)
@@ -137,201 +119,96 @@ namespace winrt::quiz_examination_system::implementation
             else
             {
                 auto title = to_string(quiz.Title());
-                auto teacher = to_string(quiz.TeacherName());
                 std::transform(title.begin(), title.end(), title.begin(), ::tolower);
-                std::transform(teacher.begin(), teacher.end(), teacher.begin(), ::tolower);
 
-                if (title.find(lowerSearch) != std::string::npos || teacher.find(lowerSearch) != std::string::npos)
+                if (title.find(lowerSearch) != std::string::npos)
                 {
                     m_quizzes.Append(quiz);
                 }
             }
         }
+
+        EmptyStateText().Visibility(m_quizzes.Size() == 0 ? Visibility::Visible : Visibility::Collapsed);
     }
 
-    void AllQuizzesManagementPage::OnPurgeClicked(IInspectable const &sender, RoutedEventArgs const &)
+    void AllQuizzesManagementPage::OnRefreshClicked(IInspectable const &, RoutedEventArgs const &)
+    {
+        LoadQuizzes();
+    }
+
+    void AllQuizzesManagementPage::OnCreateQuizClicked(IInspectable const &, RoutedEventArgs const &)
+    {
+        ShowMessage(L"Info", L"Quiz editor page coming soon", InfoBarSeverity::Informational);
+    }
+
+    void AllQuizzesManagementPage::OnEditClicked(IInspectable const &sender, RoutedEventArgs const &)
     {
         auto button = sender.as<Button>();
         auto quizId = unbox_value<hstring>(button.Tag());
-
-        for (auto const &quiz : m_allQuizzes)
-        {
-            if (quiz.QuizId() == quizId)
-            {
-                PurgeQuiz(quizId, quiz.AttemptCount());
-                break;
-            }
-        }
+        ShowMessage(L"Info", L"Edit quiz: " + quizId, InfoBarSeverity::Informational);
     }
 
-    winrt::fire_and_forget AllQuizzesManagementPage::PurgeQuiz(hstring quizId, int32_t attemptCount)
+    void AllQuizzesManagementPage::OnAssignClicked(IInspectable const &sender, RoutedEventArgs const &)
     {
-        auto lifetime = get_strong();
-
-        ContentDialog dialog;
-        dialog.XamlRoot(this->XamlRoot());
-        dialog.Title(box_value(L"Critical warning"));
-        dialog.PrimaryButtonText(L"Confirm purge");
-        dialog.CloseButtonText(L"Cancel");
-        dialog.DefaultButton(ContentDialogButton::Close);
-
-        StackPanel panel;
-        panel.Spacing(12);
-
-        TextBlock warningText;
-        if (attemptCount > 0)
-        {
-            warningText.Text(L"Warning: This quiz contains " + std::to_wstring(attemptCount) +
-                             L" student attempts. Deleting will permanently remove all scores and attempt history. This action cannot be undone.");
-        }
-        else
-        {
-            warningText.Text(L"Confirm deletion of this quiz from the system. This action cannot be undone.");
-        }
-        warningText.TextWrapping(TextWrapping::Wrap);
-        warningText.Foreground(Media::SolidColorBrush(Microsoft::UI::Colors::Red()));
-        panel.Children().Append(warningText);
-
-        dialog.Content(panel);
-
-        auto result = co_await dialog.ShowAsync();
-
-        if (result == ContentDialogResult::Primary)
-        {
-            LoadingRing().IsActive(true);
-
-            try
-            {
-                HttpClient client;
-
-                OutputDebugStringW((L"[PurgeQuiz] Deleting quiz_id: " + quizId + L"\n").c_str());
-                Uri answersUri(L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/rpc/purge_quiz_cascade");
-                HttpRequestMessage answersRequest(HttpMethod::Post(), answersUri);
-                answersRequest.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-                answersRequest.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-                answersRequest.Headers().Append(L"Content-Type", L"application/json");
-
-                JsonObject payload;
-                payload.SetNamedValue(L"target_quiz_id", JsonValue::CreateStringValue(quizId));
-                answersRequest.Content(HttpStringContent(payload.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
-
-                auto response = co_await client.SendRequestAsync(answersRequest);
-
-                if (response.IsSuccessStatusCode())
-                {
-                    OutputDebugStringW(L"[PurgeQuiz] Deleted successfully\n");
-                    ShowMessage(L"Success", L"Quiz and all related data have been deleted", InfoBarSeverity::Success);
-
-                    InsertAuditLog(L"PURGE_QUIZ", L"quizzes", quizId,
-                                   L"Purged quiz ID: " + quizId + L" causing cascade delete of " +
-                                       to_hstring(attemptCount) + L" attempts");
-
-                    LoadQuizzes();
-                }
-                else
-                {
-                    auto errorContent = co_await response.Content().ReadAsStringAsync();
-                    OutputDebugStringW((L"[PurgeQuiz] Error: " + errorContent + L"\n").c_str());
-                    ShowMessage(L"Error", L"Failed to delete quiz", InfoBarSeverity::Error);
-                }
-            }
-            catch (hresult_error const &ex)
-            {
-                OutputDebugStringW((L"[PurgeQuiz] Exception: " + ex.message() + L"\n").c_str());
-                ShowMessage(L"Error", L"Error during deletion: " + ex.message(), InfoBarSeverity::Error);
-            }
-
-            LoadingRing().IsActive(false);
-        }
+        auto button = sender.as<Button>();
+        auto quizId = unbox_value<hstring>(button.Tag());
+        ShowMessage(L"Info", L"Assign quiz: " + quizId, InfoBarSeverity::Informational);
     }
 
-    void AllQuizzesManagementPage::ShowMessage(hstring const &title, hstring const &message, InfoBarSeverity severity)
+    void AllQuizzesManagementPage::OnDeleteClicked(IInspectable const &sender, RoutedEventArgs const &)
     {
-        if (m_messageTimer)
-        {
-            m_messageTimer.Stop();
-            m_messageTimer = nullptr;
-        }
-
-        ActionMessage().Title(title);
-        ActionMessage().Message(message);
-        ActionMessage().Severity(severity);
-        ActionMessage().IsOpen(true);
-
-        m_messageTimer = DispatcherQueue().CreateTimer();
-        m_messageTimer.Interval(std::chrono::seconds(5));
-        m_messageTimer.IsRepeating(false);
-        m_messageTimer.Tick([weak_this = get_weak()](auto const &, auto const &)
-                            {
-            if (auto strong_this = weak_this.get())
-            {
-                strong_this->ActionMessage().IsOpen(false);
-                if (strong_this->m_messageTimer)
-                {
-                    strong_this->m_messageTimer.Stop();
-                    strong_this->m_messageTimer = nullptr;
-                }
-            } });
-        m_messageTimer.Start();
+        auto button = sender.as<Button>();
+        auto quizId = unbox_value<hstring>(button.Tag());
+        DeleteQuiz(quizId);
     }
 
-    winrt::fire_and_forget AllQuizzesManagementPage::InsertAuditLog(hstring action, hstring targetTable, hstring targetId, hstring details)
+    winrt::fire_and_forget AllQuizzesManagementPage::DeleteQuiz(hstring quizId)
     {
         auto lifetime = get_strong();
 
         try
         {
-            auto actorUsername = ::quiz_examination_system::SupabaseClientManager::GetInstance().GetUsername();
-            auto actorId = ::quiz_examination_system::SupabaseClientManager::GetInstance().GetUserId();
+            hstring attemptEndpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quiz_attempts?select=id&quiz_id=eq." + quizId);
+            hstring attemptContent = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(attemptEndpoint, L"", HttpMethod::Get());
+            auto attemptsArray = JsonArray::Parse(attemptContent);
 
-            JsonObject logData;
-            logData.SetNamedValue(L"action", JsonValue::CreateStringValue(action));
-            logData.SetNamedValue(L"actor_id", JsonValue::CreateStringValue(actorId));
-
-            if (!targetTable.empty())
+            if (attemptsArray.Size() > 0)
             {
-                logData.SetNamedValue(L"target_table", JsonValue::CreateStringValue(targetTable));
+                ShowMessage(L"Error", L"Cannot delete. This quiz has " + winrt::to_hstring(attemptsArray.Size()) + L" submissions.", InfoBarSeverity::Error);
+                co_return;
             }
 
-            if (!targetId.empty())
+            ContentDialog dialog;
+            dialog.XamlRoot(this->XamlRoot());
+            dialog.Title(box_value(L"Delete quiz"));
+            dialog.Content(box_value(L"Are you sure you want to delete this quiz? This action cannot be undone."));
+            dialog.PrimaryButtonText(L"Delete");
+            dialog.CloseButtonText(L"Cancel");
+            dialog.DefaultButton(ContentDialogButton::Close);
+
+            auto result = co_await dialog.ShowAsync();
+
+            if (result == ContentDialogResult::Primary)
             {
-                logData.SetNamedValue(L"target_id", JsonValue::CreateStringValue(targetId));
+                LoadingRingCenter().IsActive(true);
+
+                hstring deleteEndpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quizzes?id=eq." + quizId);
+                co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(deleteEndpoint, L"", HttpMethod::Delete());
+
+                ShowMessage(L"Success", L"Quiz deleted successfully", InfoBarSeverity::Success);
+                LoadQuizzes();
             }
-
-            JsonObject detailsObj;
-            detailsObj.SetNamedValue(L"description", JsonValue::CreateStringValue(details));
-            logData.SetNamedValue(L"details", detailsObj);
-
-            hstring jsonBody = logData.Stringify();
-
-            hstring uriString = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/audit_logs";
-            Uri uri(uriString);
-            HttpRequestMessage request(HttpMethod::Post(), uri);
-            request.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-            request.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-            request.Headers().Insert(L"Content-Type", L"application/json");
-
-            auto bodyString = Windows::Storage::Streams::InMemoryRandomAccessStream();
-            auto writer = Windows::Storage::Streams::DataWriter(bodyString);
-            writer.WriteString(jsonBody);
-            co_await writer.StoreAsync();
-            writer.DetachStream();
-            bodyString.Seek(0);
-
-            request.Content(HttpStreamContent(bodyString));
-
-            HttpClient client;
-            auto response = co_await client.SendRequestAsync(request);
-
-            OutputDebugStringW((L"[InsertAuditLog] Log inserted: " + action + L"\n").c_str());
         }
         catch (hresult_error const &ex)
         {
-            OutputDebugStringW((L"[InsertAuditLog] ERROR: " + ex.message() + L"\n").c_str());
+            OutputDebugStringW((L"[DeleteQuiz] Error: " + ex.message() + L"\n").c_str());
+            ShowMessage(L"Error", L"Failed to delete quiz: " + ex.message(), InfoBarSeverity::Error);
+            LoadingRingCenter().IsActive(false);
         }
-        catch (...)
-        {
-            OutputDebugStringW(L"[InsertAuditLog] Unknown error\n");
-        }
+    }
+
+    void AllQuizzesManagementPage::ShowMessage(hstring const &title, hstring const &message, InfoBarSeverity severity)
+    {
+        ::quiz_examination_system::PageHelper::ShowInfoBar(ActionMessage(), title, message, severity);
     }
 }

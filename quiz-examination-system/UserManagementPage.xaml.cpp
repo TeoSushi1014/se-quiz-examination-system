@@ -6,6 +6,9 @@
 #include "UserItem.h"
 #include "BCryptPasswordHasher.h"
 #include "SupabaseClientManager.h"
+#include "PageHelper.h"
+#include "HttpHelper.h"
+#include "SupabaseConfig.h"
 #include <algorithm>
 #include <winrt/Windows.Web.Http.h>
 #include <winrt/Windows.Web.Http.Headers.h>
@@ -529,9 +532,7 @@ namespace winrt::quiz_examination_system::implementation
 
     void UserManagementPage::ShowMessage(hstring const &message, InfoBarSeverity severity)
     {
-        MessageBar().Message(message);
-        MessageBar().Severity(severity);
-        MessageBar().IsOpen(true);
+        ::quiz_examination_system::PageHelper::ShowInfoBar(MessageBar(), message, severity);
     }
 
     winrt::fire_and_forget UserManagementPage::InsertAuditLog(hstring action, hstring targetTable, hstring targetId, hstring details)
@@ -563,24 +564,8 @@ namespace winrt::quiz_examination_system::implementation
 
             hstring jsonBody = logData.Stringify();
 
-            hstring uriString = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/audit_logs";
-            Uri uri(uriString);
-            HttpRequestMessage request(HttpMethod::Post(), uri);
-            request.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-            request.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-            request.Headers().Insert(L"Content-Type", L"application/json");
-
-            auto bodyString = Windows::Storage::Streams::InMemoryRandomAccessStream();
-            auto writer = Windows::Storage::Streams::DataWriter(bodyString);
-            writer.WriteString(jsonBody);
-            co_await writer.StoreAsync();
-            writer.DetachStream();
-            bodyString.Seek(0);
-
-            request.Content(HttpStreamContent(bodyString));
-
-            HttpClient client;
-            auto response = co_await client.SendRequestAsync(request);
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"audit_logs");
+            co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(endpoint, jsonBody);
 
             OutputDebugStringW((L"[InsertAuditLog] Log inserted: " + action + L"\n").c_str());
         }

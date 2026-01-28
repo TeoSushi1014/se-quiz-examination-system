@@ -4,6 +4,9 @@
 #include "SystemLogsPage.g.cpp"
 #endif
 #include "LogItem.h"
+#include "HttpHelper.h"
+#include "SupabaseConfig.h"
+#include "PageHelper.h"
 #include <algorithm>
 
 using namespace winrt;
@@ -42,18 +45,11 @@ namespace winrt::quiz_examination_system::implementation
         try
         {
             hstring query = L"select=id,action,actor_id,target_table,target_id,details,created_at,users!audit_logs_actor_id_fkey(username)&order=created_at.desc&limit=200";
-            hstring uriString = L"https://tuciofxdzzrzwzqsltps.supabase.co/rest/v1/audit_logs?" + query;
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"audit_logs?" + query);
 
-            OutputDebugStringW((L"[SystemLogsPage] Request URI: " + std::wstring(uriString) + L"\n").c_str());
+            OutputDebugStringW((L"[SystemLogsPage] Request URI: " + std::wstring(endpoint) + L"\n").c_str());
 
-            Uri uri(uriString);
-            HttpRequestMessage request(HttpMethod::Get(), uri);
-            request.Headers().Append(L"apikey", L"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-            request.Headers().Append(L"Authorization", L"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Y2lvZnhkenpyend6cXNsdHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTY5ODAsImV4cCI6MjA4NDMzMjk4MH0.2b1FYJ1GxNm_Jwg6TkP0Lf7ZOuvkVctc_96EV_uzVnI");
-
-            OutputDebugStringW(L"[SystemLogsPage] Sending HTTP request...\n");
-            HttpClient client;
-            auto response = co_await client.SendRequestAsync(request);
+            hstring responseBody = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(endpoint, L"", HttpMethod::Get());
 
             if (!lifetime)
             {
@@ -61,28 +57,11 @@ namespace winrt::quiz_examination_system::implementation
                 co_return;
             }
 
-            auto statusCode = response.StatusCode();
-            OutputDebugStringW((L"[SystemLogsPage] HTTP Status Code: " + std::to_wstring(static_cast<int>(statusCode)) + L"\n").c_str());
-
-            auto content = co_await response.Content().ReadAsStringAsync();
-
-            if (!lifetime)
-            {
-                OutputDebugStringW(L"[SystemLogsPage] Page destroyed during content read\n");
-                co_return;
-            }
-
-            OutputDebugStringW((L"[SystemLogsPage] Response Body Length: " + std::to_wstring(content.size()) + L"\n").c_str());
-            OutputDebugStringW((L"[SystemLogsPage] Full Response Body: " + std::wstring(content) + L"\n").c_str());
-
-            if (statusCode != HttpStatusCode::Ok)
-            {
-                OutputDebugStringW(L"[SystemLogsPage] ERROR: Non-OK status code received\n");
-                throw hresult_error(E_FAIL, L"HTTP request failed with status: " + to_hstring(static_cast<int>(statusCode)));
-            }
+            OutputDebugStringW((L"[SystemLogsPage] Response Body Length: " + std::to_wstring(responseBody.size()) + L"\n").c_str());
+            OutputDebugStringW((L"[SystemLogsPage] Full Response Body: " + std::wstring(responseBody) + L"\n").c_str());
 
             OutputDebugStringW(L"[SystemLogsPage] Attempting to parse JSON...\n");
-            auto logsArray = JsonArray::Parse(content);
+            auto logsArray = JsonArray::Parse(responseBody);
             OutputDebugStringW((L"[SystemLogsPage] Parsed " + std::to_wstring(logsArray.Size()) + L" logs\n").c_str());
 
             m_allLogs.clear();
@@ -311,9 +290,7 @@ namespace winrt::quiz_examination_system::implementation
     {
         if (MessageBar())
         {
-            MessageBar().Message(message);
-            MessageBar().Severity(severity);
-            MessageBar().IsOpen(true);
+            ::quiz_examination_system::PageHelper::ShowInfoBar(MessageBar(), message, severity);
         }
     }
 }

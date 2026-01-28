@@ -20,6 +20,21 @@ namespace winrt::quiz_examination_system::implementation
         hstring Topic();
         void Topic(hstring const &value);
 
+        hstring OptionA();
+        void OptionA(hstring const &value);
+
+        hstring OptionB();
+        void OptionB(hstring const &value);
+
+        hstring OptionC();
+        void OptionC(hstring const &value);
+
+        hstring OptionD();
+        void OptionD(hstring const &value);
+
+        hstring CorrectOption();
+        void CorrectOption(hstring const &value);
+
         winrt::event_token PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const &handler);
         void PropertyChanged(winrt::event_token const &token) noexcept;
 
@@ -28,6 +43,11 @@ namespace winrt::quiz_examination_system::implementation
         hstring m_questionText;
         hstring m_difficultyLevel;
         hstring m_topic;
+        hstring m_optionA;
+        hstring m_optionB;
+        hstring m_optionC;
+        hstring m_optionD;
+        hstring m_correctOption;
 
         winrt::event<Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };

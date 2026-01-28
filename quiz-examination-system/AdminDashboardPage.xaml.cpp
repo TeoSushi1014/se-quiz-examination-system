@@ -3,9 +3,11 @@
 #if __has_include("AdminDashboardPage.g.cpp")
 #include "AdminDashboardPage.g.cpp"
 #endif
+#include "PageHelper.h"
 #include "UserManagementPage.xaml.h"
 #include "AllQuizzesManagementPage.xaml.h"
 #include "SystemLogsPage.xaml.h"
+#include "ReportsPage.xaml.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -41,7 +43,7 @@ namespace winrt::quiz_examination_system::implementation
             }
             else if (tag == L"reports")
             {
-                ShowMessage(L"Feature in development", L"Reports and analytics page will be available soon", InfoBarSeverity::Informational);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::ReportsPage>());
             }
             else if (tag == L"logs")
             {
@@ -229,10 +231,7 @@ namespace winrt::quiz_examination_system::implementation
 
     void AdminDashboardPage::ShowMessage(hstring const &title, hstring const &message, Microsoft::UI::Xaml::Controls::InfoBarSeverity severity)
     {
-        ActionMessage().Title(title);
-        ActionMessage().Message(message);
-        ActionMessage().Severity(severity);
-        ActionMessage().IsOpen(true);
+        ::quiz_examination_system::PageHelper::ShowInfoBar(ActionMessage(), title, message, severity);
     }
 
 }

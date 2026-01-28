@@ -6,9 +6,14 @@ namespace quiz_examination_system
     {
         QuestionItem();
         
-        String QuestionId;
-        String QuestionText;
-        String DifficultyLevel;
-        String Topic;
+        String QuestionId { get; set; };
+        String QuestionText { get; set; };
+        String DifficultyLevel { get; set; };
+        String Topic { get; set; };
+        String OptionA { get; set; };
+        String OptionB { get; set; };
+        String OptionC { get; set; };
+        String OptionD { get; set; };
+        String CorrectOption { get; set; };
     }
 }

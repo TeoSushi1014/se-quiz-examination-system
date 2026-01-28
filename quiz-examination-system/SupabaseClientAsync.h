@@ -74,6 +74,14 @@ namespace quiz_examination_system
 
         IAsyncOperation<bool> DeleteQuestionSafeAsync(hstring const &questionId);
 
+        IAsyncOperation<hstring> UpdateQuestionValidatedAsync(
+            hstring const &id,
+            hstring const &text,
+            hstring const &optA, hstring const &optB, hstring const &optC, hstring const &optD,
+            hstring const &correctOpt,
+            hstring const &difficulty,
+            hstring const &topic);
+
         IAsyncOperation<hstring> GetQuizQuestionsJsonAsync(hstring const &quizId);
 
         IAsyncOperation<hstring> GetStudentQuizzesJsonAsync(hstring const &studentId);

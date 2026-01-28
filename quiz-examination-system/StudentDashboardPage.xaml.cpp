@@ -5,6 +5,7 @@
 #if __has_include("StudentDashboardPage.g.cpp")
 #include "StudentDashboardPage.g.cpp"
 #endif
+#include "PageHelper.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -128,8 +129,6 @@ namespace winrt::quiz_examination_system::implementation
 
     void StudentDashboardPage::ShowMessage(hstring const &message, InfoBarSeverity severity)
     {
-        ActionMessage().Message(message);
-        ActionMessage().Severity(severity);
-        ActionMessage().IsOpen(true);
+        ::quiz_examination_system::PageHelper::ShowInfoBar(ActionMessage(), message, severity);
     }
 }

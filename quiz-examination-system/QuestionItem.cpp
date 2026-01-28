@@ -74,4 +74,74 @@ namespace winrt::quiz_examination_system::implementation
     {
         m_propertyChanged.remove(token);
     }
+
+    hstring QuestionItem::OptionA()
+    {
+        return m_optionA;
+    }
+
+    void QuestionItem::OptionA(hstring const &value)
+    {
+        if (m_optionA != value)
+        {
+            m_optionA = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs(L"OptionA"));
+        }
+    }
+
+    hstring QuestionItem::OptionB()
+    {
+        return m_optionB;
+    }
+
+    void QuestionItem::OptionB(hstring const &value)
+    {
+        if (m_optionB != value)
+        {
+            m_optionB = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs(L"OptionB"));
+        }
+    }
+
+    hstring QuestionItem::OptionC()
+    {
+        return m_optionC;
+    }
+
+    void QuestionItem::OptionC(hstring const &value)
+    {
+        if (m_optionC != value)
+        {
+            m_optionC = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs(L"OptionC"));
+        }
+    }
+
+    hstring QuestionItem::OptionD()
+    {
+        return m_optionD;
+    }
+
+    void QuestionItem::OptionD(hstring const &value)
+    {
+        if (m_optionD != value)
+        {
+            m_optionD = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs(L"OptionD"));
+        }
+    }
+
+    hstring QuestionItem::CorrectOption()
+    {
+        return m_correctOption;
+    }
+
+    void QuestionItem::CorrectOption(hstring const &value)
+    {
+        if (m_correctOption != value)
+        {
+            m_correctOption = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs(L"CorrectOption"));
+        }
+    }
 }

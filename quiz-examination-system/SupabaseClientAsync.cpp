@@ -131,7 +131,7 @@ namespace quiz_examination_system
                     resultJson.Insert(L"username", JsonValue::CreateStringValue(username));
                     resultJson.Insert(L"role", JsonValue::CreateStringValue(role));
                     resultJson.Insert(L"userId", JsonValue::CreateStringValue(userId));
-                    auto displayRole = (role == L"Admin") ? L"Administrator" : (role == L"Teacher") ? L"Lecturer"
+                    auto displayRole = (role == L"Admin") ? L"Administrator" : (role == L"Teacher") ? L"Teacher"
                                                                                                     : L"Student";
                     resultJson.Insert(L"displayRole", JsonValue::CreateStringValue(displayRole));
                 }
@@ -219,24 +219,48 @@ namespace quiz_examination_system
 
     IAsyncOperation<hstring> SupabaseClientAsync::GetQuestionsJsonAsync(hstring const &createdBy)
     {
+        hstring result = L"[]";
+
         try
         {
+            OutputDebugStringW(L"[GetQuestions] START - Fetching from Supabase\n");
+
+            // Create fresh HTTP client with no-cache policy like user management
+            HttpBaseProtocolFilter filter;
+            filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
+            filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
+            HttpClient freshClient(filter);
+
             Uri uri(m_projectUrl + L"/rest/v1/questions?select=*&created_by=eq." + createdBy + L"&order=created_at.desc");
             HttpRequestMessage request(HttpMethod::Get(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
             request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
 
-            auto response = co_await m_httpClient.SendRequestAsync(request);
+            auto response = co_await freshClient.SendRequestAsync(request);
+            OutputDebugStringW((L"[GetQuestions] HTTP Status: " + std::to_wstring((int)response.StatusCode()) + L"\n").c_str());
+
             if (response.StatusCode() == HttpStatusCode::Ok)
             {
                 auto content = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[GetQuestions] SUCCESS - Received " + std::to_wstring(content.size()) + L" chars\n").c_str());
                 co_return content;
             }
+            else
+            {
+                OutputDebugStringW((L"[GetQuestions] ERROR - Status: " + std::to_wstring((int)response.StatusCode()) + L"\n").c_str());
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[GetQuestions] EXCEPTION: " + ex.message() + L"\n").c_str());
         }
         catch (...)
         {
+            OutputDebugStringW(L"[GetQuestions] UNKNOWN ERROR\n");
         }
-        co_return L"[]";
+
+        OutputDebugStringW(L"[GetQuestions] Returning empty array\n");
+        co_return result;
     }
 
     IAsyncOperation<hstring> SupabaseClientAsync::CreateQuestionValidatedAsync(
@@ -249,40 +273,157 @@ namespace quiz_examination_system
 
         try
         {
-            JsonObject questionData;
-            questionData.Insert(L"id", JsonValue::CreateStringValue(id));
-            questionData.Insert(L"created_by", JsonValue::CreateStringValue(teacherId));
-            questionData.Insert(L"question_text", JsonValue::CreateStringValue(text));
-            questionData.Insert(L"option_a", JsonValue::CreateStringValue(optA));
-            questionData.Insert(L"option_b", JsonValue::CreateStringValue(optB));
-            questionData.Insert(L"option_c", JsonValue::CreateStringValue(optC));
-            questionData.Insert(L"option_d", JsonValue::CreateStringValue(optD));
-            questionData.Insert(L"correct_option", JsonValue::CreateStringValue(correctOpt));
-            questionData.Insert(L"difficulty_level", JsonValue::CreateStringValue(difficulty));
-            questionData.Insert(L"topic", JsonValue::CreateStringValue(topic));
+            OutputDebugStringW(L"[CreateQuestion] START - Using RPC function\n");
 
-            Uri uri(m_projectUrl + L"/rest/v1/questions");
+            // Create fresh HTTP client with no-cache policy like user management
+            HttpBaseProtocolFilter filter;
+            filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
+            filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
+            HttpClient freshClient(filter);
+
+            // Use RPC function like CreateUserAsync does
+            JsonObject params;
+            params.Insert(L"p_id", JsonValue::CreateStringValue(id));
+            params.Insert(L"p_created_by", JsonValue::CreateStringValue(teacherId));
+            params.Insert(L"p_question_text", JsonValue::CreateStringValue(text));
+            params.Insert(L"p_option_a", JsonValue::CreateStringValue(optA));
+            params.Insert(L"p_option_b", JsonValue::CreateStringValue(optB));
+            params.Insert(L"p_option_c", JsonValue::CreateStringValue(optC));
+            params.Insert(L"p_option_d", JsonValue::CreateStringValue(optD));
+            params.Insert(L"p_correct_option", JsonValue::CreateStringValue(correctOpt));
+            params.Insert(L"p_difficulty_level", JsonValue::CreateStringValue(difficulty));
+            params.Insert(L"p_topic", JsonValue::CreateStringValue(topic));
+
+            OutputDebugStringW((L"[CreateQuestion] RPC JSON: " + params.Stringify() + L"\n").c_str());
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/create_question_validated");
             HttpRequestMessage request(HttpMethod::Post(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
             request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
-            request.Headers().Insert(L"Prefer", L"return=minimal");
-            request.Content(HttpStringContent(questionData.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
 
-            auto response = co_await m_httpClient.SendRequestAsync(request);
+            auto response = co_await freshClient.SendRequestAsync(request);
+            auto statusCode = static_cast<int>(response.StatusCode());
+            OutputDebugStringW((L"[CreateQuestion] HTTP Status: " + std::to_wstring(statusCode) + L"\n").c_str());
 
-            if (response.StatusCode() == HttpStatusCode::Created)
+            if (response.StatusCode() == HttpStatusCode::Ok)
             {
-                resultJson.SetNamedValue(L"success", JsonValue::CreateBooleanValue(true));
-                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Question created successfully"));
+                auto content = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[CreateQuestion] Response: " + content + L"\n").c_str());
+
+                // RPC returns {"status": "success/error", "message": "...", "question_id": "..."}
+                auto rpcResult = JsonObject::Parse(content);
+                auto status = rpcResult.GetNamedString(L"status", L"error");
+
+                if (status == L"success")
+                {
+                    resultJson.SetNamedValue(L"success", JsonValue::CreateBooleanValue(true));
+                    resultJson.Insert(L"message", JsonValue::CreateStringValue(rpcResult.GetNamedString(L"message", L"Question created successfully")));
+                    OutputDebugStringW(L"[CreateQuestion] SUCCESS\n");
+                }
+                else
+                {
+                    resultJson.Insert(L"message", JsonValue::CreateStringValue(rpcResult.GetNamedString(L"message", L"Failed to create question")));
+                    OutputDebugStringW((L"[CreateQuestion] RPC ERROR: " + rpcResult.GetNamedString(L"message") + L"\n").c_str());
+                }
             }
             else
             {
+                auto errorContent = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[CreateQuestion] HTTP Error: " + errorContent + L"\n").c_str());
                 resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to create question"));
             }
         }
         catch (hresult_error const &ex)
         {
+            OutputDebugStringW((L"[CreateQuestion] Exception: " + ex.message() + L"\n").c_str());
             resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+        }
+        catch (...)
+        {
+            OutputDebugStringW(L"[CreateQuestion] Unknown exception\n");
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Unknown error occurred"));
+        }
+
+        co_return resultJson.Stringify();
+    }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::UpdateQuestionValidatedAsync(
+        hstring const &id, hstring const &text,
+        hstring const &optA, hstring const &optB, hstring const &optC, hstring const &optD,
+        hstring const &correctOpt, hstring const &difficulty, hstring const &topic)
+    {
+        JsonObject resultJson;
+        resultJson.Insert(L"success", JsonValue::CreateBooleanValue(false));
+
+        try
+        {
+            OutputDebugStringW(L"[UpdateQuestion] START - Using RPC function\n");
+
+            HttpBaseProtocolFilter filter;
+            filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
+            filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
+            HttpClient freshClient(filter);
+
+            JsonObject params;
+            params.Insert(L"p_id", JsonValue::CreateStringValue(id));
+            params.Insert(L"p_question_text", JsonValue::CreateStringValue(text));
+            params.Insert(L"p_option_a", JsonValue::CreateStringValue(optA));
+            params.Insert(L"p_option_b", JsonValue::CreateStringValue(optB));
+            params.Insert(L"p_option_c", JsonValue::CreateStringValue(optC));
+            params.Insert(L"p_option_d", JsonValue::CreateStringValue(optD));
+            params.Insert(L"p_correct_option", JsonValue::CreateStringValue(correctOpt));
+            params.Insert(L"p_difficulty_level", JsonValue::CreateStringValue(difficulty));
+            params.Insert(L"p_topic", JsonValue::CreateStringValue(topic));
+
+            OutputDebugStringW((L"[UpdateQuestion] RPC JSON: " + params.Stringify() + L"\n").c_str());
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/update_question_validated");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto response = co_await freshClient.SendRequestAsync(request);
+            auto statusCode = static_cast<int>(response.StatusCode());
+            OutputDebugStringW((L"[UpdateQuestion] HTTP Status: " + std::to_wstring(statusCode) + L"\n").c_str());
+
+            if (response.StatusCode() == HttpStatusCode::Ok)
+            {
+                auto content = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[UpdateQuestion] Response: " + content + L"\n").c_str());
+
+                auto rpcResult = JsonObject::Parse(content);
+                auto status = rpcResult.GetNamedString(L"status", L"error");
+
+                if (status == L"success")
+                {
+                    resultJson.SetNamedValue(L"success", JsonValue::CreateBooleanValue(true));
+                    resultJson.Insert(L"message", JsonValue::CreateStringValue(rpcResult.GetNamedString(L"message", L"Question updated successfully")));
+                    OutputDebugStringW(L"[UpdateQuestion] SUCCESS\n");
+                }
+                else
+                {
+                    resultJson.Insert(L"message", JsonValue::CreateStringValue(rpcResult.GetNamedString(L"message", L"Failed to update question")));
+                    OutputDebugStringW((L"[UpdateQuestion] RPC ERROR: " + rpcResult.GetNamedString(L"message") + L"\n").c_str());
+                }
+            }
+            else
+            {
+                auto errorContent = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[UpdateQuestion] HTTP Error: " + errorContent + L"\n").c_str());
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to update question"));
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[UpdateQuestion] Exception: " + ex.message() + L"\n").c_str());
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+        }
+        catch (...)
+        {
+            OutputDebugStringW(L"[UpdateQuestion] Unknown exception\n");
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Unknown error occurred"));
         }
 
         co_return resultJson.Stringify();
@@ -292,17 +433,66 @@ namespace quiz_examination_system
     {
         try
         {
-            Uri uri(m_projectUrl + L"/rest/v1/questions?id=eq." + questionId);
-            HttpRequestMessage request(HttpMethod::Delete(), uri);
+            OutputDebugStringW(L"[DeleteQuestionSafe] START - Using RPC function\n");
+            OutputDebugStringW((L"[DeleteQuestionSafe] QuestionId: '" + questionId + L"'\n").c_str());
+
+            // Create fresh HTTP client with no-cache policy like other operations
+            HttpBaseProtocolFilter filter;
+            filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
+            filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
+            HttpClient freshClient(filter);
+
+            // Use RPC function delete_question_safe
+            JsonObject params;
+            params.Insert(L"question_id_input", JsonValue::CreateStringValue(questionId));
+
+            OutputDebugStringW((L"[DeleteQuestionSafe] RPC JSON: " + params.Stringify() + L"\n").c_str());
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/delete_question_safe");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
             request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
-            request.Headers().Insert(L"Prefer", L"return=minimal");
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
 
-            auto response = co_await m_httpClient.SendRequestAsync(request);
-            co_return response.StatusCode() == HttpStatusCode::NoContent;
+            auto response = co_await freshClient.SendRequestAsync(request);
+            auto statusCode = static_cast<int>(response.StatusCode());
+            OutputDebugStringW((L"[DeleteQuestionSafe] HTTP Status: " + std::to_wstring(statusCode) + L"\n").c_str());
+
+            if (response.StatusCode() == HttpStatusCode::Ok)
+            {
+                auto content = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[DeleteQuestionSafe] Response: " + content + L"\n").c_str());
+
+                // RPC returns {"status": "success/error/blocked", "message": "..."}
+                auto rpcResult = JsonObject::Parse(content);
+                auto status = rpcResult.GetNamedString(L"status", L"error");
+
+                if (status == L"success")
+                {
+                    OutputDebugStringW(L"[DeleteQuestionSafe] SUCCESS\n");
+                    co_return true;
+                }
+                else
+                {
+                    OutputDebugStringW((L"[DeleteQuestionSafe] RPC returned: " + status + L" - " + rpcResult.GetNamedString(L"message") + L"\n").c_str());
+                    co_return false;
+                }
+            }
+            else
+            {
+                auto errorContent = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[DeleteQuestionSafe] HTTP Error: " + errorContent + L"\n").c_str());
+                co_return false;
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[DeleteQuestionSafe] Exception: " + ex.message() + L"\n").c_str());
+            co_return false;
         }
         catch (...)
         {
+            OutputDebugStringW(L"[DeleteQuestionSafe] Unknown exception\n");
             co_return false;
         }
     }

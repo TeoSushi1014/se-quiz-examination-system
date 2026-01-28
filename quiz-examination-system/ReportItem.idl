@@ -1,0 +1,16 @@
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass ReportItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        ReportItem(String studentName, Int32 attemptNumber, Double score, Double totalPoints, String timeSpent, String submittedDate);
+        
+        String StudentName { get; };
+        Int32 AttemptNumber { get; };
+        Double Score { get; };
+        Double TotalPoints { get; };
+        String FormattedScore { get; };
+        String TimeSpent { get; };
+        String SubmittedDate { get; };
+    }
+}

@@ -38,6 +38,8 @@
     <EnableMsixTooling>false</EnableMsixTooling>
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- Suppress WindowsAppSDK duplicate file warning -->
+    <DisableSpecificWarnings>MSB8027;%(DisableSpecificWarnings)</DisableSpecificWarnings>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <ItemGroup Label="ProjectConfigurations">
@@ -147,6 +149,7 @@
     <ClInclude Include="QuizManagementItem.h" />
     <ClInclude Include="LogItem.h" />
     <ClInclude Include="UserItem.h" />
+    <ClInclude Include="ReportItem.h" />
     <ClInclude Include="UserManagementPage.xaml.h">
       <DependentUpon>UserManagementPage.xaml</DependentUpon>
     </ClInclude>
@@ -156,9 +159,19 @@
     <ClInclude Include="SystemLogsPage.xaml.h">
       <DependentUpon>SystemLogsPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="ReportsPage.xaml.h">
+      <DependentUpon>ReportsPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="QuestionBankPage.xaml.h">
+      <DependentUpon>QuestionBankPage.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="SupabaseClient.h" />
     <ClInclude Include="SupabaseClientAsync.h" />
     <ClInclude Include="SupabaseClientManager.h" />
+    <ClInclude Include="SupabaseConfig.h" />
+    <ClInclude Include="HttpHelper.h" />
+    <ClInclude Include="PageHelper.h" />
+    <ClInclude Include="DateTimeHelper.h" />
     <ClInclude Include="BCryptPasswordHasher.h" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +184,8 @@
     <Page Include="UserManagementPage.xaml" />
     <Page Include="AllQuizzesManagementPage.xaml" />
     <Page Include="SystemLogsPage.xaml" />
+    <Page Include="ReportsPage.xaml" />
+    <Page Include="QuestionBankPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -199,6 +214,7 @@
     <ClCompile Include="QuizManagementItem.cpp" />
     <ClCompile Include="LogItem.cpp" />
     <ClCompile Include="UserItem.cpp" />
+    <ClCompile Include="ReportItem.cpp" />
     <ClCompile Include="UserManagementPage.xaml.cpp">
       <DependentUpon>UserManagementPage.xaml</DependentUpon>
     </ClCompile>
@@ -207,6 +223,12 @@
     </ClCompile>
     <ClCompile Include="SystemLogsPage.xaml.cpp">
       <DependentUpon>SystemLogsPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="ReportsPage.xaml.cpp">
+      <DependentUpon>ReportsPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="QuestionBankPage.xaml.cpp">
+      <DependentUpon>QuestionBankPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="SupabaseClient.cpp" />
@@ -246,6 +268,9 @@
     <Midl Include="LogItem.idl">
       <SubType>Code</SubType>
     </Midl>
+    <Midl Include="ReportItem.idl">
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="UserItem.idl">
       <SubType>Code</SubType>
     </Midl>
@@ -260,6 +285,14 @@
     <Midl Include="SystemLogsPage.idl">
       <SubType>Code</SubType>
       <DependentUpon>SystemLogsPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="ReportsPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>ReportsPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="QuestionBankPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>QuestionBankPage.xaml</DependentUpon>
     </Midl>
   </ItemGroup>
   <ItemGroup>

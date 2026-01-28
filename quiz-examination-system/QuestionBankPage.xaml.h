@@ -5,6 +5,7 @@
 #include "SupabaseClientAsync.h"
 #include "SupabaseClientManager.h"
 #include <winrt/Windows.Foundation.Collections.h>
+#include <set>
 
 namespace winrt::quiz_examination_system::implementation
 {
@@ -16,8 +17,8 @@ namespace winrt::quiz_examination_system::implementation
         void AddQuestion_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
         void ImportQuestions_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
         void RefreshQuestions_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
-        void EditQuestion_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
-        void DeleteQuestion_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
+        winrt::fire_and_forget EditQuestion_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
+        winrt::fire_and_forget DeleteQuestion_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
 
     private:
         Windows::Foundation::Collections::IObservableVector<quiz_examination_system::QuestionItem> m_questions;

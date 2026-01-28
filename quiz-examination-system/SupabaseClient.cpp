@@ -123,7 +123,7 @@ namespace quiz_examination_system
                                                                     m_httpClient.SendRequestAsync(resetReq);
                                                                     
                                                                     hstring displayRole = (role == L"Admin") ? L"Administrator" : 
-                                                                                         (role == L"Teacher") ? L"Lecturer" : L"Student";
+                                                                                         (role == L"Teacher") ? L"Teacher" : L"Student";
                                                                     if (OnLoginSuccess)
                                                                     {
                                                                         OnLoginSuccess(username, displayRole, role, userId);
