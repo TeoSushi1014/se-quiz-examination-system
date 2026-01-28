@@ -201,10 +201,10 @@ namespace winrt::quiz_examination_system::implementation
             bool isAdmin = m_currentRole == L"Administrator";
 
             NavUsers().Visibility(isAdmin ? Visibility::Visible : Visibility::Collapsed);
-            NavQuestionBank().Visibility(isTeacher ? Visibility::Visible : Visibility::Collapsed);
-            NavManageQuizzes().Visibility(isTeacher ? Visibility::Visible : Visibility::Collapsed);
-            NavReviewAttempts().Visibility(isTeacher ? Visibility::Visible : Visibility::Collapsed);
-            NavReports().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavQuestionBank().Visibility((isTeacher || isAdmin) ? Visibility::Visible : Visibility::Collapsed);
+            NavManageQuizzes().Visibility((isTeacher || isAdmin) ? Visibility::Visible : Visibility::Collapsed);
+            NavReviewAttempts().Visibility((isTeacher || isAdmin) ? Visibility::Visible : Visibility::Collapsed);
+            NavReports().Visibility((isTeacher || isAdmin) ? Visibility::Visible : Visibility::Collapsed);
             NavAuditLogs().Visibility(isAdmin ? Visibility::Visible : Visibility::Collapsed);
             NavHistory().Visibility(isStudent ? Visibility::Visible : Visibility::Collapsed);
 
