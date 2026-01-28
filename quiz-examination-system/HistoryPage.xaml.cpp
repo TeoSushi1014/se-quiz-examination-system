@@ -24,7 +24,7 @@ namespace winrt::quiz_examination_system::implementation
 
     void HistoryPage::Page_Loaded(IInspectable const &, RoutedEventArgs const &)
     {
-        m_studentId = ::quiz_examination_system::SupabaseClientManager::Instance().GetCurrentUserId();
+        m_studentId = ::quiz_examination_system::SupabaseClientManager::GetInstance().GetUserId();
         LoadHistory();
     }
 
@@ -42,7 +42,8 @@ namespace winrt::quiz_examination_system::implementation
 
             auto jsonStr = co_await m_supabaseClient->GetStudentHistoryAsync(m_studentId);
 
-            OutputDebugStringW((L"[HistoryPage] Response: " + jsonStr.substr(0, min((size_t)200, jsonStr.size())) + L"\n").c_str());
+            std::wstring jsonStrW(jsonStr);
+            OutputDebugStringW((L"[HistoryPage] Response: " + jsonStrW.substr(0, min((size_t)200, jsonStrW.size())) + L"\n").c_str());
 
             JsonArray historyArray;
             if (!JsonArray::TryParse(jsonStr, historyArray))
