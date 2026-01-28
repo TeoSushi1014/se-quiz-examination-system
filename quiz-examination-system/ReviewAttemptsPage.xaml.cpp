@@ -40,9 +40,10 @@ namespace winrt::quiz_examination_system::implementation
         {
             auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
             auto teacherId = manager.GetUserId();
+            auto userRole = manager.GetRole();
 
-            OutputDebugStringW(L"[ReviewAttemptsPage] Loading quiz list for teacher...\n");
-            auto quizzesJson = co_await m_client->GetQuizzesJsonAsync(teacherId);
+            OutputDebugStringW((L"[ReviewAttemptsPage] Loading quiz list for user (role: " + userRole + L")...\n").c_str());
+            auto quizzesJson = co_await m_client->GetQuizzesJsonAsync(teacherId, userRole);
 
             OutputDebugStringW(L"[ReviewAttemptsPage] Received quiz response\n");
 

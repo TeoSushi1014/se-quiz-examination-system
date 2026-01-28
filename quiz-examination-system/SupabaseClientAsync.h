@@ -61,7 +61,7 @@ namespace quiz_examination_system
 
         IAsyncOperation<bool> ChangePasswordAsync(hstring const &username, hstring const &currentPassword, hstring const &newPassword);
 
-        IAsyncOperation<hstring> GetQuestionsJsonAsync(hstring const &createdBy);
+        IAsyncOperation<hstring> GetQuestionsJsonAsync(hstring const &createdBy, hstring const &userRole = L"Teacher");
 
         IAsyncOperation<hstring> CreateQuestionValidatedAsync(
             hstring const &id,
@@ -86,7 +86,7 @@ namespace quiz_examination_system
 
         IAsyncOperation<hstring> GetStudentQuizzesJsonAsync(hstring const &studentId);
 
-        IAsyncOperation<hstring> GetQuizzesJsonAsync(hstring const &createdBy);
+        IAsyncOperation<hstring> GetQuizzesJsonAsync(hstring const &createdBy, hstring const &userRole = L"Teacher");
 
         IAsyncOperation<hstring> CreateQuizFullAsync(
             hstring const &quizId,

@@ -45,6 +45,7 @@ namespace winrt::quiz_examination_system::implementation
         {
             auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
             hstring teacherId = manager.GetUserId();
+            hstring userRole = manager.GetRole();
 
             if (teacherId.empty())
             {
@@ -54,10 +55,22 @@ namespace winrt::quiz_examination_system::implementation
                 co_return;
             }
 
-            OutputDebugStringW((L"[LoadQuestions] Teacher ID: " + teacherId + L"\n").c_str());
+            OutputDebugStringW((L"[LoadQuestions] User ID: " + teacherId + L", Role: " + userRole + L"\n").c_str());
 
-            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(
-                L"questions?select=*&created_by=eq." + teacherId + L"&order=created_at.desc");
+            // Admin can see all questions, Teacher only sees their own
+            hstring queryParams;
+            if (userRole == L"Admin")
+            {
+                OutputDebugStringW(L"[LoadQuestions] Admin user - Loading ALL questions\n");
+                queryParams = L"questions?select=*&order=created_at.desc";
+            }
+            else
+            {
+                OutputDebugStringW(L"[LoadQuestions] Teacher user - Loading own questions\n");
+                queryParams = L"questions?select=*&created_by=eq." + teacherId + L"&order=created_at.desc";
+            }
+
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(queryParams);
             hstring content = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(endpoint, L"", HttpMethod::Get());
 
             OutputDebugStringW((L"[LoadQuestions] Response: " + std::wstring(content).substr(0, 200) + L"...\n").c_str());

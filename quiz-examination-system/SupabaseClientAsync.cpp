@@ -234,20 +234,33 @@ namespace quiz_examination_system
         }
     }
 
-    IAsyncOperation<hstring> SupabaseClientAsync::GetQuestionsJsonAsync(hstring const &createdBy)
+    IAsyncOperation<hstring> SupabaseClientAsync::GetQuestionsJsonAsync(hstring const &createdBy, hstring const &userRole)
     {
         hstring result = L"[]";
 
         try
         {
-            OutputDebugStringW(L"[GetQuestions] START - Fetching from Supabase\n");
+            OutputDebugStringW((L"[GetQuestions] START - Fetching from Supabase (role: " + userRole + L")\n").c_str());
 
             HttpBaseProtocolFilter filter;
             filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
             filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
             HttpClient freshClient(filter);
 
-            Uri uri(m_projectUrl + L"/rest/v1/questions?select=*&created_by=eq." + createdBy + L"&order=created_at.desc");
+            // Admin can see all questions, Teacher only sees their own
+            hstring queryUrl;
+            if (userRole == L"Admin")
+            {
+                OutputDebugStringW(L"[GetQuestions] Admin user - Fetching ALL questions\n");
+                queryUrl = m_projectUrl + L"/rest/v1/questions?select=*&order=created_at.desc";
+            }
+            else
+            {
+                OutputDebugStringW((L"[GetQuestions] Teacher user - Fetching questions for: " + createdBy + L"\n").c_str());
+                queryUrl = m_projectUrl + L"/rest/v1/questions?select=*&created_by=eq." + createdBy + L"&order=created_at.desc";
+            }
+
+            Uri uri(queryUrl);
             HttpRequestMessage request(HttpMethod::Get(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
             request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
@@ -803,21 +816,32 @@ namespace quiz_examination_system
         }
     }
 
-    IAsyncOperation<hstring> SupabaseClientAsync::GetQuizzesJsonAsync(hstring const &createdBy)
+    IAsyncOperation<hstring> SupabaseClientAsync::GetQuizzesJsonAsync(hstring const &createdBy, hstring const &userRole)
     {
         try
         {
             auto trimmedUserId = TrimUserId(createdBy);
-            OutputDebugStringW((L"[GetQuizzes] Fetching quizzes for teacher: " + trimmedUserId + L"\n").c_str());
+            OutputDebugStringW((L"[GetQuizzes] Fetching quizzes for user: " + trimmedUserId + L" (role: " + userRole + L")\n").c_str());
 
             HttpBaseProtocolFilter filter;
             filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
             filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
             HttpClient freshClient(filter);
 
-            auto uriString = m_projectUrl + L"/rest/v1/quizzes?created_by=eq." + trimmedUserId + 
-                           L"&select=id,title,time_limit_minutes,total_points,max_attempts,result_visibility,shuffle_questions,shuffle_answers,created_at";
-            
+            // Admin can see all quizzes, Teacher only sees their own
+            hstring uriString;
+            if (userRole == L"Admin")
+            {
+                OutputDebugStringW(L"[GetQuizzes] Admin user - Fetching ALL quizzes\n");
+                uriString = m_projectUrl + L"/rest/v1/quizzes?select=id,title,time_limit_minutes,total_points,max_attempts,result_visibility,shuffle_questions,shuffle_answers,created_at,created_by";
+            }
+            else
+            {
+                OutputDebugStringW(L"[GetQuizzes] Teacher user - Fetching own quizzes\n");
+                uriString = m_projectUrl + L"/rest/v1/quizzes?created_by=eq." + trimmedUserId +
+                            L"&select=id,title,time_limit_minutes,total_points,max_attempts,result_visibility,shuffle_questions,shuffle_answers,created_at";
+            }
+
             Uri uri(uriString);
             HttpRequestMessage request(HttpMethod::Get(), uri);
             request.Headers().Insert(L"apikey", m_anonKey);
@@ -882,7 +906,7 @@ namespace quiz_examination_system
         {
             auto trimmedTeacherId = TrimUserId(teacherId);
             auto trimmedQuizId = TrimUserId(quizId);
-            
+
             OutputDebugStringW((L"[CreateQuizFull] Creating quiz: " + trimmedQuizId + L"\n").c_str());
             OutputDebugStringW((L"[CreateQuizFull] Teacher: " + trimmedTeacherId + L"\n").c_str());
             OutputDebugStringW((L"[CreateQuizFull] Title: " + title + L"\n").c_str());
@@ -1150,8 +1174,8 @@ namespace quiz_examination_system
             OutputDebugStringW((L"[GetStudentHistory] Fetching history for student: " + trimmedStudentId + L"\n").c_str());
 
             // Query quiz_attempts with quiz title join
-            auto uriString = m_projectUrl + L"/rest/v1/quiz_attempts?student_id=eq." + trimmedStudentId + 
-                            L"&select=id,quiz_id,attempt_number,score,total_points,correct_count,incorrect_count,time_spent_seconds,status,submitted_at,quizzes(title)&order=submitted_at.desc";
+            auto uriString = m_projectUrl + L"/rest/v1/quiz_attempts?student_id=eq." + trimmedStudentId +
+                             L"&select=id,quiz_id,attempt_number,score,total_points,correct_count,incorrect_count,time_spent_seconds,status,submitted_at,quizzes(title)&order=submitted_at.desc";
 
             Uri uri(uriString);
             HttpRequestMessage request(HttpMethod::Get(), uri);
@@ -1165,7 +1189,7 @@ namespace quiz_examination_system
             if (statusCode == HttpStatusCode::Ok)
             {
                 auto responseBody = co_await response.Content().ReadAsStringAsync();
-                
+
                 // Parse and transform to include quiz_title at top level
                 JsonArray inputArray;
                 if (JsonArray::TryParse(responseBody, inputArray))
@@ -1214,4 +1238,3 @@ namespace quiz_examination_system
         co_return L"[]";
     }
 }
-

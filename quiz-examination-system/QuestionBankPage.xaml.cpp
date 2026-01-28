@@ -36,10 +36,13 @@ namespace winrt::quiz_examination_system::implementation
         teacherIdStr.erase(teacherIdStr.find_last_not_of(L" \t\n\r") + 1);
         hstring teacherId = hstring(teacherIdStr);
 
+        // Get user role to determine if we should fetch all questions (for Admin) or just user's questions (for Teacher)
+        auto userRole = manager.GetRole();
+
         try
         {
-            OutputDebugStringW((L"[LoadQuestions] Fetching questions for teacherId: '" + teacherId + L"' (length: " + to_hstring(teacherId.size()) + L")\n").c_str());
-            auto questionsJson = co_await m_client->GetQuestionsJsonAsync(teacherId);
+            OutputDebugStringW((L"[LoadQuestions] User role: '" + userRole + L"', Fetching questions for userId: '" + teacherId + L"' (length: " + to_hstring(teacherId.size()) + L")\n").c_str());
+            auto questionsJson = co_await m_client->GetQuestionsJsonAsync(teacherId, userRole);
             OutputDebugStringW((L"[LoadQuestions] Received JSON: " + std::wstring(questionsJson).substr(0, 100) + L"...\n").c_str());
 
             m_questions.Clear();

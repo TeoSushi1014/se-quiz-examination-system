@@ -46,11 +46,12 @@ namespace winrt::quiz_examination_system::implementation
         std::wstring teacherIdStr(teacherIdRaw);
         teacherIdStr.erase(teacherIdStr.find_last_not_of(L" \t\n\r") + 1);
         hstring teacherId = hstring(teacherIdStr);
+        auto userRole = manager.GetRole();
 
         try
         {
-            OutputDebugStringW((L"[LoadQuizzes] Fetching quizzes for teacherId: '" + std::wstring(teacherId) + L"'\n").c_str());
-            auto quizzesJson = co_await m_client->GetQuizzesJsonAsync(teacherId);
+            OutputDebugStringW((L"[LoadQuizzes] User role: '" + userRole + L"', Fetching quizzes for userId: '" + std::wstring(teacherId) + L"'\n").c_str());
+            auto quizzesJson = co_await m_client->GetQuizzesJsonAsync(teacherId, userRole);
             OutputDebugStringW(L"[LoadQuizzes] Received JSON\n");
 
             m_quizzes.Clear();
@@ -101,10 +102,11 @@ namespace winrt::quiz_examination_system::implementation
         std::wstring teacherIdStr(teacherIdRaw);
         teacherIdStr.erase(teacherIdStr.find_last_not_of(L" \t\n\r") + 1);
         hstring teacherId = hstring(teacherIdStr);
+        auto userRole = manager.GetRole();
 
         try
         {
-            auto questionsJson = co_await m_client->GetQuestionsJsonAsync(teacherId);
+            auto questionsJson = co_await m_client->GetQuestionsJsonAsync(teacherId, userRole);
             m_availableQuestions.Clear();
             m_allQuestions.clear();
 
