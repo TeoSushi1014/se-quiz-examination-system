@@ -42,7 +42,7 @@ namespace winrt::quiz_examination_system::implementation
 
         winrt::fire_and_forget LoadQuizzes();
         winrt::fire_and_forget LoadAvailableQuestions();
-        winrt::fire_and_forget LoadStudents();
+        Windows::Foundation::IAsyncAction LoadStudentsAsync();
         winrt::fire_and_forget ShowQuizEditorDialog();
         void ShowMessage(hstring const &message, Microsoft::UI::Xaml::Controls::InfoBarSeverity severity);
     };

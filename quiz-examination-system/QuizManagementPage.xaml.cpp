@@ -485,7 +485,7 @@ namespace winrt::quiz_examination_system::implementation
         }
     }
 
-    winrt::fire_and_forget QuizManagementPage::LoadStudents()
+    Windows::Foundation::IAsyncAction QuizManagementPage::LoadStudentsAsync()
     {
         auto lifetime = get_strong();
 
@@ -548,7 +548,7 @@ namespace winrt::quiz_examination_system::implementation
         AssignQuizTitle().Text(L"Quiz: " + quizTitle);
 
         // Load students
-        co_await LoadStudents();
+        co_await LoadStudentsAsync();
 
         // Populate student list
         StudentSelectionList().Items().Clear();
@@ -599,15 +599,11 @@ namespace winrt::quiz_examination_system::implementation
                 co_return;
             }
 
-            // Get selected dates and times
-            auto startDate = AssignStartDate().Date();
-            auto endDate = AssignEndDate().Date();
-            auto startTime = AssignStartTime().Time();
-            auto endTime = AssignEndTime().Time();
-
-            // Combine date and time
-            auto startDateVal = startDate.Value();
-            auto endDateVal = endDate.Value();
+            // Get selected dates and times - DatePicker.Date() returns DateTime directly
+            Windows::Foundation::DateTime startDate = AssignStartDate().Date();
+            Windows::Foundation::DateTime endDate = AssignEndDate().Date();
+            Windows::Foundation::TimeSpan startTimeSpan = AssignStartTime().Time();
+            Windows::Foundation::TimeSpan endTimeSpan = AssignEndTime().Time();
 
             // Create timestamps
             std::wstring startTimestamp = L"";
@@ -615,12 +611,12 @@ namespace winrt::quiz_examination_system::implementation
 
             // Format dates
             {
-                auto startTimeT = winrt::clock::to_time_t(startDateVal);
+                auto startTimeT = winrt::clock::to_time_t(startDate);
                 std::tm startTm;
-                gmtime_s(&startTm, &startTimeT);
+                localtime_s(&startTm, &startTimeT);
 
-                int startHours = static_cast<int>(startTime.count() / 10000000LL / 3600);
-                int startMinutes = static_cast<int>((startTime.count() / 10000000LL % 3600) / 60);
+                int startHours = static_cast<int>(startTimeSpan.count() / 10000000LL / 3600);
+                int startMinutes = static_cast<int>((startTimeSpan.count() / 10000000LL % 3600) / 60);
 
                 wchar_t buf[64];
                 swprintf_s(buf, L"%04d-%02d-%02dT%02d:%02d:00",
@@ -628,12 +624,12 @@ namespace winrt::quiz_examination_system::implementation
                            startHours, startMinutes);
                 startTimestamp = buf;
 
-                auto endTimeT = winrt::clock::to_time_t(endDateVal);
+                auto endTimeT = winrt::clock::to_time_t(endDate);
                 std::tm endTm;
-                gmtime_s(&endTm, &endTimeT);
+                localtime_s(&endTm, &endTimeT);
 
-                int endHours = static_cast<int>(endTime.count() / 10000000LL / 3600);
-                int endMinutes = static_cast<int>((endTime.count() / 10000000LL % 3600) / 60);
+                int endHours = static_cast<int>(endTimeSpan.count() / 10000000LL / 3600);
+                int endMinutes = static_cast<int>((endTimeSpan.count() / 10000000LL % 3600) / 60);
 
                 swprintf_s(buf, L"%04d-%02d-%02dT%02d:%02d:00",
                            endTm.tm_year + 1900, endTm.tm_mon + 1, endTm.tm_mday,
