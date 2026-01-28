@@ -101,14 +101,17 @@
                     <ProgressRing x:Name="LoadingRing" IsActive="False" Width="60" Height="60"/>
             
                     <TextBlock x:Name="EmptyStateText" 
-                              Text="No attempts found for this quiz" 
+                              Text="No results available to display or export" 
                               HorizontalAlignment="Center" 
                               VerticalAlignment="Center"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               FontSize="16"
                               Visibility="Collapsed"/>
             
-                    <ListView x:Name="ReportListView" SelectionMode="None">
+                    <ListView x:Name="ReportListView" 
+                             SelectionMode="Single"
+                             ItemClick="ReportListView_ItemClick"
+                             IsItemClickEnabled="True">
                         <ListView.Header>
                             <Grid Padding="16,12" 
                                  Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"

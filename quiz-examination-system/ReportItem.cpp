@@ -6,8 +6,8 @@
 
 namespace winrt::quiz_examination_system::implementation
 {
-    ReportItem::ReportItem(hstring const &studentName, int32_t attemptNumber, double score, double totalPoints, hstring const &timeSpent, hstring const &submittedDate)
-        : m_studentName(studentName), m_attemptNumber(attemptNumber), m_score(score), m_totalPoints(totalPoints), m_timeSpent(timeSpent), m_submittedDate(submittedDate)
+    ReportItem::ReportItem(hstring const &attemptId, hstring const &studentName, int32_t attemptNumber, double score, double totalPoints, hstring const &timeSpent, hstring const &submittedDate)
+        : m_attemptId(attemptId), m_studentName(studentName), m_attemptNumber(attemptNumber), m_score(score), m_totalPoints(totalPoints), m_timeSpent(timeSpent), m_submittedDate(submittedDate)
     {
     }
 

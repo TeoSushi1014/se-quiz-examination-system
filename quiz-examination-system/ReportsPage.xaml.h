@@ -23,6 +23,7 @@ namespace winrt::quiz_examination_system::implementation
         void Page_Loaded(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
         void QuizSelector_SelectionChanged(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const &e);
         void ExportCsv_Click(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
+        void ReportListView_ItemClick(Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const &e);
 
     private:
         Windows::Foundation::Collections::IObservableVector<quiz_examination_system::ReportItem> m_reports;

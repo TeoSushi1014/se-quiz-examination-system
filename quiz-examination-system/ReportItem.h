@@ -5,8 +5,9 @@ namespace winrt::quiz_examination_system::implementation
 {
     struct ReportItem : ReportItemT<ReportItem>
     {
-        ReportItem(hstring const &studentName, int32_t attemptNumber, double score, double totalPoints, hstring const &timeSpent, hstring const &submittedDate);
+        ReportItem(hstring const &attemptId, hstring const &studentName, int32_t attemptNumber, double score, double totalPoints, hstring const &timeSpent, hstring const &submittedDate);
 
+        hstring AttemptId() { return m_attemptId; }
         hstring StudentName() { return m_studentName; }
         int32_t AttemptNumber() { return m_attemptNumber; }
         double Score() { return m_score; }
@@ -19,6 +20,7 @@ namespace winrt::quiz_examination_system::implementation
         void PropertyChanged(winrt::event_token const &token) noexcept { m_propertyChanged.remove(token); }
 
     private:
+        hstring m_attemptId;
         hstring m_studentName;
         int32_t m_attemptNumber;
         double m_score;

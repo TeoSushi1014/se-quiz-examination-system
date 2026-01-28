@@ -32,21 +32,18 @@ namespace quiz_examination_system
             using namespace Windows::Web::Http;
             using namespace Windows::Storage::Streams;
 
-            // Add cache-busting timestamp for GET requests
-            hstring finalUrl = url;
-            if (method == HttpMethod::Get())
-            {
-                auto timestamp = std::chrono::system_clock::now().time_since_epoch().count();
-                std::wstring urlStr(url);
-                auto separator = urlStr.find(L'?') == std::wstring::npos ? L"?" : L"&";
-                finalUrl = url + hstring(separator) + L"_t=" + to_hstring(timestamp);
-            }
-
             HttpClient client;
-            Windows::Foundation::Uri uri(finalUrl);
+            Windows::Foundation::Uri uri(url);
             HttpRequestMessage request(method, uri);
 
             SetSupabaseHeaders(request);
+
+            // Add cache-busting via header instead of query string to avoid PostgREST filter parsing issues
+            if (method == HttpMethod::Get())
+            {
+                auto timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+                request.Headers().Insert(L"X-Cache-Bust", to_hstring(timestamp));
+            }
 
             if (!jsonBody.empty())
             {

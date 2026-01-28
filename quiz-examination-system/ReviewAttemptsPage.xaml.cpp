@@ -41,8 +41,21 @@ namespace winrt::quiz_examination_system::implementation
             auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
             auto teacherId = manager.GetUserId();
 
+            OutputDebugStringW(L"[ReviewAttemptsPage] Loading quiz list for teacher...\n");
             auto quizzesJson = co_await m_client->GetQuizzesJsonAsync(teacherId);
 
+            OutputDebugStringW(L"[ReviewAttemptsPage] Received quiz response\n");
+
+            if (quizzesJson.empty() || quizzesJson == L"[]" || quizzesJson == L"null")
+            {
+                OutputDebugStringW(L"[ReviewAttemptsPage] Empty quiz response\n");
+                m_quizOptions.clear();
+                QuizSelector().Items().Clear();
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            OutputDebugStringW(L"[ReviewAttemptsPage] Parsing quiz JSON...\n");
             auto quizzesArray = JsonArray::Parse(quizzesJson);
             m_quizOptions.clear();
 
@@ -66,9 +79,10 @@ namespace winrt::quiz_examination_system::implementation
                 QuizSelector().Items().Append(item);
             }
         }
-        catch (hresult_error const &ex)
+        catch (hresult_error const &)
         {
-            ShowMessage(ex.message(), InfoBarSeverity::Error);
+            OutputDebugStringW(L"[ReviewAttemptsPage] Error in LoadQuizList\n");
+            ShowMessage(L"Failed to load quizzes", InfoBarSeverity::Error);
         }
 
         LoadingRing().IsActive(false);
@@ -103,10 +117,51 @@ namespace winrt::quiz_examination_system::implementation
 
         try
         {
-            auto attemptsJson = co_await m_client->GetQuizAttemptsForReviewAsync(quizId);
+            OutputDebugStringW(L"[ReviewAttemptsPage] Loading attempts for quiz\n");
+
+            hstring attemptsJson;
+            try
+            {
+                attemptsJson = co_await m_client->GetQuizAttemptsForReviewAsync(quizId);
+                OutputDebugStringW(L"[ReviewAttemptsPage] Received attempts response\n");
+            }
+            catch (...)
+            {
+                OutputDebugStringW(L"[ReviewAttemptsPage] Failed to get attempts from server\n");
+                throw;
+            }
 
             m_attempts.Clear();
-            auto attemptsArray = JsonArray::Parse(attemptsJson);
+
+            if (attemptsJson.empty())
+            {
+                OutputDebugStringW(L"[ReviewAttemptsPage] Empty attempts response\n");
+                EmptyStateText().Visibility(Visibility::Visible);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            std::wstring jsonStr(attemptsJson);
+            if (jsonStr == L"[]" || jsonStr == L"null" || jsonStr.find(L'{') == std::wstring::npos)
+            {
+                OutputDebugStringW(L"[ReviewAttemptsPage] No attempts found\n");
+                EmptyStateText().Visibility(Visibility::Visible);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            OutputDebugStringW(L"[ReviewAttemptsPage] Parsing attempts JSON...\n");
+            JsonArray attemptsArray{nullptr};
+            try
+            {
+                attemptsArray = JsonArray::Parse(attemptsJson);
+                OutputDebugStringW(L"[ReviewAttemptsPage] JSON parsed successfully\n");
+            }
+            catch (hresult_error const &)
+            {
+                OutputDebugStringW(L"[ReviewAttemptsPage] Attempts JSON parse failed\n");
+                throw;
+            }
 
             for (uint32_t i = 0; i < attemptsArray.Size(); ++i)
             {
@@ -136,9 +191,10 @@ namespace winrt::quiz_examination_system::implementation
                 EmptyStateText().Visibility(Visibility::Visible);
             }
         }
-        catch (hresult_error const &ex)
+        catch (hresult_error const &)
         {
-            ShowMessage(ex.message(), InfoBarSeverity::Error);
+            OutputDebugStringW(L"[ReviewAttemptsPage] Error in LoadAttempts\n");
+            ShowMessage(L"Failed to load attempts", InfoBarSeverity::Error);
         }
 
         LoadingRing().IsActive(false);

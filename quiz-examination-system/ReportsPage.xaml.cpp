@@ -4,6 +4,7 @@
 #include "ReportsPage.g.cpp"
 #endif
 #include "ReportItem.h"
+#include "ReviewAttemptsPage.xaml.h"
 #include "SupabaseClientManager.h"
 #include "HttpHelper.h"
 #include "SupabaseConfig.h"
@@ -57,25 +58,97 @@ namespace winrt::quiz_examination_system::implementation
         {
             hstring filterByCreator = (m_currentRole == L"Teacher") ? m_currentUserId : L"";
 
-            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quizzes");
+            if (!filterByCreator.empty())
+            {
+                std::wstring trimmed(filterByCreator);
+                auto pos = trimmed.find_last_not_of(L' ');
+                if (pos != std::wstring::npos)
+                {
+                    trimmed.erase(pos + 1);
+                }
+                filterByCreator = hstring(trimmed);
+            }
+
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quizzes?select=*");
 
             if (!filterByCreator.empty())
             {
-                endpoint = ::quiz_examination_system::SupabaseConfig::GetRestEndpoint(L"quizzes?created_by=eq." + filterByCreator);
+                endpoint = endpoint + L"&created_by=eq." + filterByCreator;
             }
 
+            OutputDebugStringW(L"[ReportsPage] Fetching quizzes...\n");
+            OutputDebugStringW((L"[ReportsPage] Endpoint: " + std::wstring(endpoint) + L"\n").c_str());
             auto responseText = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(
                 endpoint, L"", HttpMethod::Get());
 
-            if (responseText.empty() || responseText == L"[]")
+            OutputDebugStringW((L"[ReportsPage] Response length: " + std::to_wstring(responseText.size()) + L"\n").c_str());
+            if (responseText.size() > 0 && responseText.size() < 500)
             {
+                OutputDebugStringW((L"[ReportsPage] Response text: " + std::wstring(responseText) + L"\n").c_str());
+            }
+
+            if (responseText.empty())
+            {
+                OutputDebugStringW(L"[ReportsPage] Empty quiz response\n");
                 m_quizOptions.clear();
                 QuizSelector().Items().Clear();
                 LoadingRing().IsActive(false);
                 co_return;
             }
 
-            auto quizzesArray = JsonArray::Parse(responseText);
+            std::wstring jsonStr(responseText);
+            if (jsonStr == L"null" || jsonStr == L"[]")
+            {
+                OutputDebugStringW(L"[ReportsPage] No quizzes available\n");
+                m_quizOptions.clear();
+                QuizSelector().Items().Clear();
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            if (jsonStr.size() < 2)
+            {
+                OutputDebugStringW(L"[ReportsPage] Invalid JSON - too short\n");
+                m_quizOptions.clear();
+                QuizSelector().Items().Clear();
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            if (jsonStr[0] == L'{' && jsonStr.find(L"\"code\":") != std::wstring::npos)
+            {
+                OutputDebugStringW(L"[ReportsPage] Server returned error response\n");
+                try
+                {
+                    auto errorObj = JsonObject::Parse(responseText);
+                    auto errorMsg = errorObj.GetNamedString(L"message", L"Unknown error");
+                    OutputDebugStringW((L"[ReportsPage] Error: " + std::wstring(errorMsg) + L"\n").c_str());
+                    ShowMessage(L"Failed to load quizzes: " + errorMsg, InfoBarSeverity::Error);
+                }
+                catch (...)
+                {
+                    ShowMessage(L"Failed to load quizzes from server", InfoBarSeverity::Error);
+                }
+                m_quizOptions.clear();
+                QuizSelector().Items().Clear();
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            JsonArray quizzesArray{nullptr};
+            try
+            {
+                OutputDebugStringW(L"[ReportsPage] Parsing quiz JSON...\n");
+                quizzesArray = JsonArray::Parse(responseText);
+                OutputDebugStringW(L"[ReportsPage] JSON parsed successfully\n");
+            }
+            catch (hresult_error const &parseEx)
+            {
+                OutputDebugStringW(L"[ReportsPage] JSON Parse Error in LoadAvailableQuizzes\n");
+                ShowMessage(L"Invalid data format from server", InfoBarSeverity::Error);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
 
             m_quizOptions.clear();
 
@@ -96,12 +169,16 @@ namespace winrt::quiz_examination_system::implementation
                 item.Tag(box_value(opt.QuizId));
                 QuizSelector().Items().Append(item);
             }
-
-            // Empty state is self-explanatory through ComboBox placeholder
         }
-        catch (hresult_error const &ex)
+        catch (hresult_error const &)
         {
-            ShowMessage(ex.message(), InfoBarSeverity::Error);
+            OutputDebugStringW(L"[ReportsPage] Error in LoadAvailableQuizzes\n");
+            ShowMessage(L"Failed to load quizzes", InfoBarSeverity::Error);
+        }
+        catch (...)
+        {
+            OutputDebugStringW(L"[ReportsPage] Unknown error in LoadAvailableQuizzes\n");
+            ShowMessage(L"An unexpected error occurred", InfoBarSeverity::Error);
         }
 
         LoadingRing().IsActive(false);
@@ -135,22 +212,58 @@ namespace winrt::quiz_examination_system::implementation
 
         try
         {
-            hstring body = hstring(L"{\"p_quiz_id:\"") + quizId + L"\"}";
-            hstring rpcEndpoint = ::quiz_examination_system::SupabaseConfig::GetRpcEndpoint(L"get_quiz_attempts_report");
+            OutputDebugStringW(L"[ReportsPage] Loading report data...\n");
+            auto responseText = co_await m_client->GetQuizAttemptsForReviewAsync(quizId);
 
-            auto responseText = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(
-                rpcEndpoint, body);
-
-            if (responseText.empty() || responseText == L"[]" || responseText == L"null")
+            if (responseText.empty())
             {
+                OutputDebugStringW(L"[ReportsPage] Empty report response\n");
                 m_reports.Clear();
+                EmptyStateText().Text(L"No results available to display or export");
                 EmptyStateText().Visibility(Visibility::Visible);
                 SummaryCards().Visibility(Visibility::Collapsed);
                 LoadingRing().IsActive(false);
                 co_return;
             }
 
-            auto attemptsArray = JsonArray::Parse(responseText);
+            std::wstring jsonStr(responseText);
+            if (jsonStr == L"null" || jsonStr == L"[]")
+            {
+                OutputDebugStringW(L"[ReportsPage] No report data available\n");
+                m_reports.Clear();
+                EmptyStateText().Text(L"No results available to display or export");
+                EmptyStateText().Visibility(Visibility::Visible);
+                SummaryCards().Visibility(Visibility::Collapsed);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            if (jsonStr.size() < 2)
+            {
+                OutputDebugStringW(L"[ReportsPage] Invalid report JSON - too short\n");
+                m_reports.Clear();
+                EmptyStateText().Text(L"No results available to display or export");
+                EmptyStateText().Visibility(Visibility::Visible);
+                SummaryCards().Visibility(Visibility::Collapsed);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
+            JsonArray attemptsArray{nullptr};
+            try
+            {
+                OutputDebugStringW(L"[ReportsPage] Parsing report JSON...\n");
+                attemptsArray = JsonArray::Parse(responseText);
+                OutputDebugStringW(L"[ReportsPage] Report JSON parsed successfully\n");
+            }
+            catch (hresult_error const &)
+            {
+                OutputDebugStringW(L"[ReportsPage] JSON Parse Error in LoadReportData\n");
+                m_reports.Clear();
+                ShowMessage(L"Invalid report data format from server", InfoBarSeverity::Error);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
 
             m_reports.Clear();
 
@@ -162,7 +275,7 @@ namespace winrt::quiz_examination_system::implementation
 
                 ::quiz_examination_system::SupabaseClient::AttemptReportRow row;
                 row.student_id = aObj.GetNamedString(L"student_id", L"");
-                row.username = aObj.GetNamedString(L"username", L"");
+                row.username = aObj.GetNamedString(L"student_username", L"");
                 row.attempt_number = static_cast<int>(aObj.GetNamedNumber(L"attempt_number", 0));
                 row.score = static_cast<int>(aObj.GetNamedNumber(L"score", 0));
                 row.total_points = static_cast<int>(aObj.GetNamedNumber(L"total_points", 0));
@@ -172,9 +285,11 @@ namespace winrt::quiz_examination_system::implementation
 
                 reportData.push_back(row);
 
+                hstring attemptId = aObj.GetNamedString(L"attempt_id", L"");
                 hstring submittedAt = aObj.GetNamedString(L"submitted_at", L"");
 
                 auto reportItem = make<ReportItem>(
+                    attemptId,
                     row.username,
                     row.attempt_number,
                     static_cast<double>(row.score),
@@ -197,9 +312,17 @@ namespace winrt::quiz_examination_system::implementation
                 SummaryCards().Visibility(Visibility::Visible);
             }
         }
-        catch (hresult_error const &ex)
+        catch (hresult_error const &)
         {
-            ShowMessage(ex.message(), InfoBarSeverity::Error);
+            OutputDebugStringW(L"[ReportsPage] Error in LoadReportData\n");
+            m_reports.Clear();
+            ShowMessage(L"Failed to load report data", InfoBarSeverity::Error);
+        }
+        catch (...)
+        {
+            OutputDebugStringW(L"[ReportsPage] Unknown error in LoadReportData\n");
+            m_reports.Clear();
+            ShowMessage(L"An unexpected error occurred while loading report", InfoBarSeverity::Error);
         }
 
         LoadingRing().IsActive(false);
@@ -303,5 +426,16 @@ namespace winrt::quiz_examination_system::implementation
     void ReportsPage::ShowMessage(hstring const &message, Microsoft::UI::Xaml::Controls::InfoBarSeverity severity)
     {
         ::quiz_examination_system::PageHelper::ShowInfoBar(ActionMessage(), message, severity);
+    }
+
+    void ReportsPage::ReportListView_ItemClick(Windows::Foundation::IInspectable const &, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const &e)
+    {
+        auto clickedItem = e.ClickedItem().as<quiz_examination_system::ReportItem>();
+        if (clickedItem)
+        {
+            // Navigate to ReviewAttemptsPage with the selected quiz
+            // The teacher can then see all attempts and perform actions (delete, view details, etc.)
+            this->Frame().Navigate(xaml_typename<quiz_examination_system::ReviewAttemptsPage>());
+        }
     }
 }
