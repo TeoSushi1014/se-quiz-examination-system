@@ -9,6 +9,7 @@
 #include "SupabaseClientManager.h"
 #include "SupabaseClientAsync.h"
 #include <winrt/Windows.Data.Json.h>
+#include <winrt/Microsoft.UI.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -96,6 +97,15 @@ namespace winrt::quiz_examination_system::implementation
                 }
 
                 item.Status(hasAttemptsLeft ? L"Available" : L"No attempts left");
+
+                if (hasAttemptsLeft)
+                {
+                    item.StatusBadgeColor(Microsoft::UI::Xaml::Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 16, 124, 16)));
+                }
+                else
+                {
+                    item.StatusBadgeColor(Microsoft::UI::Xaml::Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 209, 52, 56)));
+                }
 
                 m_quizzes.Append(item);
             }

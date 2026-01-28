@@ -29,6 +29,9 @@ namespace winrt::quiz_examination_system::implementation
         hstring Status();
         void Status(hstring const &value);
 
+        Microsoft::UI::Xaml::Media::Brush StatusBadgeColor();
+        void StatusBadgeColor(Microsoft::UI::Xaml::Media::Brush const &value);
+
         winrt::event_token PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const &handler);
         void PropertyChanged(winrt::event_token const &token) noexcept;
 
@@ -40,6 +43,7 @@ namespace winrt::quiz_examination_system::implementation
         int32_t m_attemptsUsed{0};
         hstring m_maxAttempts;
         hstring m_status;
+        Microsoft::UI::Xaml::Media::Brush m_statusBadgeColor{nullptr};
 
         winrt::event<Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };

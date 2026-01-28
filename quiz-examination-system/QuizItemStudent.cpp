@@ -102,6 +102,20 @@ namespace winrt::quiz_examination_system::implementation
         }
     }
 
+    Microsoft::UI::Xaml::Media::Brush QuizItemStudent::StatusBadgeColor()
+    {
+        return m_statusBadgeColor;
+    }
+
+    void QuizItemStudent::StatusBadgeColor(Microsoft::UI::Xaml::Media::Brush const &value)
+    {
+        if (m_statusBadgeColor != value)
+        {
+            m_statusBadgeColor = value;
+            m_propertyChanged(*this, Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"StatusBadgeColor"});
+        }
+    }
+
     winrt::event_token QuizItemStudent::PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const &handler)
     {
         return m_propertyChanged.add(handler);

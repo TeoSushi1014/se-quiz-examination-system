@@ -21,7 +21,7 @@
             <TextBlock Text="Create new quiz" FontSize="28" FontWeight="SemiBold"/>
             <TextBlock Text="Configure quiz settings and select questions" 
                        FontSize="14" 
-                       Opacity="0.7"/>
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
         </StackPanel>
 
         <Pivot Grid.Row="1">

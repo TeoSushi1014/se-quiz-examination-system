@@ -7,6 +7,8 @@
 #include "UserManagementPage.xaml.h"
 #include "SystemLogsPage.xaml.h"
 #include "ReportsPage.xaml.h"
+#include <winrt/Microsoft.UI.h>
+#include <winrt/Microsoft.UI.Text.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -78,12 +80,13 @@ namespace winrt::quiz_examination_system::implementation
         auto titleText = TextBlock();
         titleText.Text(L"Administrator dashboard");
         titleText.FontSize(28);
+        titleText.FontWeight(Microsoft::UI::Text::FontWeights::SemiBold());
         headerStack.Children().Append(titleText);
 
         auto descText = TextBlock();
         descText.Text(L"Manage users, quizzes, view reports and monitor system activities");
         descText.FontSize(14);
-        descText.Opacity(0.7);
+        descText.Foreground(Application::Current().Resources().Lookup(box_value(L"TextFillColorSecondaryBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         headerStack.Children().Append(descText);
 
         mainStack.Children().Append(headerStack);
@@ -107,41 +110,45 @@ namespace winrt::quiz_examination_system::implementation
         cardsGrid.RowDefinitions().Append(row2);
 
         auto usersCard = Border();
-        usersCard.Padding({24, 24, 24, 24});
+        usersCard.Padding({16, 16, 16, 16});
         usersCard.CornerRadius({8, 8, 8, 8});
         usersCard.BorderThickness({1, 1, 1, 1});
         usersCard.MinHeight(160);
-        usersCard.Background(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 250, 250, 250)));
-        usersCard.BorderBrush(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 225, 225, 225)));
+        usersCard.Background(Application::Current().Resources().Lookup(box_value(L"CardBackgroundFillColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
+        usersCard.BorderBrush(Application::Current().Resources().Lookup(box_value(L"CardStrokeColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         Grid::SetColumn(usersCard, 0);
         Grid::SetRow(usersCard, 0);
+
+        auto adminIconColor = Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 139, 92, 246));
 
         auto usersStack = StackPanel();
         usersStack.Spacing(8);
         auto usersIcon = FontIcon();
         usersIcon.Glyph(L"\uE716");
         usersIcon.FontSize(32);
+        usersIcon.Foreground(adminIconColor);
         usersStack.Children().Append(usersIcon);
         auto usersTitle = TextBlock();
         usersTitle.Text(L"User management");
         usersTitle.FontSize(20);
+        usersTitle.FontWeight(Microsoft::UI::Text::FontWeights::SemiBold());
         usersStack.Children().Append(usersTitle);
         auto usersDesc = TextBlock();
         usersDesc.Text(L"Create, edit and manage user accounts");
         usersDesc.FontSize(12);
-        usersDesc.Opacity(0.7);
+        usersDesc.Foreground(Application::Current().Resources().Lookup(box_value(L"TextFillColorSecondaryBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         usersDesc.TextWrapping(TextWrapping::Wrap);
         usersStack.Children().Append(usersDesc);
         usersCard.Child(usersStack);
         cardsGrid.Children().Append(usersCard);
 
         auto quizzesCard = Border();
-        quizzesCard.Padding({24, 24, 24, 24});
+        quizzesCard.Padding({16, 16, 16, 16});
         quizzesCard.CornerRadius({8, 8, 8, 8});
         quizzesCard.BorderThickness({1, 1, 1, 1});
         quizzesCard.MinHeight(160);
-        quizzesCard.Background(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 250, 250, 250)));
-        quizzesCard.BorderBrush(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 225, 225, 225)));
+        quizzesCard.Background(Application::Current().Resources().Lookup(box_value(L"CardBackgroundFillColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
+        quizzesCard.BorderBrush(Application::Current().Resources().Lookup(box_value(L"CardStrokeColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         Grid::SetColumn(quizzesCard, 1);
         Grid::SetRow(quizzesCard, 0);
 
@@ -150,27 +157,29 @@ namespace winrt::quiz_examination_system::implementation
         auto quizzesIcon = FontIcon();
         quizzesIcon.Glyph(L"\uE8F1");
         quizzesIcon.FontSize(32);
+        quizzesIcon.Foreground(adminIconColor);
         quizzesStack.Children().Append(quizzesIcon);
         auto quizzesTitle = TextBlock();
         quizzesTitle.Text(L"Quiz management");
         quizzesTitle.FontSize(20);
+        quizzesTitle.FontWeight(Microsoft::UI::Text::FontWeights::SemiBold());
         quizzesStack.Children().Append(quizzesTitle);
         auto quizzesDesc = TextBlock();
         quizzesDesc.Text(L"View and permanently delete quizzes with related data");
         quizzesDesc.FontSize(12);
-        quizzesDesc.Opacity(0.7);
+        quizzesDesc.Foreground(Application::Current().Resources().Lookup(box_value(L"TextFillColorSecondaryBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         quizzesDesc.TextWrapping(TextWrapping::Wrap);
         quizzesStack.Children().Append(quizzesDesc);
         quizzesCard.Child(quizzesStack);
         cardsGrid.Children().Append(quizzesCard);
 
         auto reportsCard = Border();
-        reportsCard.Padding({24, 24, 24, 24});
+        reportsCard.Padding({16, 16, 16, 16});
         reportsCard.CornerRadius({8, 8, 8, 8});
         reportsCard.BorderThickness({1, 1, 1, 1});
         reportsCard.MinHeight(160);
-        reportsCard.Background(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 250, 250, 250)));
-        reportsCard.BorderBrush(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 225, 225, 225)));
+        reportsCard.Background(Application::Current().Resources().Lookup(box_value(L"CardBackgroundFillColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
+        reportsCard.BorderBrush(Application::Current().Resources().Lookup(box_value(L"CardStrokeColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         Grid::SetColumn(reportsCard, 0);
         Grid::SetRow(reportsCard, 1);
 
@@ -179,27 +188,29 @@ namespace winrt::quiz_examination_system::implementation
         auto reportsIcon = FontIcon();
         reportsIcon.Glyph(L"\uE9F9");
         reportsIcon.FontSize(32);
+        reportsIcon.Foreground(adminIconColor);
         reportsStack.Children().Append(reportsIcon);
         auto reportsTitle = TextBlock();
         reportsTitle.Text(L"Reports and analytics");
         reportsTitle.FontSize(20);
+        reportsTitle.FontWeight(Microsoft::UI::Text::FontWeights::SemiBold());
         reportsStack.Children().Append(reportsTitle);
         auto reportsDesc = TextBlock();
         reportsDesc.Text(L"View exam results and export CSV reports");
         reportsDesc.FontSize(12);
-        reportsDesc.Opacity(0.7);
+        reportsDesc.Foreground(Application::Current().Resources().Lookup(box_value(L"TextFillColorSecondaryBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         reportsDesc.TextWrapping(TextWrapping::Wrap);
         reportsStack.Children().Append(reportsDesc);
         reportsCard.Child(reportsStack);
         cardsGrid.Children().Append(reportsCard);
 
         auto logsCard = Border();
-        logsCard.Padding({24, 24, 24, 24});
+        logsCard.Padding({16, 16, 16, 16});
         logsCard.CornerRadius({8, 8, 8, 8});
         logsCard.BorderThickness({1, 1, 1, 1});
         logsCard.MinHeight(160);
-        logsCard.Background(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 250, 250, 250)));
-        logsCard.BorderBrush(Media::SolidColorBrush(Microsoft::UI::ColorHelper::FromArgb(255, 225, 225, 225)));
+        logsCard.Background(Application::Current().Resources().Lookup(box_value(L"CardBackgroundFillColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
+        logsCard.BorderBrush(Application::Current().Resources().Lookup(box_value(L"CardStrokeColorDefaultBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         Grid::SetColumn(logsCard, 1);
         Grid::SetRow(logsCard, 1);
 
@@ -208,15 +219,17 @@ namespace winrt::quiz_examination_system::implementation
         auto logsIcon = FontIcon();
         logsIcon.Glyph(L"\uE7C3");
         logsIcon.FontSize(32);
+        logsIcon.Foreground(adminIconColor);
         logsStack.Children().Append(logsIcon);
         auto logsTitle = TextBlock();
         logsTitle.Text(L"Audit logs");
         logsTitle.FontSize(20);
+        logsTitle.FontWeight(Microsoft::UI::Text::FontWeights::SemiBold());
         logsStack.Children().Append(logsTitle);
         auto logsDesc = TextBlock();
         logsDesc.Text(L"Monitor and view system activity history");
         logsDesc.FontSize(12);
-        logsDesc.Opacity(0.7);
+        logsDesc.Foreground(Application::Current().Resources().Lookup(box_value(L"TextFillColorSecondaryBrush")).as<Microsoft::UI::Xaml::Media::Brush>());
         logsDesc.TextWrapping(TextWrapping::Wrap);
         logsStack.Children().Append(logsDesc);
         logsCard.Child(logsStack);

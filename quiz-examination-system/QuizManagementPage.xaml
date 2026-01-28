@@ -20,7 +20,7 @@
             <TextBlock Text="Quiz management" Style="{StaticResource TitleTextBlockStyle}"/>
             
             <StackPanel Orientation="Horizontal" Spacing="12">
-                <Button x:Name="CreateQuizBtn" Content="Create quiz" Click="CreateQuiz_Click">
+                <Button x:Name="CreateQuizBtn" Content="Create quiz" Click="CreateQuiz_Click" Style="{StaticResource AccentButtonStyle}">
                     <Button.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control"/>
                     </Button.KeyboardAccelerators>

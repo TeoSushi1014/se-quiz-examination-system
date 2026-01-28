@@ -72,13 +72,14 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" 
+                                <Border Background="{x:Bind StatusBadgeColor, Mode=OneWay}" 
                                         CornerRadius="4" 
                                         Padding="8,4"
                                         HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Bind Status, Mode=OneWay}" 
                                                Style="{StaticResource CaptionTextBlockStyle}"
-                                               Foreground="White"/>
+                                               Foreground="White"
+                                               FontWeight="SemiBold"/>
                                 </Border>
                             </StackPanel>
                         </Grid>

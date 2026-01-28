@@ -13,5 +13,6 @@ namespace quiz_examination_system
         Int32 AttemptsUsed;
         String MaxAttempts;
         String Status;
+        Microsoft.UI.Xaml.Media.Brush StatusBadgeColor;
     }
 }

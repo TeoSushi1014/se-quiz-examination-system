@@ -9,6 +9,83 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <Color x:Key="AdminBadgeColor">#8B5CF6</Color>
+            <Color x:Key="TeacherBadgeColor">#0078D4</Color>
+            <Color x:Key="StudentBadgeColor">#00B7C3</Color>
+            
+            <Color x:Key="AdminBadgeLightColor">#EDE9FE</Color>
+            <Color x:Key="TeacherBadgeLightColor">#DBEAFE</Color>
+            <Color x:Key="StudentBadgeLightColor">#D1FAE5</Color>
+            
+            <Color x:Key="AdminBadgeDarkTextColor">#6B21A8</Color>
+            <Color x:Key="TeacherBadgeDarkTextColor">#1E40AF</Color>
+            <Color x:Key="StudentBadgeDarkTextColor">#065F46</Color>
+            
+            <Color x:Key="ActiveStatusColor">#107C10</Color>
+            <Color x:Key="InactiveStatusColor">#605E5C</Color>
+            <Color x:Key="WarningStatusColor">#FCE100</Color>
+            <Color x:Key="ErrorStatusColor">#D13438</Color>
+            
+            <Color x:Key="SuccessColor">#107C10</Color>
+            <Color x:Key="InfoColor">#0078D4</Color>
+            <Color x:Key="WarningColor">#FCE100</Color>
+            <Color x:Key="DangerColor">#D13438</Color>
+            
+            <SolidColorBrush x:Key="AdminBadgeBrush" Color="{StaticResource AdminBadgeColor}"/>
+            <SolidColorBrush x:Key="TeacherBadgeBrush" Color="{StaticResource TeacherBadgeColor}"/>
+            <SolidColorBrush x:Key="StudentBadgeBrush" Color="{StaticResource StudentBadgeColor}"/>
+            <SolidColorBrush x:Key="ActiveStatusBrush" Color="{StaticResource ActiveStatusColor}"/>
+            <SolidColorBrush x:Key="InactiveStatusBrush" Color="{StaticResource InactiveStatusColor}"/>
+            <SolidColorBrush x:Key="ErrorStatusBrush" Color="{StaticResource ErrorStatusColor}"/>
+            <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+            <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+            
+            <Style x:Key="RoleBadgeStyle" TargetType="Border">
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="10,4"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            
+            <Style x:Key="StatusBadgeStyle" TargetType="Border">
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Padding" Value="8,4"/>
+            </Style>
+            
+            <Style x:Key="BadgeTextStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+            
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="16"/>
+            </Style>
+            
+            <Style x:Key="ElevatedCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="24"/>
+            </Style>
+            
+            <Style x:Key="StatCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="20"/>
+            </Style>
+            
+            <Style x:Key="DangerButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="CornerRadius" Value="4"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

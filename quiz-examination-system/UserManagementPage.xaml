@@ -9,14 +9,6 @@
     mc:Ignorable="d"
     Background="Transparent">
 
-    <Page.Resources>
-        <Color x:Key="AdminBadgeColor">#8B5CF6</Color>
-        <Color x:Key="TeacherBadgeColor">#0078D4</Color>
-        <Color x:Key="StudentBadgeColor">#00B7C3</Color>
-        <Color x:Key="ActiveStatusColor">#107C10</Color>
-        <Color x:Key="InactiveStatusColor">#605E5C</Color>
-    </Page.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
