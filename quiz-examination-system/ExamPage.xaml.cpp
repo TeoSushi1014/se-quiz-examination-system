@@ -6,7 +6,6 @@
 #include "PageHelper.h"
 #include "SupabaseClientManager.h"
 #include "HttpHelper.h"
-#include "StudentDashboardPage.xaml.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -390,7 +389,7 @@ namespace winrt::quiz_examination_system::implementation
                         }
                         else
                         {
-                            Frame().Navigate(xaml_typename<StudentDashboardPage>());
+                            Frame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
                         }
                     });
                     timer.Start(); });
@@ -437,7 +436,7 @@ namespace winrt::quiz_examination_system::implementation
             }
             else
             {
-                Frame().Navigate(xaml_typename<StudentDashboardPage>());
+                Frame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
             }
         }
     }
