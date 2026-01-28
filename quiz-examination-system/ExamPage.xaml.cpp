@@ -6,6 +6,7 @@
 #include "PageHelper.h"
 #include "SupabaseClientManager.h"
 #include "HttpHelper.h"
+#include "StudentDashboardPage.xaml.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -373,6 +374,26 @@ namespace winrt::quiz_examination_system::implementation
                 OptionB().IsEnabled(false);
                 OptionC().IsEnabled(false);
                 OptionD().IsEnabled(false);
+                ExitButton().IsEnabled(false);
+
+                // Navigate back to dashboard after 2 seconds
+                DispatcherQueue().TryEnqueue([this]()
+                                             {
+                    auto timer = DispatcherQueue().CreateTimer();
+                    timer.Interval(std::chrono::seconds(2));
+                    timer.Tick([this, timer](auto&&, auto&&)
+                    {
+                        timer.Stop();
+                        if (Frame().CanGoBack())
+                        {
+                            Frame().GoBack();
+                        }
+                        else
+                        {
+                            Frame().Navigate(xaml_typename<StudentDashboardPage>());
+                        }
+                    });
+                    timer.Start(); });
             }
             else
             {
@@ -387,5 +408,37 @@ namespace winrt::quiz_examination_system::implementation
     void ExamPage::ShowMessage(hstring const &message, InfoBarSeverity severity)
     {
         ::quiz_examination_system::PageHelper::ShowInfoBar(MessageBar(), message, severity);
+    }
+
+    fire_and_forget ExamPage::ExitButton_Click(IInspectable const &, RoutedEventArgs const &)
+    {
+        auto lifetime = get_strong();
+
+        ContentDialog confirmDialog;
+        confirmDialog.XamlRoot(this->XamlRoot());
+        confirmDialog.Title(box_value(L"Exit Quiz?"));
+        confirmDialog.Content(box_value(L"Are you sure you want to exit? Your progress will be lost if you haven't submitted."));
+        confirmDialog.PrimaryButtonText(L"Stay");
+        confirmDialog.SecondaryButtonText(L"Exit");
+        confirmDialog.DefaultButton(ContentDialogButton::Primary);
+
+        auto result = co_await confirmDialog.ShowAsync();
+
+        if (result == ContentDialogResult::Secondary)
+        {
+            if (m_timer)
+            {
+                m_timer.Stop();
+            }
+
+            if (Frame().CanGoBack())
+            {
+                Frame().GoBack();
+            }
+            else
+            {
+                Frame().Navigate(xaml_typename<StudentDashboardPage>());
+            }
+        }
     }
 }

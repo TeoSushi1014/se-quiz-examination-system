@@ -81,6 +81,16 @@
         </Grid>
 
         <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Button x:Name="ExitButton" Content="Exit Quiz" Click="ExitButton_Click" 
+                    Padding="16,12"
+                    HorizontalAlignment="Left">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#E74C3C"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#C0392B"/>
+                    <SolidColorBrush x:Key="ButtonForeground" Color="White"/>
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White"/>
+                </Button.Resources>
+            </Button>
             <Button x:Name="SubmitButton" Content="Submit" Click="SubmitButton_Click" 
                     Style="{StaticResource AccentButtonStyle}" Padding="24,12" FontWeight="Bold"
                     HorizontalAlignment="Right"/>

@@ -25,6 +25,7 @@ namespace winrt::quiz_examination_system::implementation
         void PrevButton_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
         void NextButton_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
         winrt::fire_and_forget SubmitButton_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
+        winrt::fire_and_forget ExitButton_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
 
     private:
         std::unique_ptr<::quiz_examination_system::SupabaseClient> m_supabaseClient;
