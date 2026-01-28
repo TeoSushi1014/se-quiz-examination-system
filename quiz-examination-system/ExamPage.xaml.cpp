@@ -374,25 +374,11 @@ namespace winrt::quiz_examination_system::implementation
                 OptionC().IsEnabled(false);
                 OptionD().IsEnabled(false);
                 ExitButton().IsEnabled(false);
+                SubmitButton().IsEnabled(false);
 
-                // Navigate back to dashboard after 2 seconds
-                DispatcherQueue().TryEnqueue([this]()
-                                             {
-                    auto timer = DispatcherQueue().CreateTimer();
-                    timer.Interval(std::chrono::seconds(2));
-                    timer.Tick([this, timer](auto&&, auto&&)
-                    {
-                        timer.Stop();
-                        if (Frame().CanGoBack())
-                        {
-                            Frame().GoBack();
-                        }
-                        else
-                        {
-                            Frame().Navigate(winrt::xaml_typename<quiz_examination_system::StudentDashboardPage>());
-                        }
-                    });
-                    timer.Start(); });
+                // Change Exit button to "Back to Dashboard"
+                ExitButton().Content(box_value(L"Back to Dashboard"));
+                ExitButton().IsEnabled(true);
             }
             else
             {
@@ -413,31 +399,36 @@ namespace winrt::quiz_examination_system::implementation
     {
         auto lifetime = get_strong();
 
-        ContentDialog confirmDialog;
-        confirmDialog.XamlRoot(this->XamlRoot());
-        confirmDialog.Title(box_value(L"Exit Quiz?"));
-        confirmDialog.Content(box_value(L"Are you sure you want to exit? Your progress will be lost if you haven't submitted."));
-        confirmDialog.PrimaryButtonText(L"Stay");
-        confirmDialog.SecondaryButtonText(L"Exit");
-        confirmDialog.DefaultButton(ContentDialogButton::Primary);
+        // Check if quiz already submitted (button text changed)
+        auto buttonText = unbox_value<hstring>(ExitButton().Content());
+        bool alreadySubmitted = (buttonText == L"Back to Dashboard");
 
-        auto result = co_await confirmDialog.ShowAsync();
-
-        if (result == ContentDialogResult::Secondary)
+        if (!alreadySubmitted)
         {
-            if (m_timer)
-            {
-                m_timer.Stop();
-            }
+            ContentDialog confirmDialog;
+            confirmDialog.XamlRoot(this->XamlRoot());
+            confirmDialog.Title(box_value(L"Exit Quiz?"));
+            confirmDialog.Content(box_value(L"Are you sure you want to exit? Your progress will be lost if you haven't submitted."));
+            confirmDialog.PrimaryButtonText(L"Stay");
+            confirmDialog.SecondaryButtonText(L"Exit");
+            confirmDialog.DefaultButton(ContentDialogButton::Primary);
 
-            if (Frame().CanGoBack())
+            auto result = co_await confirmDialog.ShowAsync();
+
+            if (result != ContentDialogResult::Secondary)
             {
-                Frame().GoBack();
+                co_return;
             }
-            else
-            {
-                Frame().Navigate(winrt::xaml_typename<quiz_examination_system::StudentDashboardPage>());
-            }
+        }
+
+        if (m_timer)
+        {
+            m_timer.Stop();
+        }
+
+        if (Frame().CanGoBack())
+        {
+            Frame().GoBack();
         }
     }
 }
