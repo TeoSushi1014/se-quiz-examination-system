@@ -67,6 +67,14 @@ namespace winrt::quiz_examination_system::implementation
             auto responseText = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(
                 endpoint, L"", HttpMethod::Get());
 
+            if (responseText.empty() || responseText == L"[]")
+            {
+                m_quizOptions.clear();
+                QuizSelector().Items().Clear();
+                LoadingRing().IsActive(false);
+                co_return;
+            }
+
             auto quizzesArray = JsonArray::Parse(responseText);
 
             m_quizOptions.clear();
@@ -132,6 +140,15 @@ namespace winrt::quiz_examination_system::implementation
 
             auto responseText = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(
                 rpcEndpoint, body);
+
+            if (responseText.empty() || responseText == L"[]" || responseText == L"null")
+            {
+                m_reports.Clear();
+                EmptyStateText().Visibility(Visibility::Visible);
+                SummaryCards().Visibility(Visibility::Collapsed);
+                LoadingRing().IsActive(false);
+                co_return;
+            }
 
             auto attemptsArray = JsonArray::Parse(responseText);
 

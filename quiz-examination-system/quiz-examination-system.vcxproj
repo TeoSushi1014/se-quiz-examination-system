@@ -145,16 +145,13 @@
       <DependentUpon>ExamPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="QuestionItem.h" />
+    <ClInclude Include="QuizItem.h" />
     <ClInclude Include="QuizItemStudent.h" />
-    <ClInclude Include="QuizManagementItem.h" />
     <ClInclude Include="LogItem.h" />
     <ClInclude Include="UserItem.h" />
     <ClInclude Include="ReportItem.h" />
     <ClInclude Include="UserManagementPage.xaml.h">
       <DependentUpon>UserManagementPage.xaml</DependentUpon>
-    </ClInclude>
-    <ClInclude Include="AllQuizzesManagementPage.xaml.h">
-      <DependentUpon>AllQuizzesManagementPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="SystemLogsPage.xaml.h">
       <DependentUpon>SystemLogsPage.xaml</DependentUpon>
@@ -164,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="QuestionBankPage.xaml.h">
       <DependentUpon>QuestionBankPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="QuizManagementPage.xaml.h">
+      <DependentUpon>QuizManagementPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="QuizEditorPage.xaml.h">
+      <DependentUpon>QuizEditorPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="SupabaseClient.h" />
     <ClInclude Include="SupabaseClientAsync.h" />
@@ -182,10 +185,11 @@
     <Page Include="StudentDashboardPage.xaml" />
     <Page Include="ExamPage.xaml" />
     <Page Include="UserManagementPage.xaml" />
-    <Page Include="AllQuizzesManagementPage.xaml" />
     <Page Include="SystemLogsPage.xaml" />
     <Page Include="ReportsPage.xaml" />
     <Page Include="QuestionBankPage.xaml" />
+    <Page Include="QuizManagementPage.xaml" />
+    <Page Include="QuizEditorPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -210,16 +214,13 @@
       <DependentUpon>ExamPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="QuestionItem.cpp" />
+    <ClCompile Include="QuizItem.cpp" />
     <ClCompile Include="QuizItemStudent.cpp" />
-    <ClCompile Include="QuizManagementItem.cpp" />
     <ClCompile Include="LogItem.cpp" />
     <ClCompile Include="UserItem.cpp" />
     <ClCompile Include="ReportItem.cpp" />
     <ClCompile Include="UserManagementPage.xaml.cpp">
       <DependentUpon>UserManagementPage.xaml</DependentUpon>
-    </ClCompile>
-    <ClCompile Include="AllQuizzesManagementPage.xaml.cpp">
-      <DependentUpon>AllQuizzesManagementPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="SystemLogsPage.xaml.cpp">
       <DependentUpon>SystemLogsPage.xaml</DependentUpon>
@@ -227,8 +228,14 @@
     <ClCompile Include="ReportsPage.xaml.cpp">
       <DependentUpon>ReportsPage.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="QuizManagementPage.xaml.cpp">
+      <DependentUpon>QuizManagementPage.xaml</DependentUpon>
+    </ClCompile>
     <ClCompile Include="QuestionBankPage.xaml.cpp">
       <DependentUpon>QuestionBankPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="QuizEditorPage.xaml.cpp">
+      <DependentUpon>QuizEditorPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="SupabaseClient.cpp" />
@@ -259,10 +266,10 @@
     <Midl Include="QuestionItem.idl">
       <SubType>Code</SubType>
     </Midl>
-    <Midl Include="QuizItemStudent.idl">
+    <Midl Include="QuizItem.idl">
       <SubType>Code</SubType>
     </Midl>
-    <Midl Include="QuizManagementItem.idl">
+    <Midl Include="QuizItemStudent.idl">
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="LogItem.idl">
@@ -278,10 +285,6 @@
       <SubType>Code</SubType>
       <DependentUpon>UserManagementPage.xaml</DependentUpon>
     </Midl>
-    <Midl Include="AllQuizzesManagementPage.idl">
-      <SubType>Code</SubType>
-      <DependentUpon>AllQuizzesManagementPage.xaml</DependentUpon>
-    </Midl>
     <Midl Include="SystemLogsPage.idl">
       <SubType>Code</SubType>
       <DependentUpon>SystemLogsPage.xaml</DependentUpon>
@@ -293,6 +296,14 @@
     <Midl Include="QuestionBankPage.idl">
       <SubType>Code</SubType>
       <DependentUpon>QuestionBankPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="QuizManagementPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>QuizManagementPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="QuizEditorPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>QuizEditorPage.xaml</DependentUpon>
     </Midl>
   </ItemGroup>
   <ItemGroup>

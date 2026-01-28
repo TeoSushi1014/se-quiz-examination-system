@@ -5,7 +5,7 @@
 #endif
 #include "PageHelper.h"
 #include "QuestionBankPage.xaml.h"
-#include "AllQuizzesManagementPage.xaml.h"
+#include "QuizManagementPage.xaml.h"
 #include "ReportsPage.xaml.h"
 
 using namespace winrt;
@@ -40,7 +40,7 @@ namespace winrt::quiz_examination_system::implementation
             }
             else if (tag == L"ManageQuizzes")
             {
-                ContentFrame().Navigate(xaml_typename<quiz_examination_system::AllQuizzesManagementPage>());
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::QuizManagementPage>());
             }
             else if (tag == L"ReviewAttempts")
             {

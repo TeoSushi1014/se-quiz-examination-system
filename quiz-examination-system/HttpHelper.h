@@ -4,6 +4,7 @@
 #include <winrt/Windows.Web.Http.h>
 #include <winrt/Windows.Web.Http.Headers.h>
 #include <winrt/Windows.Storage.Streams.h>
+#include <chrono>
 #include "SupabaseConfig.h"
 
 namespace quiz_examination_system
@@ -16,6 +17,10 @@ namespace quiz_examination_system
             auto headers = request.Headers();
             headers.Insert(L"apikey", SupabaseConfig::ANON_KEY);
             headers.Insert(L"Authorization", SupabaseConfig::GetAuthorizationHeader());
+
+            // Force no-cache to prevent stale data
+            headers.Insert(L"Cache-Control", L"no-cache, no-store, must-revalidate");
+            headers.Insert(L"Pragma", L"no-cache");
         }
 
         static winrt::Windows::Foundation::IAsyncOperation<winrt::hstring> SendSupabaseRequest(
@@ -27,8 +32,18 @@ namespace quiz_examination_system
             using namespace Windows::Web::Http;
             using namespace Windows::Storage::Streams;
 
+            // Add cache-busting timestamp for GET requests
+            hstring finalUrl = url;
+            if (method == HttpMethod::Get())
+            {
+                auto timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+                std::wstring urlStr(url);
+                auto separator = urlStr.find(L'?') == std::wstring::npos ? L"?" : L"&";
+                finalUrl = url + hstring(separator) + L"_t=" + to_hstring(timestamp);
+            }
+
             HttpClient client;
-            Windows::Foundation::Uri uri(url);
+            Windows::Foundation::Uri uri(finalUrl);
             HttpRequestMessage request(method, uri);
 
             SetSupabaseHeaders(request);

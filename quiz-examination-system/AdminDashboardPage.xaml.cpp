@@ -5,7 +5,6 @@
 #endif
 #include "PageHelper.h"
 #include "UserManagementPage.xaml.h"
-#include "AllQuizzesManagementPage.xaml.h"
 #include "SystemLogsPage.xaml.h"
 #include "ReportsPage.xaml.h"
 
@@ -39,7 +38,7 @@ namespace winrt::quiz_examination_system::implementation
             }
             else if (tag == L"quizzes")
             {
-                ContentFrame().Navigate(xaml_typename<quiz_examination_system::AllQuizzesManagementPage>());
+                ShowMessage(L"Quiz management", L"Quiz management page is being rebuilt. Coming soon.", InfoBarSeverity::Informational);
             }
             else if (tag == L"reports")
             {

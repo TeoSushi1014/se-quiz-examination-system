@@ -74,9 +74,10 @@ namespace winrt::quiz_examination_system::implementation
                 m_currentUserId = result.GetNamedString(L"userId", L"");
                 m_currentDbRole = result.GetNamedString(L"role", L"");
                 m_currentRole = result.GetNamedString(L"displayRole", L"");
+                auto jwtToken = result.GetNamedString(L"jwtToken", L"");
 
                 auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
-                manager.SaveSession(m_currentUserId, m_currentUser, m_currentDbRole);
+                manager.SaveSession(m_currentUserId, m_currentUser, m_currentDbRole, jwtToken);
 
                 LoginMessage().IsOpen(false);
                 UpdateView();

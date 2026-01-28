@@ -26,11 +26,12 @@ namespace quiz_examination_system
         return m_client.get();
     }
 
-    void SupabaseClientManager::SaveSession(hstring const &userId, hstring const &username, hstring const &role)
+    void SupabaseClientManager::SaveSession(hstring const &userId, hstring const &username, hstring const &role, hstring const &jwtToken)
     {
         m_userId = userId;
         m_username = username;
         m_role = role;
+        m_jwtToken = jwtToken;
 
         HKEY hKey;
         if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, NULL, 0, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
@@ -38,10 +39,12 @@ namespace quiz_examination_system
             std::wstring userIdStr = userId.c_str();
             std::wstring usernameStr = username.c_str();
             std::wstring roleStr = role.c_str();
+            std::wstring jwtTokenStr = jwtToken.c_str();
 
             RegSetValueExW(hKey, L"userId", 0, REG_SZ, (BYTE *)userIdStr.c_str(), (DWORD)((userIdStr.length() + 1) * sizeof(wchar_t)));
             RegSetValueExW(hKey, L"username", 0, REG_SZ, (BYTE *)usernameStr.c_str(), (DWORD)((usernameStr.length() + 1) * sizeof(wchar_t)));
             RegSetValueExW(hKey, L"role", 0, REG_SZ, (BYTE *)roleStr.c_str(), (DWORD)((roleStr.length() + 1) * sizeof(wchar_t)));
+            RegSetValueExW(hKey, L"jwtToken", 0, REG_SZ, (BYTE *)jwtTokenStr.c_str(), (DWORD)((jwtTokenStr.length() + 1) * sizeof(wchar_t)));
 
             RegCloseKey(hKey);
         }
@@ -52,6 +55,7 @@ namespace quiz_examination_system
         m_userId = L"";
         m_username = L"";
         m_role = L"";
+        m_jwtToken = L"";
 
         HKEY hKey;
         if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, KEY_WRITE, &hKey) == ERROR_SUCCESS)
@@ -59,6 +63,7 @@ namespace quiz_examination_system
             RegDeleteValueW(hKey, L"userId");
             RegDeleteValueW(hKey, L"username");
             RegDeleteValueW(hKey, L"role");
+            RegDeleteValueW(hKey, L"jwtToken");
             RegCloseKey(hKey);
         }
     }
@@ -90,6 +95,12 @@ namespace quiz_examination_system
                     m_role = hstring(buffer);
                 }
 
+                bufferSize = sizeof(buffer);
+                if (RegQueryValueExW(hKey, L"jwtToken", NULL, NULL, (BYTE *)buffer, &bufferSize) == ERROR_SUCCESS)
+                {
+                    m_jwtToken = hstring(buffer);
+                }
+
                 RegCloseKey(hKey);
             }
         }
@@ -116,5 +127,10 @@ namespace quiz_examination_system
     hstring SupabaseClientManager::GetRole() const
     {
         return m_role;
+    }
+
+    hstring SupabaseClientManager::GetJwtToken() const
+    {
+        return m_jwtToken;
     }
 }

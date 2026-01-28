@@ -1,0 +1,20 @@
+namespace quiz_examination_system
+{
+    [bindable]
+    [default_interface]
+    runtimeclass QuizItem : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        QuizItem();
+        
+        String QuizId { get; set; };
+        String Title { get; set; };
+        Int32 TimeLimitMinutes { get; set; };
+        Int32 TotalPoints { get; set; };
+        Int32 QuestionCount { get; set; };
+        String MaxAttempts { get; set; };
+        String ResultVisibility { get; set; };
+        Boolean ShuffleQuestions { get; set; };
+        Boolean ShuffleAnswers { get; set; };
+        String CreatedAt { get; set; };
+    }
+}

@@ -12,13 +12,14 @@ namespace quiz_examination_system
 
         SupabaseClient *GetClient();
 
-        void SaveSession(hstring const &userId, hstring const &username, hstring const &role);
+        void SaveSession(hstring const &userId, hstring const &username, hstring const &role, hstring const &jwtToken);
         void ClearSession();
 
         bool HasActiveSession() const;
         hstring GetUserId() const;
         hstring GetUsername() const;
         hstring GetRole() const;
+        hstring GetJwtToken() const;
 
         SupabaseClientManager(SupabaseClientManager const &) = delete;
         SupabaseClientManager &operator=(SupabaseClientManager const &) = delete;
@@ -31,5 +32,6 @@ namespace quiz_examination_system
         hstring m_userId;
         hstring m_username;
         hstring m_role;
+        hstring m_jwtToken;
     };
 }

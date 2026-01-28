@@ -86,6 +86,32 @@ namespace quiz_examination_system
 
         IAsyncOperation<hstring> GetStudentQuizzesJsonAsync(hstring const &studentId);
 
+        IAsyncOperation<hstring> GetQuizzesJsonAsync(hstring const &createdBy);
+
+        IAsyncOperation<hstring> CreateQuizFullAsync(
+            hstring const &quizId,
+            hstring const &teacherId,
+            hstring const &title,
+            int32_t timeLimitMinutes,
+            int32_t totalPoints,
+            hstring const &maxAttempts,
+            hstring const &resultVisibility,
+            bool shuffleQuestions,
+            bool shuffleAnswers,
+            hstring const &questionIdsJson);
+
+        IAsyncOperation<hstring> UpdateQuizAsync(
+            hstring const &quizId,
+            hstring const &title,
+            int32_t timeLimitMinutes,
+            int32_t totalPoints,
+            hstring const &maxAttempts,
+            hstring const &resultVisibility,
+            bool shuffleQuestions,
+            bool shuffleAnswers);
+
+        IAsyncOperation<hstring> DeleteQuizSafeAsync(hstring const &quizId);
+
         IAsyncOperation<hstring> GetAllUsersAsync();
 
         IAsyncOperation<bool> CreateUserAsync(hstring const &adminUsername, hstring const &newUsername, hstring const &hashedPassword, hstring const &role);

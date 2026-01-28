@@ -108,7 +108,6 @@ namespace quiz_examination_system
 
                 OutputDebugStringW((L"Stored hash from DB: " + storedHash + L"\n").c_str());
 
-                // Generate hash for "123456" for testing
                 auto testHash = BCryptPasswordHasher::HashPassword(L"123456");
                 OutputDebugStringW((L"Generated hash for '123456': " + testHash + L"\n").c_str());
 
@@ -127,10 +126,28 @@ namespace quiz_examination_system
 
                     co_await m_httpClient.SendRequestAsync(resetReq);
 
+                    JsonObject loginParams;
+                    loginParams.Insert(L"p_username", JsonValue::CreateStringValue(username));
+                    loginParams.Insert(L"p_password", JsonValue::CreateStringValue(storedHash));
+                    Uri loginUri(m_projectUrl + L"/rest/v1/rpc/login_user");
+                    HttpRequestMessage loginReq(HttpMethod::Post(), loginUri);
+                    loginReq.Headers().Insert(L"apikey", m_anonKey);
+                    loginReq.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+                    loginReq.Content(HttpStringContent(loginParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+                    auto loginResponse = co_await m_httpClient.SendRequestAsync(loginReq);
+                    auto loginContent = co_await loginResponse.Content().ReadAsStringAsync();
+                    auto loginResult = JsonObject::Parse(loginContent);
+
+                    OutputDebugStringW((L"Login RPC Response: " + loginContent + L"\n").c_str());
+
+                    auto jwtToken = loginResult.GetNamedString(L"jwt_token", L"");
+
                     resultJson.SetNamedValue(L"success", JsonValue::CreateBooleanValue(true));
                     resultJson.Insert(L"username", JsonValue::CreateStringValue(username));
                     resultJson.Insert(L"role", JsonValue::CreateStringValue(role));
                     resultJson.Insert(L"userId", JsonValue::CreateStringValue(userId));
+                    resultJson.Insert(L"jwtToken", JsonValue::CreateStringValue(jwtToken));
                     auto displayRole = (role == L"Admin") ? L"Administrator" : (role == L"Teacher") ? L"Teacher"
                                                                                                     : L"Student";
                     resultJson.Insert(L"displayRole", JsonValue::CreateStringValue(displayRole));
@@ -225,7 +242,6 @@ namespace quiz_examination_system
         {
             OutputDebugStringW(L"[GetQuestions] START - Fetching from Supabase\n");
 
-            // Create fresh HTTP client with no-cache policy like user management
             HttpBaseProtocolFilter filter;
             filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
             filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
@@ -275,13 +291,11 @@ namespace quiz_examination_system
         {
             OutputDebugStringW(L"[CreateQuestion] START - Using RPC function\n");
 
-            // Create fresh HTTP client with no-cache policy like user management
             HttpBaseProtocolFilter filter;
             filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
             filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
             HttpClient freshClient(filter);
 
-            // Use RPC function like CreateUserAsync does
             JsonObject params;
             params.Insert(L"p_id", JsonValue::CreateStringValue(id));
             params.Insert(L"p_created_by", JsonValue::CreateStringValue(teacherId));
@@ -436,13 +450,11 @@ namespace quiz_examination_system
             OutputDebugStringW(L"[DeleteQuestionSafe] START - Using RPC function\n");
             OutputDebugStringW((L"[DeleteQuestionSafe] QuestionId: '" + questionId + L"'\n").c_str());
 
-            // Create fresh HTTP client with no-cache policy like other operations
             HttpBaseProtocolFilter filter;
             filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
             filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
             HttpClient freshClient(filter);
 
-            // Use RPC function delete_question_safe
             JsonObject params;
             params.Insert(L"question_id_input", JsonValue::CreateStringValue(questionId));
 
@@ -579,7 +591,6 @@ namespace quiz_examination_system
                 result = co_await response.Content().ReadAsStringAsync();
                 OutputDebugStringW((L"[GetAllUsers] Received data length: " + std::to_wstring(result.size()) + L" chars\n").c_str());
 
-                // Parse to count users
                 try
                 {
                     auto usersArray = JsonArray::Parse(result);
@@ -744,4 +755,243 @@ namespace quiz_examination_system
             co_return false;
         }
     }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::GetQuizzesJsonAsync(hstring const &createdBy)
+    {
+        try
+        {
+            auto trimmedUserId = TrimUserId(createdBy);
+            OutputDebugStringW((L"[GetQuizzes] Fetching quizzes for teacher: " + trimmedUserId + L"\n").c_str());
+
+            HttpBaseProtocolFilter filter;
+            filter.CacheControl().ReadBehavior(HttpCacheReadBehavior::MostRecent);
+            filter.CacheControl().WriteBehavior(HttpCacheWriteBehavior::NoCache);
+            HttpClient freshClient(filter);
+
+            auto uriString = m_projectUrl + L"/rest/v1/quizzes?created_by=eq." + trimmedUserId + 
+                           L"&select=id,title,time_limit_minutes,total_points,max_attempts,result_visibility,shuffle_questions,shuffle_answers,created_at";
+            
+            Uri uri(uriString);
+            HttpRequestMessage request(HttpMethod::Get(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            auto response = co_await freshClient.SendRequestAsync(request);
+            auto content = co_await response.Content().ReadAsStringAsync();
+
+            if (response.StatusCode() != HttpStatusCode::Ok)
+            {
+                OutputDebugStringW((L"[GetQuizzes] Error: " + content + L"\n").c_str());
+                co_return L"[]";
+            }
+
+            auto quizzesArray = JsonArray::Parse(content);
+            JsonArray enrichedQuizzes;
+
+            for (uint32_t i = 0; i < quizzesArray.Size(); ++i)
+            {
+                auto quizObj = quizzesArray.GetObjectAt(i);
+                auto quizId = quizObj.GetNamedString(L"id", L"");
+
+                auto countUri = m_projectUrl + L"/rest/v1/quiz_questions?quiz_id=eq." + quizId + L"&select=id";
+                HttpRequestMessage countRequest(HttpMethod::Get(), Uri(countUri));
+                countRequest.Headers().Insert(L"apikey", m_anonKey);
+                countRequest.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+                auto countResponse = co_await freshClient.SendRequestAsync(countRequest);
+                auto countContent = co_await countResponse.Content().ReadAsStringAsync();
+                auto countArray = JsonArray::Parse(countContent);
+
+                quizObj.Insert(L"question_count", JsonValue::CreateNumberValue(static_cast<double>(countArray.Size())));
+                enrichedQuizzes.Append(quizObj);
+            }
+
+            OutputDebugStringW((L"[GetQuizzes] SUCCESS - " + std::to_wstring(enrichedQuizzes.Size()) + L" quizzes\n").c_str());
+            co_return enrichedQuizzes.Stringify();
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[GetQuizzes] Exception: " + ex.message() + L"\n").c_str());
+            co_return L"[]";
+        }
+    }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::CreateQuizFullAsync(
+        hstring const &quizId,
+        hstring const &teacherId,
+        hstring const &title,
+        int32_t timeLimitMinutes,
+        int32_t totalPoints,
+        hstring const &maxAttempts,
+        hstring const &resultVisibility,
+        bool shuffleQuestions,
+        bool shuffleAnswers,
+        hstring const &questionIdsJson)
+    {
+        JsonObject resultJson;
+        resultJson.Insert(L"success", JsonValue::CreateBooleanValue(false));
+
+        try
+        {
+            auto trimmedTeacherId = TrimUserId(teacherId);
+            auto trimmedQuizId = TrimUserId(quizId);
+            
+            OutputDebugStringW((L"[CreateQuizFull] Creating quiz: " + trimmedQuizId + L"\n").c_str());
+            OutputDebugStringW((L"[CreateQuizFull] Teacher: " + trimmedTeacherId + L"\n").c_str());
+            OutputDebugStringW((L"[CreateQuizFull] Title: " + title + L"\n").c_str());
+
+            JsonObject rpcParams;
+            rpcParams.Insert(L"p_quiz_id", JsonValue::CreateStringValue(trimmedQuizId));
+            rpcParams.Insert(L"p_teacher_id", JsonValue::CreateStringValue(trimmedTeacherId));
+            rpcParams.Insert(L"p_title", JsonValue::CreateStringValue(title));
+            rpcParams.Insert(L"p_time_limit", JsonValue::CreateNumberValue(timeLimitMinutes));
+            rpcParams.Insert(L"p_total_points", JsonValue::CreateNumberValue(totalPoints));
+            rpcParams.Insert(L"p_max_attempts", JsonValue::CreateStringValue(maxAttempts));
+            rpcParams.Insert(L"p_result_visibility", JsonValue::CreateStringValue(resultVisibility));
+            rpcParams.Insert(L"p_shuffle_questions", JsonValue::CreateBooleanValue(shuffleQuestions));
+            rpcParams.Insert(L"p_shuffle_answers", JsonValue::CreateBooleanValue(shuffleAnswers));
+            rpcParams.Insert(L"p_question_ids_json", JsonValue::CreateStringValue(questionIdsJson));
+
+            Uri uri(m_projectUrl + L"/rest/v1/rpc/create_quiz_full");
+            HttpRequestMessage request(HttpMethod::Post(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(rpcParams.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+            auto content = co_await response.Content().ReadAsStringAsync();
+
+            OutputDebugStringW((L"[CreateQuizFull] Response: " + content + L"\n").c_str());
+
+            if (response.StatusCode() == HttpStatusCode::Ok)
+            {
+                auto responseObj = JsonObject::Parse(content);
+                co_return responseObj.Stringify();
+            }
+            else
+            {
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to create quiz"));
+                co_return resultJson.Stringify();
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[CreateQuizFull] Exception: " + ex.message() + L"\n").c_str());
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+            co_return resultJson.Stringify();
+        }
+    }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::UpdateQuizAsync(
+        hstring const &quizId,
+        hstring const &title,
+        int32_t timeLimitMinutes,
+        int32_t totalPoints,
+        hstring const &maxAttempts,
+        hstring const &resultVisibility,
+        bool shuffleQuestions,
+        bool shuffleAnswers)
+    {
+        JsonObject resultJson;
+        resultJson.Insert(L"success", JsonValue::CreateBooleanValue(false));
+
+        try
+        {
+            auto trimmedQuizId = TrimUserId(quizId);
+            OutputDebugStringW((L"[UpdateQuiz] Updating quiz: " + trimmedQuizId + L"\n").c_str());
+
+            JsonObject params;
+            params.Insert(L"title", JsonValue::CreateStringValue(title));
+            params.Insert(L"time_limit_minutes", JsonValue::CreateNumberValue(timeLimitMinutes));
+            params.Insert(L"total_points", JsonValue::CreateNumberValue(totalPoints));
+            params.Insert(L"max_attempts", JsonValue::CreateStringValue(maxAttempts));
+            params.Insert(L"result_visibility", JsonValue::CreateStringValue(resultVisibility));
+            params.Insert(L"shuffle_questions", JsonValue::CreateBooleanValue(shuffleQuestions));
+            params.Insert(L"shuffle_answers", JsonValue::CreateBooleanValue(shuffleAnswers));
+
+            Uri uri(m_projectUrl + L"/rest/v1/quizzes?id=eq." + trimmedQuizId);
+            HttpRequestMessage request(HttpMethod::Patch(), uri);
+            request.Headers().Insert(L"apikey", m_anonKey);
+            request.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+            request.Content(HttpStringContent(params.Stringify(), Windows::Storage::Streams::UnicodeEncoding::Utf8, L"application/json"));
+
+            auto response = co_await m_httpClient.SendRequestAsync(request);
+
+            if (response.StatusCode() == HttpStatusCode::NoContent || response.StatusCode() == HttpStatusCode::Ok)
+            {
+                resultJson.SetNamedValue(L"success", JsonValue::CreateBooleanValue(true));
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Quiz updated successfully"));
+            }
+            else
+            {
+                auto content = co_await response.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[UpdateQuiz] Error: " + content + L"\n").c_str());
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to update quiz"));
+            }
+
+            co_return resultJson.Stringify();
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[UpdateQuiz] Exception: " + ex.message() + L"\n").c_str());
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+            co_return resultJson.Stringify();
+        }
+    }
+
+    IAsyncOperation<hstring> SupabaseClientAsync::DeleteQuizSafeAsync(hstring const &quizId)
+    {
+        JsonObject resultJson;
+        resultJson.Insert(L"success", JsonValue::CreateBooleanValue(false));
+
+        try
+        {
+            auto trimmedQuizId = TrimUserId(quizId);
+            OutputDebugStringW((L"[DeleteQuizSafe] Checking quiz: " + trimmedQuizId + L"\n").c_str());
+
+            auto checkUri = m_projectUrl + L"/rest/v1/quiz_attempts?quiz_id=eq." + trimmedQuizId + L"&select=id";
+            HttpRequestMessage checkRequest(HttpMethod::Get(), Uri(checkUri));
+            checkRequest.Headers().Insert(L"apikey", m_anonKey);
+            checkRequest.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            auto checkResponse = co_await m_httpClient.SendRequestAsync(checkRequest);
+            auto checkContent = co_await checkResponse.Content().ReadAsStringAsync();
+            auto attemptsArray = JsonArray::Parse(checkContent);
+
+            if (attemptsArray.Size() > 0)
+            {
+                OutputDebugStringW(L"[DeleteQuizSafe] Quiz has attempts, cannot delete\n");
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Cannot delete quiz with student attempts. Contact admin."));
+                co_return resultJson.Stringify();
+            }
+
+            Uri deleteUri(m_projectUrl + L"/rest/v1/quizzes?id=eq." + trimmedQuizId);
+            HttpRequestMessage deleteRequest(HttpMethod::Delete(), deleteUri);
+            deleteRequest.Headers().Insert(L"apikey", m_anonKey);
+            deleteRequest.Headers().Insert(L"Authorization", hstring(L"Bearer ") + m_anonKey);
+
+            auto deleteResponse = co_await m_httpClient.SendRequestAsync(deleteRequest);
+
+            if (deleteResponse.StatusCode() == HttpStatusCode::NoContent)
+            {
+                resultJson.SetNamedValue(L"success", JsonValue::CreateBooleanValue(true));
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Quiz deleted successfully"));
+            }
+            else
+            {
+                auto content = co_await deleteResponse.Content().ReadAsStringAsync();
+                OutputDebugStringW((L"[DeleteQuizSafe] Error: " + content + L"\n").c_str());
+                resultJson.Insert(L"message", JsonValue::CreateStringValue(L"Failed to delete quiz"));
+            }
+
+            co_return resultJson.Stringify();
+        }
+        catch (hresult_error const &ex)
+        {
+            OutputDebugStringW((L"[DeleteQuizSafe] Exception: " + ex.message() + L"\n").c_str());
+            resultJson.Insert(L"message", JsonValue::CreateStringValue(ex.message()));
+            co_return resultJson.Stringify();
+        }
+    }
 }
+

@@ -1,0 +1,11 @@
+import "QuestionItem.idl";
+
+namespace quiz_examination_system
+{
+    [default_interface]
+    runtimeclass QuizManagementPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        QuizManagementPage();
+        Windows.Foundation.Collections.IObservableVector<QuestionItem> AvailableQuestions{ get; };
+    }
+}
