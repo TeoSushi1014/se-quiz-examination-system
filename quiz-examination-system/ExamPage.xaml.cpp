@@ -4,13 +4,17 @@
 #include "ExamPage.g.cpp"
 #endif
 #include "PageHelper.h"
+#include "SupabaseClientManager.h"
+#include "HttpHelper.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
+using namespace Microsoft::UI::Xaml::Navigation;
 using namespace Windows::Foundation;
 using namespace Microsoft::UI::Dispatching;
 using namespace Windows::UI::Xaml::Interop;
+using namespace Windows::Data::Json;
 
 namespace winrt::quiz_examination_system::implementation
 {
@@ -26,6 +30,29 @@ namespace winrt::quiz_examination_system::implementation
         m_studentId = studentId;
     }
 
+    void ExamPage::OnNavigatedTo(NavigationEventArgs const &e)
+    {
+        __super::OnNavigatedTo(e);
+
+        if (auto param = e.Parameter())
+        {
+            hstring paramStr = unbox_value_or<hstring>(param, L"");
+            if (!paramStr.empty())
+            {
+                // Parse "quizId|studentId" format
+                std::wstring paramWStr(paramStr);
+                size_t pos = paramWStr.find(L'|');
+                if (pos != std::wstring::npos)
+                {
+                    m_quizId = hstring(paramWStr.substr(0, pos));
+                    m_studentId = hstring(paramWStr.substr(pos + 1));
+
+                    OutputDebugStringW((L"ExamPage - Quiz ID: " + m_quizId + L", Student ID: " + m_studentId + L"\n").c_str());
+                }
+            }
+        }
+    }
+
     void ExamPage::Page_Loaded(IInspectable const &, RoutedEventArgs const &)
     {
         if (m_quizId.empty() || m_studentId.empty())
@@ -34,8 +61,61 @@ namespace winrt::quiz_examination_system::implementation
             return;
         }
 
-        LoadQuizData();
-        LoadQuestions();
+        ValidateAccessAndLoad();
+    }
+
+    fire_and_forget ExamPage::ValidateAccessAndLoad()
+    {
+        auto lifetime = get_strong();
+
+        try
+        {
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRpcEndpoint(L"validate_quiz_access");
+
+            JsonObject params;
+            params.Insert(L"input_student_id", JsonValue::CreateStringValue(m_studentId));
+            params.Insert(L"input_quiz_id", JsonValue::CreateStringValue(m_quizId));
+
+            auto responseText = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(
+                endpoint, params.Stringify(), Windows::Web::Http::HttpMethod::Post());
+
+            if (responseText.empty() || responseText == L"null" || responseText == L"[]")
+            {
+                ShowMessage(L"Failed to validate quiz access", InfoBarSeverity::Error);
+                co_return;
+            }
+
+            JsonArray resultArray = JsonArray::Parse(responseText);
+            if (resultArray.Size() > 0)
+            {
+                auto result = resultArray.GetObjectAt(0);
+                bool canAccess = result.GetNamedBoolean(L"can_access", false);
+                hstring message = result.GetNamedString(L"message", L"");
+
+                if (!canAccess)
+                {
+                    ShowMessage(message, InfoBarSeverity::Error);
+
+                    co_await winrt::resume_after(std::chrono::seconds(2));
+
+                    if (Frame().CanGoBack())
+                    {
+                        Frame().GoBack();
+                    }
+                    co_return;
+                }
+
+                // Get time limit from response
+                m_timeLimitSeconds = static_cast<int>(result.GetNamedNumber(L"time_limit_minutes", 30)) * 60;
+            }
+
+            LoadQuizData();
+            LoadQuestions();
+        }
+        catch (...)
+        {
+            ShowMessage(L"Error validating quiz access", InfoBarSeverity::Error);
+        }
     }
 
     void ExamPage::LoadQuizData()
@@ -82,7 +162,6 @@ namespace winrt::quiz_examination_system::implementation
                 QuizInfoText().Text(hstring(L"Questions: ") + to_hstring(m_questions.size()) +
                                     L" | Total Points: " + to_hstring(totalPoints));
 
-                m_timeLimitSeconds = 30 * 60;
                 m_timeRemainingSeconds = m_timeLimitSeconds;
 
                 DisplayQuestion(0);
@@ -130,7 +209,7 @@ namespace winrt::quiz_examination_system::implementation
         }
 
         PrevButton().IsEnabled(index > 0);
-        NextButton().IsEnabled(index < static_cast<int>(m_questions.size()) - 1);
+        NextButton().IsEnabled(true);
 
         QuestionListView().SelectedIndex(index);
     }
@@ -217,6 +296,10 @@ namespace winrt::quiz_examination_system::implementation
         {
             DisplayQuestion(m_currentQuestionIndex + 1);
         }
+        else
+        {
+            SubmitButton_Click(nullptr, nullptr);
+        }
     }
 
     fire_and_forget ExamPage::SubmitButton_Click(IInspectable const &, RoutedEventArgs const &)
@@ -228,13 +311,13 @@ namespace winrt::quiz_examination_system::implementation
         confirmDialog.Title(box_value(L"Confirm Submission"));
         confirmDialog.Content(box_value(hstring(L"Are you sure you want to submit? You have answered ") +
                                         to_hstring(m_answers.size()) + L"/" + to_hstring(m_questions.size()) + L" questions."));
-        confirmDialog.PrimaryButtonText(L"Submit");
-        confirmDialog.CloseButtonText(L"Cancel");
-        confirmDialog.DefaultButton(ContentDialogButton::Close);
+        confirmDialog.PrimaryButtonText(L"Cancel");
+        confirmDialog.SecondaryButtonText(L"Submit");
+        confirmDialog.DefaultButton(ContentDialogButton::Secondary);
 
         auto result = co_await confirmDialog.ShowAsync();
 
-        if (result == ContentDialogResult::Primary)
+        if (result == ContentDialogResult::Secondary)
         {
             SubmitAttempt();
         }

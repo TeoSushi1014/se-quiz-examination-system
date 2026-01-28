@@ -12,6 +12,7 @@ namespace winrt::quiz_examination_system::implementation
 
         winrt::fire_and_forget Login_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
         void Logout_Click(IInspectable const &, Microsoft::UI::Xaml::RoutedEventArgs const &);
+        void NavView_ItemInvoked(Microsoft::UI::Xaml::Controls::NavigationView const &, Microsoft::UI::Xaml::Controls::NavigationViewItemInvokedEventArgs const &);
 
     private:
         void UpdateView();

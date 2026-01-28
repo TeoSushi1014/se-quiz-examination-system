@@ -72,8 +72,8 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,24,0,0">
-                            <Button x:Name="PrevButton" Content="⬅ Previous" Click="PrevButton_Click" IsEnabled="False"/>
-                            <Button x:Name="NextButton" Content="Next ➡" Click="NextButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                            <Button x:Name="PrevButton" Content="Previous" Click="PrevButton_Click" IsEnabled="False"/>
+                            <Button x:Name="NextButton" Content="Next" Click="NextButton_Click" Style="{StaticResource AccentButtonStyle}"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

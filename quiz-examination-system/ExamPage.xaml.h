@@ -20,6 +20,7 @@ namespace winrt::quiz_examination_system::implementation
         }
 
         void Page_Loaded(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
+        void OnNavigatedTo(Microsoft::UI::Xaml::Navigation::NavigationEventArgs const &e);
         void QuestionListView_SelectionChanged(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const &e);
         void PrevButton_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
         void NextButton_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
@@ -38,6 +39,7 @@ namespace winrt::quiz_examination_system::implementation
 
         void LoadQuizData();
         void LoadQuestions();
+        winrt::fire_and_forget ValidateAccessAndLoad();
         void DisplayQuestion(int index);
         void SaveCurrentAnswer();
         void StartTimer();

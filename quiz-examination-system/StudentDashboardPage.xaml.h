@@ -2,7 +2,9 @@
 
 #include "StudentDashboardPage.g.h"
 #include "QuizItemStudent.h"
-#include "SupabaseClient.h"
+#include "SupabaseClientAsync.h"
+#include "SupabaseConfig.h"
+#include "HttpHelper.h"
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Windows.Foundation.Collections.h>
@@ -22,12 +24,12 @@ namespace winrt::quiz_examination_system::implementation
         void StartExam_Click(winrt::Windows::Foundation::IInspectable const &sender, Microsoft::UI::Xaml::RoutedEventArgs const &e);
 
     private:
-        std::unique_ptr<::quiz_examination_system::SupabaseClient> m_supabaseClient;
+        std::unique_ptr<::quiz_examination_system::SupabaseClientAsync> m_client;
         Windows::Foundation::Collections::IObservableVector<quiz_examination_system::QuizItemStudent> m_quizzes{nullptr};
         quiz_examination_system::QuizItemStudent m_selectedQuiz{nullptr};
         hstring m_currentUserId;
 
-        void LoadQuizzes();
+        winrt::fire_and_forget LoadQuizzes();
         void ShowMessage(hstring const &message, Microsoft::UI::Xaml::Controls::InfoBarSeverity severity);
     };
 }

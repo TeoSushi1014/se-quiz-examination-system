@@ -128,6 +128,51 @@ namespace winrt::quiz_examination_system::implementation
         confirmDialog.ShowAsync();
     }
 
+    void MainWindow::NavView_ItemInvoked(NavigationView const &, NavigationViewItemInvokedEventArgs const &args)
+    {
+        if (auto tag = args.InvokedItemContainer().Tag())
+        {
+            hstring tagStr = unbox_value<hstring>(tag);
+            auto invokedItem = args.InvokedItemContainer();
+
+            if (tagStr == L"Dashboard")
+            {
+                NavView().SelectedItem(invokedItem);
+                if (m_currentRole == L"Administrator")
+                    ContentFrame().Navigate(xaml_typename<quiz_examination_system::AdminDashboardPage>());
+                else if (m_currentRole == L"Teacher")
+                    ContentFrame().Navigate(xaml_typename<quiz_examination_system::TeacherDashboardPage>());
+                else if (m_currentRole == L"Student")
+                    ContentFrame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
+            }
+            else if (tagStr == L"QuestionBank")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::QuestionBankPage>());
+            }
+            else if (tagStr == L"ManageQuizzes")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::QuizManagementPage>());
+            }
+            else if (tagStr == L"ReviewAttempts")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::ReviewAttemptsPage>());
+            }
+            else if (tagStr == L"Reports")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::ReportsPage>());
+            }
+            else if (tagStr == L"History")
+            {
+                NavView().SelectedItem(invokedItem);
+                ContentFrame().Navigate(xaml_typename<quiz_examination_system::StudentDashboardPage>());
+            }
+        }
+    }
+
     void MainWindow::UpdateView()
     {
         LoginPanel().Visibility(m_authenticated ? Visibility::Collapsed : Visibility::Visible);
@@ -137,6 +182,18 @@ namespace winrt::quiz_examination_system::implementation
         {
             WelcomeText().Text(hstring(L"Welcome, ") + m_currentUser);
             RoleText().Text(hstring(L"(") + m_currentRole + hstring(L")"));
+
+            bool isStudent = m_currentRole == L"Student";
+            bool isTeacher = m_currentRole == L"Teacher";
+            bool isAdmin = m_currentRole == L"Administrator";
+
+            NavQuestionBank().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavManageQuizzes().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavReviewAttempts().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavReports().Visibility(isTeacher || isAdmin ? Visibility::Visible : Visibility::Collapsed);
+            NavHistory().Visibility(isStudent ? Visibility::Visible : Visibility::Collapsed);
+
+            NavView().SelectedItem(NavDashboard());
 
             if (m_currentRole == L"Administrator")
             {

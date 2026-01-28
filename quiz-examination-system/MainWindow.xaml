@@ -79,34 +79,66 @@
 
         <Grid x:Name="DashboardPanel" Visibility="Collapsed">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Padding="24,16" 
-                 Background="{ThemeResource LayerOnMicaBaseAltFillColorTransparentBrush}" 
-                 ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <NavigationView x:Name="NavView"
+                           IsBackButtonVisible="Collapsed"
+                           PaneDisplayMode="Left"
+                           IsSettingsVisible="False"
+                           ItemInvoked="NavView_ItemInvoked">
+                <NavigationView.MenuItems>
+                    <NavigationViewItem Content="Dashboard" Tag="Dashboard" x:Name="NavDashboard">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE80F;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem Content="Question bank" Tag="QuestionBank" x:Name="NavQuestionBank">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE8F1;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem Content="Manage quizzes" Tag="ManageQuizzes" x:Name="NavManageQuizzes">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE8FD;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem Content="Review attempts" Tag="ReviewAttempts" x:Name="NavReviewAttempts">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE8A0;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem Content="Reports" Tag="Reports" x:Name="NavReports">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE9F9;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem Content="History" Tag="History" x:Name="NavHistory">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE81C;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </NavigationView.MenuItems>
 
-                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
-                    <PersonPicture Width="40" Height="40"/>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="WelcomeText" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                        <TextBlock x:Name="RoleText" 
-                                 Style="{StaticResource CaptionTextBlockStyle}" 
-                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <NavigationView.PaneFooter>
+                    <StackPanel Spacing="4" Margin="16,8">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PersonPicture Width="32" Height="32"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="WelcomeText" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                <TextBlock x:Name="RoleText" 
+                                         Style="{StaticResource CaptionTextBlockStyle}" 
+                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <Button Content="Sign out" 
+                              Click="Logout_Click"
+                              HorizontalAlignment="Stretch"/>
                     </StackPanel>
-                </StackPanel>
+                </NavigationView.PaneFooter>
 
-                <Button Grid.Column="1" 
-                      Content="Sign out" 
-                      Click="Logout_Click"/>
-            </Grid>
-
-            <Frame x:Name="ContentFrame" Grid.Row="1"/>
+                <Frame x:Name="ContentFrame"/>
+            </NavigationView>
         </Grid>
     </Grid>
 </Window>

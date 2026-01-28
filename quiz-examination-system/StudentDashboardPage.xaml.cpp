@@ -6,11 +6,15 @@
 #include "StudentDashboardPage.g.cpp"
 #endif
 #include "PageHelper.h"
+#include "SupabaseClientManager.h"
+#include "SupabaseClientAsync.h"
+#include <winrt/Windows.Data.Json.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
 using namespace Microsoft::UI::Xaml::Interop;
+using namespace Windows::Data::Json;
 
 namespace winrt::quiz_examination_system::implementation
 {
@@ -18,8 +22,10 @@ namespace winrt::quiz_examination_system::implementation
     {
         InitializeComponent();
         m_quizzes = single_threaded_observable_vector<quiz_examination_system::QuizItemStudent>();
-        m_supabaseClient = std::make_unique<::quiz_examination_system::SupabaseClient>();
-        m_currentUserId = L"";
+        m_client = std::make_unique<::quiz_examination_system::SupabaseClientAsync>();
+
+        auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
+        m_currentUserId = manager.GetUserId();
     }
 
     Windows::Foundation::Collections::IObservableVector<quiz_examination_system::QuizItemStudent> StudentDashboardPage::Quizzes()
@@ -32,58 +38,84 @@ namespace winrt::quiz_examination_system::implementation
         LoadQuizzes();
     }
 
-    void StudentDashboardPage::LoadQuizzes()
+    winrt::fire_and_forget StudentDashboardPage::LoadQuizzes()
     {
-        if (!m_supabaseClient)
-        {
-            ShowMessage(L"Error: Cannot connect to database", InfoBarSeverity::Error);
-            return;
-        }
+        auto lifetime = get_strong();
 
         LoadingRing().IsActive(true);
-        ShowMessage(L"Loading quiz list...", InfoBarSeverity::Informational);
+        m_quizzes.Clear();
+        StartExamButton().IsEnabled(false);
 
-        auto dispatcher = Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
-
-        m_supabaseClient->OnStudentQuizzesLoaded = [this, dispatcher](bool success, std::vector<::quiz_examination_system::SupabaseClient::QuizData> quizzes)
+        try
         {
-            dispatcher.TryEnqueue([this, success, quizzes]()
-                                  {
+            hstring endpoint = ::quiz_examination_system::SupabaseConfig::GetRpcEndpoint(L"get_student_quizzes");
+
+            JsonObject params;
+            params.Insert(L"input_student_id", JsonValue::CreateStringValue(m_currentUserId));
+
+            auto responseText = co_await ::quiz_examination_system::HttpHelper::SendSupabaseRequest(
+                endpoint, params.Stringify(), Windows::Web::Http::HttpMethod::Post());
+
+            if (responseText.empty() || responseText == L"null" || responseText == L"[]")
+            {
+                ShowMessage(L"No quizzes assigned to you yet", InfoBarSeverity::Warning);
                 LoadingRing().IsActive(false);
-                ActionMessage().IsOpen(false);
+                co_return;
+            }
 
-                if (!success)
+            JsonArray quizzesArray = JsonArray::Parse(responseText);
+
+            for (uint32_t i = 0; i < quizzesArray.Size(); ++i)
+            {
+                auto qObj = quizzesArray.GetObjectAt(i);
+
+                auto item = make<QuizItemStudent>();
+                item.QuizId(qObj.GetNamedString(L"quiz_id", L""));
+                item.Title(qObj.GetNamedString(L"quiz_title", L""));
+                item.TimeLimit(static_cast<int>(qObj.GetNamedNumber(L"time_limit_minutes", 0)));
+                item.TotalPoints(static_cast<int>(qObj.GetNamedNumber(L"total_points", 0)));
+                item.AttemptsUsed(static_cast<int>(qObj.GetNamedNumber(L"attempts_used", 0)));
+
+                hstring maxAttempts = qObj.GetNamedString(L"max_attempts", L"Unlimited");
+                item.MaxAttempts(maxAttempts);
+
+                int attemptsUsed = item.AttemptsUsed();
+                bool hasAttemptsLeft = true;
+
+                if (maxAttempts != L"Unlimited")
                 {
-                    ShowMessage(L"Failed to load quiz list", InfoBarSeverity::Error);
-                    return;
+                    try
+                    {
+                        int maxCount = std::stoi(maxAttempts.c_str());
+                        hasAttemptsLeft = attemptsUsed < maxCount;
+                    }
+                    catch (...)
+                    {
+                        hasAttemptsLeft = true;
+                    }
                 }
 
-                if (quizzes.empty())
-                {
-                    ShowMessage(L"No quizzes assigned to you yet", InfoBarSeverity::Warning);
-                    return;
-                }
+                item.Status(hasAttemptsLeft ? L"Available" : L"No attempts left");
 
-                m_quizzes.Clear();
+                m_quizzes.Append(item);
+            }
 
-                for (const auto &quiz : quizzes)
-                {
-                    auto item = make<QuizItemStudent>();
-                    item.QuizId(quiz.quiz_id);
-                    item.Title(quiz.quiz_title);
-                    item.TimeLimit(quiz.time_limit_minutes);
-                    item.TotalPoints(quiz.total_points);
-                    item.AttemptsUsed(quiz.attempts_used);
-                    item.MaxAttempts(quiz.max_attempts);
-                    item.Status(L"Available");
+            // Only show message if no quizzes available
+            if (m_quizzes.Size() == 0)
+            {
+                ShowMessage(L"No quizzes available", InfoBarSeverity::Warning);
+            }
+        }
+        catch (hresult_error const &ex)
+        {
+            ShowMessage(L"Failed to load quizzes: " + ex.message(), InfoBarSeverity::Error);
+        }
+        catch (...)
+        {
+            ShowMessage(L"An error occurred while loading quizzes", InfoBarSeverity::Error);
+        }
 
-                    m_quizzes.Append(item);
-                }
-
-                ShowMessage(hstring(L"Loaded ") + to_hstring(quizzes.size()) + L" quizzes", InfoBarSeverity::Success); });
-        };
-
-        m_supabaseClient->GetStudentQuizzes(m_currentUserId);
+        LoadingRing().IsActive(false);
     }
 
     void StudentDashboardPage::QuizzesGridView_SelectionChanged(IInspectable const &, SelectionChangedEventArgs const &)
@@ -92,7 +124,25 @@ namespace winrt::quiz_examination_system::implementation
         if (index >= 0 && index < static_cast<int>(m_quizzes.Size()))
         {
             m_selectedQuiz = m_quizzes.GetAt(index);
-            StartExamButton().IsEnabled(true);
+
+            // Check if user still has attempts left
+            hstring maxAttempts = m_selectedQuiz.MaxAttempts();
+            bool hasAttemptsLeft = true;
+
+            if (maxAttempts != L"Unlimited")
+            {
+                try
+                {
+                    int maxCount = std::stoi(maxAttempts.c_str());
+                    hasAttemptsLeft = m_selectedQuiz.AttemptsUsed() < maxCount;
+                }
+                catch (...)
+                {
+                    hasAttemptsLeft = true;
+                }
+            }
+
+            StartExamButton().IsEnabled(hasAttemptsLeft);
         }
         else
         {
@@ -108,23 +158,28 @@ namespace winrt::quiz_examination_system::implementation
             return;
         }
 
-        if (m_selectedQuiz.MaxAttempts() != L"unlimited")
+        hstring maxAttempts = m_selectedQuiz.MaxAttempts();
+        if (maxAttempts != L"Unlimited")
         {
-            int maxAttempts = std::stoi(m_selectedQuiz.MaxAttempts().c_str());
-            if (m_selectedQuiz.AttemptsUsed() >= maxAttempts)
+            try
             {
-                ShowMessage(L"You have reached the maximum attempts for this quiz", InfoBarSeverity::Error);
-                return;
+                int maxCount = std::stoi(maxAttempts.c_str());
+                if (m_selectedQuiz.AttemptsUsed() >= maxCount)
+                {
+                    ShowMessage(L"You have reached the maximum attempts for this quiz", InfoBarSeverity::Error);
+                    return;
+                }
+            }
+            catch (...)
+            {
             }
         }
 
-        Frame().Navigate(xaml_typename<quiz_examination_system::ExamPage>());
+        auto &manager = ::quiz_examination_system::SupabaseClientManager::GetInstance();
+        hstring studentId = manager.GetUserId();
 
-        auto page = Frame().Content().try_as<quiz_examination_system::ExamPage>();
-        if (page)
-        {
-            page.as<quiz_examination_system::implementation::ExamPage>()->SetQuizData(m_selectedQuiz.QuizId(), m_currentUserId);
-        }
+        hstring navParam = m_selectedQuiz.QuizId() + L"|" + studentId;
+        Frame().Navigate(xaml_typename<quiz_examination_system::ExamPage>(), box_value(navParam));
     }
 
     void StudentDashboardPage::ShowMessage(hstring const &message, InfoBarSeverity severity)
