@@ -172,6 +172,9 @@
     <ClInclude Include="QuizEditorPage.xaml.h">
       <DependentUpon>QuizEditorPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="HistoryPage.xaml.h">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="SupabaseClient.h" />
     <ClInclude Include="SupabaseClientAsync.h" />
     <ClInclude Include="SupabaseClientManager.h" />
@@ -195,6 +198,7 @@
     <Page Include="QuizManagementPage.xaml" />
     <Page Include="ReviewAttemptsPage.xaml" />
     <Page Include="QuizEditorPage.xaml" />
+    <Page Include="HistoryPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -245,6 +249,9 @@
     </ClCompile>
     <ClCompile Include="QuizEditorPage.xaml.cpp">
       <DependentUpon>QuizEditorPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="HistoryPage.xaml.cpp">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="SupabaseClient.cpp" />
@@ -320,6 +327,10 @@
     <Midl Include="QuizEditorPage.idl">
       <SubType>Code</SubType>
       <DependentUpon>QuizEditorPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="HistoryPage.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
     </Midl>
   </ItemGroup>
   <ItemGroup>
