@@ -3,6 +3,7 @@
 #include "HistoryPage.g.h"
 #include "AttemptItem.h"
 #include "SupabaseClientAsync.h"
+#include <memory>
 
 namespace winrt::quiz_examination_system::implementation
 {
@@ -14,7 +15,7 @@ namespace winrt::quiz_examination_system::implementation
                          Microsoft::UI::Xaml::RoutedEventArgs const &e);
 
     private:
-        quiz_examination_system::SupabaseClientAsync m_supabaseClient;
+        std::unique_ptr<::quiz_examination_system::SupabaseClientAsync> m_supabaseClient;
         hstring m_studentId;
 
         winrt::fire_and_forget LoadHistory();
